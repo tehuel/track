@@ -1,14 +1,14 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
 import { Hono } from 'hono'
 import { apiRouter } from '../src/api'
-import { createDatabase } from '../src/db'
+import { createDatabase, setDb } from '../src/db'
 
 describe('JSON API endpoints (/api)', () => {
   let app: Hono
 
   beforeEach(() => {
-    // Reset test database
-    createDatabase(':memory:')
+    // Reset test database to fresh in-memory SQLite
+    setDb(createDatabase(':memory:'))
     app = new Hono()
     app.route('/api', apiRouter)
   })

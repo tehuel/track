@@ -34,25 +34,33 @@ export function createDatabase(path: string = DEFAULT_DB_PATH): Database {
   return db
 }
 
-export const db = createDatabase()
+let activeDb: Database = createDatabase()
+
+export function getDb(): Database {
+  return activeDb
+}
+
+export function setDb(database: Database): void {
+  activeDb = database
+}
 
 // --- Tracker Queries ---
 
-export function listTrackers(database: Database = db): Tracker[] {
+export function listTrackers(database: Database = getDb()): Tracker[] {
   const query = database.query<Tracker, []>(
     'SELECT id, name, type, description, created_at FROM trackers ORDER BY created_at ASC'
   )
   return query.all()
 }
 
-export function getTrackerById(id: string, database: Database = db): Tracker | null {
+export function getTrackerById(id: string, database: Database = getDb()): Tracker | null {
   const query = database.query<Tracker, [string]>(
     'SELECT id, name, type, description, created_at FROM trackers WHERE id = ?'
   )
   return query.get(id)
 }
 
-export function trackerExists(id: string, database: Database = db): boolean {
+export function trackerExists(id: string, database: Database = getDb()): boolean {
   const query = database.query<{ count: number }, [string]>(
     'SELECT COUNT(*) as count FROM trackers WHERE id = ?'
   )
@@ -60,7 +68,7 @@ export function trackerExists(id: string, database: Database = db): boolean {
   return (result?.count ?? 0) > 0
 }
 
-export function generateUniqueSlug(name: string, database: Database = db): string {
+export function generateUniqueSlug(name: string, database: Database = getDb()): string {
   const baseSlug = slugify(name)
   if (!trackerExists(baseSlug, database)) {
     return baseSlug
@@ -68,7 +76,7 @@ export function generateUniqueSlug(name: string, database: Database = db): strin
   return `${baseSlug}-${crypto.randomUUID().slice(0, 4)}`
 }
 
-export function createTracker(tracker: Tracker, database: Database = db): Tracker {
+export function createTracker(tracker: Tracker, database: Database = getDb()): Tracker {
   const query = database.query<never, [string, string, string, string | null]>(
     'INSERT INTO trackers (id, name, type, description) VALUES (?, ?, ?, ?)'
   )
@@ -76,7 +84,7 @@ export function createTracker(tracker: Tracker, database: Database = db): Tracke
   return getTrackerById(tracker.id, database)!
 }
 
-export function deleteTracker(id: string, database: Database = db): boolean {
+export function deleteTracker(id: string, database: Database = getDb()): boolean {
   const query = database.query<never, [string]>('DELETE FROM trackers WHERE id = ?')
   const result = query.run(id)
   return result.changes > 0
@@ -87,7 +95,7 @@ export function deleteTracker(id: string, database: Database = db): boolean {
 export function listEventsByTracker(
   trackerId: string,
   limit: number = 50,
-  database: Database = db
+  database: Database = getDb()
 ): TrackerEvent[] {
   const query = database.query<TrackerEvent, [string, number]>(
     'SELECT id, tracker_id, value, note, timestamp FROM tracker_events WHERE tracker_id = ? ORDER BY timestamp DESC LIMIT ?'
@@ -95,7 +103,7 @@ export function listEventsByTracker(
   return query.all(trackerId, limit)
 }
 
-export function createEvent(event: TrackerEvent, database: Database = db): TrackerEvent {
+export function createEvent(event: TrackerEvent, database: Database = getDb()): TrackerEvent {
   const query = database.query<never, [string, string, number | null, string | null, string]>(
     'INSERT INTO tracker_events (id, tracker_id, value, note, timestamp) VALUES (?, ?, ?, ?, ?)'
   )
@@ -112,7 +120,7 @@ export function createEvent(event: TrackerEvent, database: Database = db): Track
   return fetchQuery.get(event.id)!
 }
 
-export function deleteEvent(trackerId: string, eventId: string, database: Database = db): boolean {
+export function deleteEvent(trackerId: string, eventId: string, database: Database = getDb()): boolean {
   const query = database.query<never, [string, string]>(
     'DELETE FROM tracker_events WHERE id = ? AND tracker_id = ?'
   )
