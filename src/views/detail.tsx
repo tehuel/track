@@ -53,10 +53,10 @@ export function DetailPage({ tracker, events }: DetailProps) {
           <div class="d-flex align-items-center gap-2 flex-wrap">
             {/* Primary Action Button */}
             {tracker.type === 'habit' ? (
-              <form action={`/trackers/${tracker.id}/events`} method="post">
+              <form action={`/trackers/${tracker.id}/events`} method="post" class="m-0 p-0 d-inline-flex">
                 <button
                   type="submit"
-                  class="btn btn-primary d-flex align-items-center gap-1.5"
+                  class="btn btn-primary d-flex align-items-center gap-1"
                 >
                   <i class="bi bi-check2"></i>
                   <span>Completar</span>
@@ -65,7 +65,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
             ) : (
               <a
                 href={`/trackers/${tracker.id}/log`}
-                class="btn btn-primary d-flex align-items-center gap-1.5"
+                class="btn btn-primary d-flex align-items-center gap-1"
               >
                 <i class="bi bi-plus-lg"></i>
                 <span>Registrar</span>
