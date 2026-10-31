@@ -11,13 +11,11 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 - **Perimeter Delegation**: Access control is handled externally at the network boundary (Tailscale, Cloudflare Tunnel Access, Authelia, or reverse proxy basic auth).
 
 ### 2. Backend Architecture (2-Layer Pattern)
-- **HTTP / Routing Layer (`src/web.tsx`, `src/api.ts`)**: Hono sub-routers handling request parameters, form parsing, validation, and HTTP responses.
-  - `src/web.tsx`: Server-rendered HTML and HTMX partial routes.
-  - `src/api.ts`: Headless REST JSON API routes mounted at `/api/*`.
+- **HTTP / Routing Layer (`src/web.tsx`)**: Hono router handling request parameters, form parsing, and HTTP/HTMX responses.
+  - Server-rendered HTML pages and HTMX partial routes.
 - **Data Access Layer (`src/db.ts`)**: Pure TypeScript functions executing native SQLite prepared queries (`db.query(...)`).
   - Connection singleton with Write-Ahead Logging (WAL) and foreign keys enabled.
   - Testable with in-memory SQLite via `createDatabase(':memory:')` and `setDb(...)`.
-- **Validation Layer (`src/schemas.ts`)**: Strict Zod schemas validating tracker creation and event logging.
 - **Views (`src/views/`)**: Server-rendered Hono JSX components (`layout.tsx`, `dashboard.tsx`, `detail.tsx`, `log-entry.tsx`, `components/`).
 - **Entrypoint (`src/index.ts`)**: Initializes Hono server, health endpoints, static asset handlers, and exports default Bun server configuration.
 
@@ -32,7 +30,6 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 ### 4. Testing & Verification Philosophy
 - **Automated Tests**: Unit and integration tests written for Bun Test (`bun test`) located in `test/`.
   - Database queries tested against `:memory:` SQLite instances (`test/db.test.ts`).
-  - REST API endpoints tested via `app.request()` (`test/api.test.ts`).
   - Web UI & HTMX partials tested via `app.request()` (`test/web.test.ts`).
 - **Strict Typing**: Full TypeScript coverage verified with `bun run typecheck` (`tsc --noEmit`).
 
@@ -44,13 +41,10 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
   - `index.ts` — Main server entrypoint.
   - `db.ts` — Native SQLite connection and typed database queries.
   - `web.tsx` — Web page and HTMX route handlers.
-  - `api.ts` — Headless JSON REST API router.
   - `views/` — Hono JSX view templates.
   - `slug.ts` — Slug generation and collision handling.
-  - `schemas.ts` — Zod schemas.
   - `types.ts` — Centralized TypeScript interfaces.
 - `public/` — Static assets (favicons, icons).
-- `test/` — Bun test suite (`db.test.ts`, `api.test.ts`, `web.test.ts`).
+- `test/` — Bun test suite (`db.test.ts`, `web.test.ts`).
 - `schema.sql` — SQLite DDL schema.
-- `bruno/` — Bruno API collection.
 - `Dockerfile` & `docker-compose.yml` — Containerization and self-hosting configuration.
