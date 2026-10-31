@@ -74,7 +74,7 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
               {/* Numeric Inline Input */}
               {tracker.type === 'numeric' && (
                 <form
-                  class="flex-grow-1"
+                  class="flex-grow-1 m-0 p-0 d-flex"
                   hx-post={`/trackers/${tracker.id}/quick`}
                   hx-target={`#tracker-card-${tracker.id}`}
                   hx-swap="outerHTML"
@@ -106,7 +106,7 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
               {/* Text Inline Note */}
               {tracker.type === 'text' && (
                 <form
-                  class="flex-grow-1"
+                  class="flex-grow-1 m-0 p-0 d-flex"
                   hx-post={`/trackers/${tracker.id}/quick`}
                   hx-target={`#tracker-card-${tracker.id}`}
                   hx-swap="outerHTML"

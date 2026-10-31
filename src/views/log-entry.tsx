@@ -39,7 +39,7 @@ export function LogEntryPage({ tracker }: LogEntryProps) {
                 <h1 class="h5 mb-0 fw-semibold">Registrar: {tracker.name}</h1>
               </div>
 
-              <form action={`/trackers/${tracker.id}/events`} method="post">
+              <form action={`/trackers/${tracker.id}/events`} method="post" class="m-0 p-0">
                 <div class="card-body p-4">
                   {/* Value Input (numeric tracker) */}
                   {tracker.type === 'numeric' && (
