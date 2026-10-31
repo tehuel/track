@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Database files
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Environment & local secrets
+.env
+.env.local
+
+# Logs
+*.log
+.wrangler/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
