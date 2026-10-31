@@ -2,9 +2,11 @@ import type { Tracker } from '../types'
 import { Layout } from './layout'
 import { TrackerCard } from './components/tracker-card'
 import { NewTrackerModal } from './components/new-tracker-modal'
+import { LogEntryModal } from './components/log-entry-modal'
 
 interface DashboardProps {
   trackers: Tracker[]
+  query?: string
 }
 
 export function TrackersGrid({ trackers }: DashboardProps) {
@@ -29,15 +31,20 @@ export function TrackersGrid({ trackers }: DashboardProps) {
   }
 
   return (
-    <div id="trackers-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+    <div id="trackers-grid">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        {trackers.map((tracker) => (
+          <TrackerCard tracker={tracker} />
+        ))}
+      </div>
       {trackers.map((tracker) => (
-        <TrackerCard tracker={tracker} />
+        <LogEntryModal tracker={tracker} modalId={`logModal-${tracker.id}`} returnTo="/" />
       ))}
     </div>
   )
 }
 
-export function DashboardPage({ trackers }: DashboardProps) {
+export function DashboardPage({ trackers, query = '' }: DashboardProps) {
   return (
     <Layout>
       <div>
@@ -52,13 +59,15 @@ export function DashboardPage({ trackers }: DashboardProps) {
               <input
                 type="search"
                 name="q"
+                value={query}
                 class="form-control"
                 placeholder="Buscar..."
                 aria-label="Buscar tracks"
-                hx-get="/search"
+                hx-get="/"
                 hx-trigger="keyup changed delay:200ms, search"
                 hx-target="#trackers-grid"
                 hx-swap="outerHTML"
+                hx-push-url="true"
               />
             </div>
           </div>

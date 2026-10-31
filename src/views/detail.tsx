@@ -1,6 +1,7 @@
 import type { Tracker, TrackerEvent } from '../types'
 import { Layout } from './layout'
 import { getTrackerIcon } from './components/tracker-card'
+import { LogEntryModal } from './components/log-entry-modal'
 
 interface DetailProps {
   tracker: Tracker
@@ -34,7 +35,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
             class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
           >
             <i class="bi bi-arrow-left"></i>
-            <span>Tracks</span>
+            <span>Volver</span>
           </a>
         </div>
 
@@ -51,9 +52,9 @@ export function DetailPage({ tracker, events }: DetailProps) {
           </div>
 
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            {/* Primary Action Button */}
-            {tracker.type === 'habit' ? (
-              <form action={`/trackers/${tracker.id}/events`} method="post" class="m-0 p-0 d-inline-flex">
+            {/* Habit Quick check-in */}
+            {tracker.type === 'habit' && (
+              <form action={`/track/${tracker.id}`} method="post" class="m-0 p-0 d-inline-flex">
                 <button
                   type="submit"
                   class="btn btn-primary d-flex align-items-center gap-1"
@@ -62,32 +63,26 @@ export function DetailPage({ tracker, events }: DetailProps) {
                   <span>Completar</span>
                 </button>
               </form>
-            ) : (
-              <a
-                href={`/trackers/${tracker.id}/log`}
-                class="btn btn-primary d-flex align-items-center gap-1"
-              >
-                <i class="bi bi-plus-lg"></i>
-                <span>Registrar</span>
-              </a>
             )}
 
-            {/* Habit custom note / date entry */}
-            {tracker.type === 'habit' && (
-              <a
-                href={`/trackers/${tracker.id}/log`}
-                class="btn btn-outline-secondary d-flex align-items-center gap-1"
-              >
-                <i class="bi bi-pencil-square"></i>
-                <span>+ Nota</span>
-              </a>
-            )}
+            {/* Open Modal for detailed log (or non-habit log) */}
+            <button
+              type="button"
+              class={`btn d-flex align-items-center gap-1 ${
+                tracker.type === 'habit' ? 'btn-outline-secondary' : 'btn-primary'
+              }`}
+              data-bs-toggle="modal"
+              data-bs-target="#logModal"
+            >
+              <i class={`bi ${tracker.type === 'habit' ? 'bi-pencil-square' : 'bi-plus-lg'}`}></i>
+              <span>{tracker.type === 'habit' ? '+ Nota' : 'Registrar'}</span>
+            </button>
 
             {/* Delete Tracker */}
             <button
               type="button"
               class="btn btn-outline-danger d-flex align-items-center gap-1"
-              hx-delete={`/trackers/${tracker.id}`}
+              hx-delete={`/track/${tracker.id}`}
               hx-confirm="¿Eliminar track?"
               title="Eliminar track"
             >
@@ -128,7 +123,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
                   <button
                     type="button"
                     class="btn btn-link link-danger p-1 text-decoration-none lh-1 flex-shrink-0"
-                    hx-delete={`/trackers/${tracker.id}/events/${event.id}`}
+                    hx-delete={`/track/${tracker.id}/${event.id}`}
                     hx-target="closest .list-group-item"
                     hx-swap="outerHTML"
                     hx-confirm="¿Eliminar entrada?"
@@ -142,6 +137,13 @@ export function DetailPage({ tracker, events }: DetailProps) {
             </div>
           )}
         </div>
+
+        {/* Log Entry Modal */}
+        <LogEntryModal
+          tracker={tracker}
+          modalId="logModal"
+          returnTo={`/track/${tracker.id}`}
+        />
       </div>
     </Layout>
   )

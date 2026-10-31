@@ -12,7 +12,7 @@ describe('Web UI & HTMX endpoints', () => {
     app.route('/', webRouter)
   })
 
-  it('GET / renders dashboard with tracker cards in Spanish', async () => {
+  it('GET / renders dashboard with tracker cards in Spanish, /track/:id links, and log modals', async () => {
     createTracker({ id: 'guitar', name: 'Tocar Guitarra', type: 'habit' })
 
     const res = await app.request('/')
@@ -21,25 +21,68 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('Tocar Guitarra')
     expect(html).toContain('htmx.org')
     expect(html).toContain('Nuevo track')
+    expect(html).toContain('/track/guitar')
+    expect(html).toContain('id="logModal-guitar"')
   })
 
-  it('GET /search returns filtered HTMX partial', async () => {
+  it('POST /track/:id with return_to redirects to custom path (dashboard modal flow)', async () => {
+    createTracker({ id: 'guitar', name: 'Tocar Guitarra', type: 'habit' })
+
+    const formData = new FormData()
+    formData.append('note', '30 minutos de acordes')
+    formData.append('return_to', '/')
+
+    const res = await app.request('/track/guitar', {
+      method: 'POST',
+      body: formData,
+    })
+
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toBe('/')
+  })
+
+  it('GET /?q=... with HX-Request returns filtered HTMX partial and sets HX-Push-Url', async () => {
     createTracker({ id: 'run', name: 'Correr mañana', type: 'numeric' })
     createTracker({ id: 'meditate', name: 'Meditación', type: 'habit' })
 
-    const res = await app.request('/search?q=correr')
+    const res = await app.request('/?q=correr', {
+      headers: { 'HX-Request': 'true' },
+    })
     expect(res.status).toBe(200)
+    expect(res.headers.get('HX-Push-Url')).toBe('/?q=correr')
     const html = await res.text()
     expect(html).toContain('Correr mañana')
     expect(html).not.toContain('Meditación')
+    expect(html).not.toContain('<nav')
   })
 
-  it('POST /trackers creates a tracker via form submit', async () => {
+  it('GET /?q= with empty query sets HX-Push-Url to / without query param', async () => {
+    createTracker({ id: 'run', name: 'Correr mañana', type: 'numeric' })
+
+    const res = await app.request('/?q=', {
+      headers: { 'HX-Request': 'true' },
+    })
+    expect(res.status).toBe(200)
+    expect(res.headers.get('HX-Push-Url')).toBe('/')
+  })
+
+  it('GET /?q=... without HX-Request renders full page with query preserved in input', async () => {
+    createTracker({ id: 'run', name: 'Correr mañana', type: 'numeric' })
+
+    const res = await app.request('/?q=correr')
+    expect(res.status).toBe(200)
+    const html = await res.text()
+    expect(html).toContain('Correr mañana')
+    expect(html).toContain('value="correr"')
+    expect(html).toContain('<nav')
+  })
+
+  it('POST /track creates a tracker via form submit', async () => {
     const formData = new FormData()
     formData.append('name', 'Rutina de Yoga')
     formData.append('type', 'habit')
 
-    const res = await app.request('/trackers', {
+    const res = await app.request('/track', {
       method: 'POST',
       body: formData,
     })
@@ -48,12 +91,13 @@ describe('Web UI & HTMX endpoints', () => {
     expect(res.headers.get('location')).toBe('/')
   })
 
-  it('POST /trackers/:id/quick logs quick habit and returns card partial with Spanish confirmation', async () => {
+  it('POST /track/:id quick-logs habit via HTMX and returns card partial', async () => {
     createTracker({ id: 'pushups', name: 'Flexiones', type: 'habit' })
 
     const formData = new FormData()
-    const res = await app.request('/trackers/pushups/quick', {
+    const res = await app.request('/track/pushups', {
       method: 'POST',
+      headers: { 'HX-Target': 'tracker-card-pushups' },
       body: formData,
     })
 
@@ -64,7 +108,24 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('¡Registrado!')
   })
 
-  it('GET /trackers/:id displays detail view with history', async () => {
+  it('POST /track/:id saves detailed event from modal and redirects to /track/:id', async () => {
+    createTracker({ id: 'weight', name: 'Peso', type: 'numeric' })
+
+    const formData = new FormData()
+    formData.append('value', '72.5')
+    formData.append('note', 'En ayunas')
+    formData.append('timestamp', '2026-10-31T08:00')
+
+    const res = await app.request('/track/weight', {
+      method: 'POST',
+      body: formData,
+    })
+
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toBe('/track/weight')
+  })
+
+  it('GET /track/:id displays detail view with history and log modal', async () => {
     createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
     createEvent({
       id: 'e1',
@@ -73,40 +134,29 @@ describe('Web UI & HTMX endpoints', () => {
       timestamp: '2026-10-31T10:00:00Z',
     })
 
-    const res = await app.request('/trackers/reading')
+    const res = await app.request('/track/reading')
     expect(res.status).toBe(200)
     const html = await res.text()
     expect(html).toContain('Lectura')
     expect(html).toContain('Terminado capítulo 3')
     expect(html).toContain('Historial de entradas')
+    expect(html).toContain('id="logModal"')
   })
 
-  it('GET /trackers/:id/log renders entry form with consistent right-aligned action buttons', async () => {
-    createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
-
-    const res = await app.request('/trackers/reading/log')
-    expect(res.status).toBe(200)
-    const html = await res.text()
-    expect(html).toContain('Registrar: Lectura')
-    expect(html).toContain('justify-content-end align-items-center gap-2')
-    expect(html).toContain('Cancelar')
-    expect(html).toContain('Guardar')
-  })
-
-  it('DELETE /trackers/:id/events/:eventId removes event', async () => {
+  it('DELETE /track/:id/:eventId removes event', async () => {
     createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
     createEvent({ id: 'e1', tracker_id: 'reading', timestamp: new Date().toISOString() })
 
-    const res = await app.request('/trackers/reading/events/e1', {
+    const res = await app.request('/track/reading/e1', {
       method: 'DELETE',
     })
     expect(res.status).toBe(200)
   })
 
-  it('DELETE /trackers/:id deletes tracker and sets HX-Location', async () => {
+  it('DELETE /track/:id deletes tracker and sets HX-Location', async () => {
     createTracker({ id: 'temp', name: 'Temporal', type: 'habit' })
 
-    const res = await app.request('/trackers/temp', {
+    const res = await app.request('/track/temp', {
       method: 'DELETE',
     })
     expect(res.status).toBe(200)

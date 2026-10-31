@@ -34,7 +34,7 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
                 </span>
                 <h2 class="h6 card-title mb-0 fw-semibold text-truncate">
                   <a
-                    href={`/trackers/${tracker.id}`}
+                    href={`/track/${tracker.id}`}
                     class="stretched-link text-reset text-decoration-none"
                     title={tracker.name}
                   >
@@ -59,7 +59,7 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
               {tracker.type === 'habit' && (
                 <button
                   type="button"
-                  hx-post={`/trackers/${tracker.id}/quick`}
+                  hx-post={`/track/${tracker.id}`}
                   hx-target={`#tracker-card-${tracker.id}`}
                   hx-swap="outerHTML"
                   class={`btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1 ${
@@ -75,7 +75,7 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
               {tracker.type === 'numeric' && (
                 <form
                   class="flex-grow-1 m-0 p-0 d-flex"
-                  hx-post={`/trackers/${tracker.id}/quick`}
+                  hx-post={`/track/${tracker.id}`}
                   hx-target={`#tracker-card-${tracker.id}`}
                   hx-swap="outerHTML"
                 >
@@ -107,7 +107,7 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
               {tracker.type === 'text' && (
                 <form
                   class="flex-grow-1 m-0 p-0 d-flex"
-                  hx-post={`/trackers/${tracker.id}/quick`}
+                  hx-post={`/track/${tracker.id}`}
                   hx-target={`#tracker-card-${tracker.id}`}
                   hx-swap="outerHTML"
                 >
@@ -134,15 +134,17 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
                 </form>
               )}
 
-              {/* Pencil icon for detailed entry */}
-              <a
-                href={`/trackers/${tracker.id}/log`}
+              {/* Detailed log modal trigger */}
+              <button
+                type="button"
                 class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center flex-shrink-0"
-                title="Registrar entrada"
-                aria-label="Registrar entrada"
+                data-bs-toggle="modal"
+                data-bs-target={`#logModal-${tracker.id}`}
+                title="Registrar con fecha o nota"
+                aria-label="Registrar con fecha o nota"
               >
                 <i class="bi bi-pencil-square"></i>
-              </a>
+              </button>
             </div>
           </div>
         </div>

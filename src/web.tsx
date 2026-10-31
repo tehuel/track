@@ -13,20 +13,14 @@ import {
 import type { Tracker, TrackerEvent, TrackerType } from './types'
 import { DashboardPage, TrackersGrid } from './views/dashboard'
 import { DetailPage } from './views/detail'
-import { LogEntryPage } from './views/log-entry'
 import { TrackerCard } from './views/components/tracker-card'
 
 export const webRouter = new Hono()
 
-// GET / - Dashboard
+// GET / - Dashboard & Search (supports ?q= query param)
 webRouter.get('/', (c) => {
-  const trackers = listTrackers()
-  return c.html(<DashboardPage trackers={trackers} />)
-})
-
-// GET /search - Live search HTMX partial
-webRouter.get('/search', (c) => {
-  const q = (c.req.query('q') || '').toLowerCase().trim()
+  const rawQ = c.req.query('q') || ''
+  const q = rawQ.toLowerCase().trim()
   const all = listTrackers()
   const filtered = q
     ? all.filter(
@@ -36,11 +30,20 @@ webRouter.get('/search', (c) => {
       )
     : all
 
-  return c.html(<TrackersGrid trackers={filtered} />)
+  // If HTMX requested just the grid partial, return TrackersGrid with clean URL push
+  if (c.req.header('HX-Request')) {
+    c.header('HX-Push-Url', q ? `/?q=${encodeURIComponent(rawQ.trim())}` : '/')
+    return c.html(<TrackersGrid trackers={filtered} />)
+  }
+
+  return c.html(<DashboardPage trackers={filtered} query={rawQ.trim()} />)
 })
 
-// POST /trackers - Create new tracker
-webRouter.post('/trackers', async (c) => {
+// Sub-router for all /track operations
+const trackRouter = new Hono()
+
+// POST /track - Create new track
+trackRouter.post('/', async (c) => {
   const body = await c.req.parseBody()
   const name = String(body['name'] || '').trim()
   if (!name) {
@@ -63,8 +66,8 @@ webRouter.post('/trackers', async (c) => {
   return c.redirect('/')
 })
 
-// GET /trackers/:id - Single tracker detail
-webRouter.get('/trackers/:id', (c) => {
+// GET /track/:id - Single track detail
+trackRouter.get('/:id', (c) => {
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
@@ -75,62 +78,27 @@ webRouter.get('/trackers/:id', (c) => {
   return c.html(<DetailPage tracker={tracker} events={events} />)
 })
 
-// GET /trackers/:id/log - Full-page entry logger
-webRouter.get('/trackers/:id/log', (c) => {
+// POST /track/:id - Log event (quick check-in from dashboard or modal from detail)
+trackRouter.post('/:id', async (c) => {
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
     return c.redirect('/')
-  }
-
-  return c.html(<LogEntryPage tracker={tracker} />)
-})
-
-// POST /trackers/:id/quick - Quick-log action (Habit, Numeric, or Text)
-webRouter.post('/trackers/:id/quick', async (c) => {
-  const id = c.req.param('id')
-  const tracker = getTrackerById(id)
-  if (!tracker) {
-    return c.text('Not found', 404)
   }
 
   const body = await c.req.parseBody()
   let value: number | null = null
   let note: string | null = null
 
-  if (tracker.type === 'numeric') {
+  if (body['value'] !== undefined && body['value'] !== '') {
     const rawVal = body['value']
-    const parsed = typeof rawVal === 'string' ? parseFloat(rawVal) : NaN
-    value = isNaN(parsed) ? null : parsed
-  } else if (tracker.type === 'text') {
-    note = body['note'] ? String(body['note']).trim() : null
+    const parsedVal = typeof rawVal === 'string' ? parseFloat(rawVal) : NaN
+    value = isNaN(parsedVal) ? null : parsedVal
   }
 
-  const event: TrackerEvent = {
-    id: crypto.randomUUID(),
-    tracker_id: id,
-    value,
-    note,
-    timestamp: new Date().toISOString(),
+  if (body['note']) {
+    note = String(body['note']).trim() || null
   }
-
-  createEvent(event)
-  return c.html(<TrackerCard tracker={tracker} justLogged={true} />)
-})
-
-// POST /trackers/:id/events - Save entry from detailed form
-webRouter.post('/trackers/:id/events', async (c) => {
-  const id = c.req.param('id')
-  const tracker = getTrackerById(id)
-  if (!tracker) {
-    return c.redirect('/')
-  }
-
-  const body = await c.req.parseBody()
-  const rawVal = body['value']
-  const parsedVal = typeof rawVal === 'string' && rawVal !== '' ? parseFloat(rawVal) : NaN
-  const value = isNaN(parsedVal) ? null : parsedVal
-  const note = body['note'] ? String(body['note']).trim() : null
 
   let timestamp = new Date().toISOString()
   if (body['timestamp'] && typeof body['timestamp'] === 'string') {
@@ -149,21 +117,36 @@ webRouter.post('/trackers/:id/events', async (c) => {
   }
 
   createEvent(event)
-  return c.redirect(`/trackers/${id}`)
+
+  // If return_to is specified (e.g. from dashboard modal), redirect there
+  if (body['return_to'] && typeof body['return_to'] === 'string') {
+    return c.redirect(body['return_to'])
+  }
+
+  // If HTMX requested card update from dashboard, return the card
+  if (c.req.header('HX-Target') === `tracker-card-${id}`) {
+    return c.html(<TrackerCard tracker={tracker} justLogged={true} />)
+  }
+
+  // Otherwise, default redirect to the track detail page
+  return c.redirect(`/track/${id}`)
 })
 
-// DELETE /trackers/:id/events/:eventId - Delete single event
-webRouter.delete('/trackers/:id/events/:eventId', (c) => {
+// DELETE /track/:id - Delete track
+trackRouter.delete('/:id', (c) => {
+  const id = c.req.param('id')
+  deleteTracker(id)
+  c.header('HX-Location', '/')
+  return c.body(null, 200)
+})
+
+// DELETE /track/:id/:eventId - Delete single event
+trackRouter.delete('/:id/:eventId', (c) => {
   const trackerId = c.req.param('id')
   const eventId = c.req.param('eventId')
   deleteEvent(trackerId, eventId)
   return c.body(null, 200)
 })
 
-// DELETE /trackers/:id - Delete tracker
-webRouter.delete('/trackers/:id', (c) => {
-  const id = c.req.param('id')
-  deleteTracker(id)
-  c.header('HX-Location', '/')
-  return c.body(null, 200)
-})
+// Mount trackRouter at /track
+webRouter.route('/track', trackRouter)
