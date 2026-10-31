@@ -16,7 +16,7 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 - **Data Access Layer (`src/db.ts`)**: Pure TypeScript functions executing native SQLite prepared queries (`db.query(...)`).
   - Connection singleton with Write-Ahead Logging (WAL) and foreign keys enabled.
   - Testable with in-memory SQLite via `createDatabase(':memory:')` and `setDb(...)`.
-- **Views (`src/views/`)**: Server-rendered Hono JSX components (`layout.tsx`, `dashboard.tsx`, `detail.tsx`, `log-entry.tsx`, `components/`).
+- **Views (`src/views/`)**: Server-rendered Hono JSX components (`layout.tsx`, `dashboard.tsx`, `detail.tsx`, `components/`).
 - **Entrypoint (`src/index.ts`)**: Initializes Hono server, health endpoints, static asset handlers, and exports default Bun server configuration.
 
 ### 3. Hypermedia & Frontend Architecture (HTMX + Bootstrap 5)
@@ -39,12 +39,10 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 
 - `src/` — Server codebase:
   - `index.ts` — Main server entrypoint.
-  - `db.ts` — Native SQLite connection and typed database queries.
+  - `db.ts` — Native SQLite connection, slug generation, and typed database queries.
   - `web.tsx` — Web page and HTMX route handlers.
   - `views/` — Hono JSX view templates.
-  - `slug.ts` — Slug generation and collision handling.
   - `types.ts` — Centralized TypeScript interfaces.
 - `public/` — Static assets (favicons, icons).
 - `test/` — Bun test suite (`db.test.ts`, `web.test.ts`).
-- `schema.sql` — SQLite DDL schema.
 - `Dockerfile` & `docker-compose.yml` — Containerization and self-hosting configuration.

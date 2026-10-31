@@ -8,7 +8,6 @@ RUN bun install --production --frozen-lockfile
 # Copy application source and assets
 COPY src/ ./src/
 COPY public/ ./public/
-COPY schema.sql ./
 COPY tsconfig.json ./
 
 # Default environment configuration

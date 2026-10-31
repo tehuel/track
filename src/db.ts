@@ -1,8 +1,18 @@
 import { Database } from 'bun:sqlite'
 import type { Tracker, TrackerEvent } from './types'
-import { slugify } from './slug'
 
 const DEFAULT_DB_PATH = process.env.DB_PATH || 'tracker.db'
+
+export function slugify(text: string): string {
+  const slug = text
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return slug || `tracker-${crypto.randomUUID().slice(0, 8)}`
+}
 
 export function createDatabase(path: string = DEFAULT_DB_PATH): Database {
   const db = new Database(path)
@@ -77,11 +87,10 @@ export function generateUniqueSlug(name: string, database: Database = getDb()): 
 }
 
 export function createTracker(tracker: Tracker, database: Database = getDb()): Tracker {
-  const query = database.query<never, [string, string, string, string | null]>(
-    'INSERT INTO trackers (id, name, type, description) VALUES (?, ?, ?, ?)'
+  const query = database.query<Tracker, [string, string, string, string | null]>(
+    'INSERT INTO trackers (id, name, type, description) VALUES (?, ?, ?, ?) RETURNING id, name, type, description, created_at'
   )
-  query.run(tracker.id, tracker.name, tracker.type, tracker.description ?? null)
-  return getTrackerById(tracker.id, database)!
+  return query.get(tracker.id, tracker.name, tracker.type, tracker.description ?? null)!
 }
 
 export function deleteTracker(id: string, database: Database = getDb()): boolean {
@@ -104,20 +113,16 @@ export function listEventsByTracker(
 }
 
 export function createEvent(event: TrackerEvent, database: Database = getDb()): TrackerEvent {
-  const query = database.query<never, [string, string, number | null, string | null, string]>(
-    'INSERT INTO tracker_events (id, tracker_id, value, note, timestamp) VALUES (?, ?, ?, ?, ?)'
+  const query = database.query<TrackerEvent, [string, string, number | null, string | null, string]>(
+    'INSERT INTO tracker_events (id, tracker_id, value, note, timestamp) VALUES (?, ?, ?, ?, ?) RETURNING id, tracker_id, value, note, timestamp'
   )
-  query.run(
+  return query.get(
     event.id,
     event.tracker_id,
     event.value ?? null,
     event.note ?? null,
     event.timestamp
-  )
-  const fetchQuery = database.query<TrackerEvent, [string]>(
-    'SELECT id, tracker_id, value, note, timestamp FROM tracker_events WHERE id = ?'
-  )
-  return fetchQuery.get(event.id)!
+  )!
 }
 
 export function deleteEvent(trackerId: string, eventId: string, database: Database = getDb()): boolean {

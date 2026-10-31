@@ -15,16 +15,3 @@ export interface TrackerEvent {
   note?: string | null
   timestamp: string
 }
-
-export interface CreateTrackerInput {
-  id?: string
-  name: string
-  type?: TrackerType
-  description?: string
-}
-
-export interface CreateEventInput {
-  value?: number | null
-  note?: string | null
-  timestamp?: string
-}
