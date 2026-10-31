@@ -40,14 +40,59 @@ export function NewTrackerModal() {
               </div>
 
               <div class="mb-3">
-                <label for="tracker-type" class="form-label fw-medium">
+                <label class="form-label fw-medium d-block">
                   Tipo de track
                 </label>
-                <select class="form-select" id="tracker-type" name="type">
-                  <option value="habit">Hábito (Completado Sí/No)</option>
-                  <option value="numeric">Métrica numérica (Unidades, peso, distancia)</option>
-                  <option value="text">General / Registro de notas</option>
-                </select>
+                <div class="btn-group w-100" role="group" aria-label="Tipo de track">
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="type"
+                    id="tracker-type-habit"
+                    value="habit"
+                    autocomplete="off"
+                    checked
+                  />
+                  <label
+                    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
+                    for="tracker-type-habit"
+                  >
+                    <i class="bi bi-check2-circle"></i>
+                    <span>Hábito</span>
+                  </label>
+
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="type"
+                    id="tracker-type-numeric"
+                    value="numeric"
+                    autocomplete="off"
+                  />
+                  <label
+                    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
+                    for="tracker-type-numeric"
+                  >
+                    <i class="bi bi-123"></i>
+                    <span>Numérico</span>
+                  </label>
+
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="type"
+                    id="tracker-type-text"
+                    value="text"
+                    autocomplete="off"
+                  />
+                  <label
+                    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
+                    for="tracker-type-text"
+                  >
+                    <i class="bi bi-card-text"></i>
+                    <span>Texto</span>
+                  </label>
+                </div>
                 <div class="form-text">
                   Elegí el formato que mejor se adapte a lo que vas a registrar.
                 </div>
