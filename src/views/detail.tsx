@@ -153,30 +153,15 @@ export function DetailPage({ tracker, events }: DetailProps) {
           </div>
 
           <div class="d-flex align-items-center gap-2 flex-wrap">
-            {/* Habit Quick check-in */}
-            {tracker.type === 'habit' && (
-              <form action={`/track/${tracker.id}`} method="post" class="m-0 p-0 d-inline-flex">
-                <button
-                  type="submit"
-                  class="btn btn-primary d-flex align-items-center gap-1"
-                >
-                  <i class="bi bi-check2"></i>
-                  <span>Completar</span>
-                </button>
-              </form>
-            )}
-
-            {/* Open Modal for detailed log (or non-habit log) */}
+            {/* Open Modal for detailed log */}
             <button
               type="button"
-              class={`btn d-flex align-items-center gap-1 ${
-                tracker.type === 'habit' ? 'btn-outline-secondary' : 'btn-primary'
-              }`}
+              class="btn btn-primary d-flex align-items-center gap-1"
               data-bs-toggle="modal"
               data-bs-target="#logModal"
             >
-              <i class={`bi ${tracker.type === 'habit' ? 'bi-pencil-square' : 'bi-plus-lg'}`}></i>
-              <span>{tracker.type === 'habit' ? '+ Nota' : 'Registrar'}</span>
+              <i class="bi bi-plus-lg"></i>
+              <span>Registrar</span>
             </button>
 
             {/* Delete Tracker */}
