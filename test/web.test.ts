@@ -81,6 +81,18 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('Historial de entradas')
   })
 
+  it('GET /trackers/:id/log renders entry form with consistent right-aligned action buttons', async () => {
+    createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
+
+    const res = await app.request('/trackers/reading/log')
+    expect(res.status).toBe(200)
+    const html = await res.text()
+    expect(html).toContain('Registrar: Lectura')
+    expect(html).toContain('justify-content-end align-items-center gap-2')
+    expect(html).toContain('Cancelar')
+    expect(html).toContain('Guardar')
+  })
+
   it('DELETE /trackers/:id/events/:eventId removes event', async () => {
     createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
     createEvent({ id: 'e1', tracker_id: 'reading', timestamp: new Date().toISOString() })

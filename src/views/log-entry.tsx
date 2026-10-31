@@ -93,7 +93,7 @@ export function LogEntryPage({ tracker }: LogEntryProps) {
                   </div>
                 </div>
 
-                <div class="card-footer border-top bg-body-tertiary d-flex justify-content-between align-items-center p-3">
+                <div class="card-footer border-top bg-body-tertiary d-flex justify-content-end align-items-center gap-2 p-3">
                   <a href={`/trackers/${tracker.id}`} class="btn btn-secondary">
                     Cancelar
                   </a>
