@@ -1,13 +1,13 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
 import { Hono } from 'hono'
 import { webRouter } from '../src/web'
-import { createDatabase, setDb, createTracker, createEvent } from '../src/db'
+import { db, createTracker, createEvent } from '../src/db'
 
 describe('Web UI & HTMX endpoints', () => {
   let app: Hono
 
   beforeEach(() => {
-    setDb(createDatabase(':memory:'))
+    db.exec('DELETE FROM trackers')
     app = new Hono()
     app.route('/', webRouter)
   })
