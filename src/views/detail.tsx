@@ -34,7 +34,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
             class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
           >
             <i class="bi bi-arrow-left"></i>
-            <span>Todos los tracks</span>
+            <span>Tracks</span>
           </a>
         </div>
 
@@ -59,7 +59,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
                   class="btn btn-primary d-flex align-items-center gap-1.5"
                 >
                   <i class="bi bi-check2"></i>
-                  <span>Completar hoy</span>
+                  <span>Completar</span>
                 </button>
               </form>
             ) : (
@@ -68,9 +68,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
                 class="btn btn-primary d-flex align-items-center gap-1.5"
               >
                 <i class="bi bi-plus-lg"></i>
-                <span>
-                  {tracker.type === 'numeric' ? 'Registrar valor' : 'Registrar entrada'}
-                </span>
+                <span>Registrar</span>
               </a>
             )}
 
@@ -90,7 +88,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
               type="button"
               class="btn btn-outline-danger d-flex align-items-center gap-1"
               hx-delete={`/trackers/${tracker.id}`}
-              hx-confirm="¿Seguro que querés eliminar este track? Esta acción no se puede deshacer."
+              hx-confirm="¿Eliminar track?"
               title="Eliminar track"
             >
               <i class="bi bi-trash3"></i>
@@ -111,10 +109,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
           {events.length === 0 ? (
             <div class="text-center text-body-secondary py-5 border rounded-3 bg-body shadow-sm">
               <i class="bi bi-calendar-x fs-1 d-block mb-2 text-body-tertiary"></i>
-              <h3 class="h6 fw-semibold">Todavía no hay entradas registradas</h3>
-              <p class="small text-body-secondary mb-0">
-                Tus entradas registradas van a aparecer acá cronológicamente.
-              </p>
+              <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
             </div>
           ) : (
             <div class="list-group shadow-sm" id="events-list">
@@ -136,7 +131,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
                     hx-delete={`/trackers/${tracker.id}/events/${event.id}`}
                     hx-target="closest .list-group-item"
                     hx-swap="outerHTML"
-                    hx-confirm="¿Seguro que querés eliminar esta entrada?"
+                    hx-confirm="¿Eliminar entrada?"
                     title="Eliminar entrada"
                     aria-label="Eliminar entrada"
                   >

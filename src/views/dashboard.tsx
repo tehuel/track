@@ -13,10 +13,7 @@ export function TrackersGrid({ trackers }: DashboardProps) {
       <div id="trackers-grid" class="card text-center p-5 border-dashed bg-body shadow-sm">
         <div class="py-4">
           <i class="bi bi-card-checklist text-body-tertiary fs-1"></i>
-          <h3 class="h5 mt-3 mb-2">No se encontraron tracks</h3>
-          <p class="text-body-secondary mb-4">
-            Empezá a registrar tus hábitos, rutinas o métricas hoy.
-          </p>
+          <h3 class="h5 mt-3 mb-3">No hay tracks</h3>
           <button
             type="button"
             class="btn btn-primary"
@@ -24,7 +21,7 @@ export function TrackersGrid({ trackers }: DashboardProps) {
             data-bs-target="#newTrackerModal"
           >
             <i class="bi bi-plus-lg me-1"></i>
-            <span>Creá tu primer track</span>
+            <span>Crear track</span>
           </button>
         </div>
       </div>
@@ -56,8 +53,8 @@ export function DashboardPage({ trackers }: DashboardProps) {
                 type="search"
                 name="q"
                 class="form-control"
-                placeholder="Filtrar tracks..."
-                aria-label="Filtrar tracks"
+                placeholder="Buscar..."
+                aria-label="Buscar tracks"
                 hx-get="/search"
                 hx-trigger="keyup changed delay:200ms, search"
                 hx-target="#trackers-grid"

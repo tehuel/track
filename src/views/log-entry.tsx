@@ -26,7 +26,7 @@ export function LogEntryPage({ tracker }: LogEntryProps) {
             class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
           >
             <i class="bi bi-arrow-left"></i>
-            <span>Volver a {tracker.name}</span>
+            <span>Volver</span>
           </a>
         </div>
 
@@ -36,7 +36,7 @@ export function LogEntryPage({ tracker }: LogEntryProps) {
             <div class="card shadow-sm border bg-body rounded-3">
               <div class="card-header bg-body p-3 border-bottom d-flex align-items-center gap-2">
                 <i class={`bi ${icon} text-primary fs-5`}></i>
-                <h1 class="h5 mb-0 fw-semibold">Registrar entrada: {tracker.name}</h1>
+                <h1 class="h5 mb-0 fw-semibold">Registrar: {tracker.name}</h1>
               </div>
 
               <form action={`/trackers/${tracker.id}/events`} method="post">
@@ -54,7 +54,7 @@ export function LogEntryPage({ tracker }: LogEntryProps) {
                         class="form-control"
                         id="event-value"
                         name="value"
-                        placeholder="ej. 72.5, 5000"
+                        placeholder="Valor..."
                         autofocus
                         required
                       />
@@ -72,7 +72,7 @@ export function LogEntryPage({ tracker }: LogEntryProps) {
                       class="form-control"
                       id="event-note"
                       name="note"
-                      placeholder="ej. Completado después de caminar, Gran sesión"
+                      placeholder="Nota..."
                       autofocus={tracker.type !== 'numeric'}
                     />
                   </div>
@@ -101,7 +101,7 @@ export function LogEntryPage({ tracker }: LogEntryProps) {
                     type="submit"
                     class="btn btn-primary d-flex align-items-center gap-1"
                   >
-                    <span>Guardar entrada</span>
+                    <span>Guardar</span>
                   </button>
                 </div>
               </form>

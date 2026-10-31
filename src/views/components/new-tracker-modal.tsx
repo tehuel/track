@@ -12,7 +12,7 @@ export function NewTrackerModal() {
           <div class="modal-header border-bottom">
             <h5 class="modal-title d-flex align-items-center gap-2" id="newTrackerModalLabel">
               <i class="bi bi-plus-circle-fill text-primary"></i>
-              <span>Crear nuevo track</span>
+              <span>Crear track</span>
             </h5>
             <button
               type="button"
@@ -26,7 +26,7 @@ export function NewTrackerModal() {
             <div class="modal-body p-4">
               <div class="mb-3">
                 <label for="tracker-name" class="form-label fw-medium">
-                  <span>Nombre del track</span>
+                  <span>Nombre</span>
                   <span class="text-danger ms-1">*</span>
                 </label>
                 <input
@@ -34,16 +34,16 @@ export function NewTrackerModal() {
                   class="form-control"
                   id="tracker-name"
                   name="name"
-                  placeholder="ej. Meditación diaria, Consumo de agua, Correr"
+                  placeholder="ej. Meditación"
                   required
                 />
               </div>
 
               <div class="mb-3">
                 <label class="form-label fw-medium d-block">
-                  Tipo de track
+                  Tipo
                 </label>
-                <div class="btn-group w-100" role="group" aria-label="Tipo de track">
+                <div class="btn-group w-100" role="group" aria-label="Tipo">
                   <input
                     type="radio"
                     class="btn-check"
@@ -93,9 +93,6 @@ export function NewTrackerModal() {
                     <span>Texto</span>
                   </label>
                 </div>
-                <div class="form-text">
-                  Elegí el formato que mejor se adapte a lo que vas a registrar.
-                </div>
               </div>
 
               <div class="mb-3">
@@ -107,7 +104,7 @@ export function NewTrackerModal() {
                   class="form-control"
                   id="tracker-description"
                   name="description"
-                  placeholder="ej. Registrar vasos de agua al día, Racha de meditación matutina"
+                  placeholder="Descripción..."
                   rows={2}
                   maxlength={500}
                 ></textarea>
@@ -115,7 +112,7 @@ export function NewTrackerModal() {
 
               <div class="mb-2">
                 <label for="tracker-id" class="form-label fw-medium">
-                  <span>ID / Slug personalizado</span>{' '}
+                  <span>ID</span>{' '}
                   <span class="text-body-secondary fw-normal">(opcional)</span>
                 </label>
                 <input
@@ -123,11 +120,8 @@ export function NewTrackerModal() {
                   class="form-control font-monospace"
                   id="tracker-id"
                   name="id"
-                  placeholder="ej. meditacion-diaria"
+                  placeholder="ej. meditacion"
                 />
-                <div class="form-text">
-                  Dejá en blanco para generar automáticamente un slug limpio desde el nombre.
-                </div>
               </div>
             </div>
 
