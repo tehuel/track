@@ -9,7 +9,6 @@ app.get('/health', (c) => {
 // Serve static assets from public/
 app.use('/favicon.ico', serveStatic({ path: './public/favicon.ico' }))
 app.use('/favicon.svg', serveStatic({ path: './public/favicon.svg' }))
-app.use('/static/*', serveStatic({ root: './public' }))
 
 const port = Number(process.env.PORT || 3000)
 

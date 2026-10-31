@@ -14,7 +14,6 @@ data/
 
 # Logs
 *.log
-.wrangler/
 
 # OS / Editor
 .DS_Store

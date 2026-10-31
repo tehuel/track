@@ -75,26 +75,14 @@ app.post('/track/:id', async (c) => {
   }
 
   const body = await c.req.parseBody()
-  let value: number | null = null
-  let note: string | null = null
-
-  if (body['value'] !== undefined && body['value'] !== '') {
-    const rawVal = body['value']
-    const parsedVal = typeof rawVal === 'string' ? parseFloat(rawVal) : NaN
-    value = isNaN(parsedVal) ? null : parsedVal
-  }
-
-  if (body['note']) {
-    note = String(body['note']).trim() || null
-  }
-
-  let timestamp = new Date().toISOString()
-  if (body['timestamp'] && typeof body['timestamp'] === 'string') {
-    const parsedDate = new Date(body['timestamp'])
-    if (!isNaN(parsedDate.getTime())) {
-      timestamp = parsedDate.toISOString()
-    }
-  }
+  const parsedVal = parseFloat(String(body['value'] ?? ''))
+  const value = Number.isNaN(parsedVal) ? null : parsedVal
+  const note = String(body['note'] || '').trim() || null
+  const parsedDate = body['timestamp'] ? new Date(String(body['timestamp'])) : null
+  const timestamp =
+    parsedDate && !Number.isNaN(parsedDate.getTime())
+      ? parsedDate.toISOString()
+      : new Date().toISOString()
 
   createEvent({
     id: crypto.randomUUID(),
