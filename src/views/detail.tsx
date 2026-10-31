@@ -139,11 +139,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
         </div>
 
         {/* Log Entry Modal */}
-        <LogEntryModal
-          tracker={tracker}
-          modalId="logModal"
-          returnTo={`/track/${tracker.id}`}
-        />
+        <LogEntryModal tracker={tracker} />
       </div>
     </Layout>
   )

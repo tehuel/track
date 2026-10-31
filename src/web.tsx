@@ -115,11 +115,6 @@ webRouter.post('/track/:id', async (c) => {
 
   createEvent(event)
 
-  // If return_to is specified (e.g. from dashboard modal), redirect there
-  if (body['return_to'] && typeof body['return_to'] === 'string') {
-    return c.redirect(body['return_to'])
-  }
-
   // If HTMX requested card update from dashboard, return the card
   if (c.req.header('HX-Target') === `tracker-card-${id}`) {
     return c.html(<TrackerCard tracker={tracker} justLogged={true} />)

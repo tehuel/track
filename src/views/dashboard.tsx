@@ -2,7 +2,6 @@ import type { Tracker } from '../types'
 import { Layout } from './layout'
 import { TrackerCard } from './components/tracker-card'
 import { NewTrackerModal } from './components/new-tracker-modal'
-import { LogEntryModal } from './components/log-entry-modal'
 
 interface DashboardProps {
   trackers: Tracker[]
@@ -37,9 +36,6 @@ export function TrackersGrid({ trackers }: DashboardProps) {
           <TrackerCard tracker={tracker} />
         ))}
       </div>
-      {trackers.map((tracker) => (
-        <LogEntryModal tracker={tracker} modalId={`logModal-${tracker.id}`} returnTo="/" />
-      ))}
     </div>
   )
 }

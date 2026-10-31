@@ -54,32 +54,28 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
 
           {/* Quick Action Footer */}
           <div class="pt-3 position-relative z-2">
-            <div class="d-flex align-items-center gap-2">
-              {/* Habit Quick Check-in */}
-              {tracker.type === 'habit' && (
-                <button
-                  type="button"
-                  hx-post={`/track/${tracker.id}`}
-                  hx-target={`#tracker-card-${tracker.id}`}
-                  hx-swap="outerHTML"
-                  class={`btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1 ${
-                    justLogged ? 'btn-success' : 'btn-primary'
-                  }`}
-                >
-                  <i class={`bi ${justLogged ? 'bi-check-all' : 'bi-check2'}`}></i>
-                  <span>{justLogged ? '¡Registrado!' : 'Completar'}</span>
-                </button>
-              )}
-
-              {/* Numeric Inline Input */}
-              {tracker.type === 'numeric' && (
-                <form
-                  class="flex-grow-1 m-0 p-0 d-flex"
-                  hx-post={`/track/${tracker.id}`}
-                  hx-target={`#tracker-card-${tracker.id}`}
-                  hx-swap="outerHTML"
-                >
-                  <div class="input-group input-group-sm">
+            {tracker.type === 'habit' ? (
+              <button
+                type="button"
+                hx-post={`/track/${tracker.id}`}
+                hx-target={`#tracker-card-${tracker.id}`}
+                hx-swap="outerHTML"
+                class={`btn btn-sm w-100 d-flex align-items-center justify-content-center gap-1 ${
+                  justLogged ? 'btn-success' : 'btn-primary'
+                }`}
+              >
+                <i class={`bi ${justLogged ? 'bi-check-all' : 'bi-check2'}`}></i>
+                <span>{justLogged ? '¡Registrado!' : 'Completar'}</span>
+              </button>
+            ) : (
+              <form
+                class="m-0 p-0 d-flex"
+                hx-post={`/track/${tracker.id}`}
+                hx-target={`#tracker-card-${tracker.id}`}
+                hx-swap="outerHTML"
+              >
+                <div class="input-group input-group-sm">
+                  {tracker.type === 'numeric' ? (
                     <input
                       type="number"
                       step="any"
@@ -89,29 +85,7 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
                       required
                       aria-label="Valor"
                     />
-                    <button
-                      type="submit"
-                      class={`btn d-flex align-items-center gap-1 ${
-                        justLogged ? 'btn-success' : 'btn-primary'
-                      }`}
-                      title="Registrar"
-                    >
-                      <i class="bi bi-check-lg"></i>
-                      <span>Registrar</span>
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* Text Inline Note */}
-              {tracker.type === 'text' && (
-                <form
-                  class="flex-grow-1 m-0 p-0 d-flex"
-                  hx-post={`/track/${tracker.id}`}
-                  hx-target={`#tracker-card-${tracker.id}`}
-                  hx-swap="outerHTML"
-                >
-                  <div class="input-group input-group-sm">
+                  ) : (
                     <input
                       type="text"
                       name="note"
@@ -120,32 +94,20 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
                       required
                       aria-label="Nota"
                     />
-                    <button
-                      type="submit"
-                      class={`btn d-flex align-items-center gap-1 ${
-                        justLogged ? 'btn-success' : 'btn-primary'
-                      }`}
-                      title="Registrar"
-                    >
-                      <i class="bi bi-check-lg"></i>
-                      <span>Registrar</span>
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {/* Detailed log modal trigger */}
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center flex-shrink-0"
-                data-bs-toggle="modal"
-                data-bs-target={`#logModal-${tracker.id}`}
-                title="Registrar con fecha o nota"
-                aria-label="Registrar con fecha o nota"
-              >
-                <i class="bi bi-pencil-square"></i>
-              </button>
-            </div>
+                  )}
+                  <button
+                    type="submit"
+                    class={`btn d-flex align-items-center gap-1 ${
+                      justLogged ? 'btn-success' : 'btn-primary'
+                    }`}
+                    title="Registrar"
+                  >
+                    <i class="bi bi-check-lg"></i>
+                    <span>Registrar</span>
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </div>

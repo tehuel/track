@@ -12,7 +12,7 @@ describe('Web UI & HTMX endpoints', () => {
     app.route('/', webRouter)
   })
 
-  it('GET / renders dashboard with tracker cards in Spanish, /track/:id links, and log modals', async () => {
+  it('GET / renders dashboard with tracker cards in Spanish and /track/:id links', async () => {
     createTracker({ id: 'guitar', name: 'Tocar Guitarra', type: 'habit' })
 
     const res = await app.request('/')
@@ -22,23 +22,6 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('htmx.org')
     expect(html).toContain('Nuevo track')
     expect(html).toContain('/track/guitar')
-    expect(html).toContain('id="logModal-guitar"')
-  })
-
-  it('POST /track/:id with return_to redirects to custom path (dashboard modal flow)', async () => {
-    createTracker({ id: 'guitar', name: 'Tocar Guitarra', type: 'habit' })
-
-    const formData = new FormData()
-    formData.append('note', '30 minutos de acordes')
-    formData.append('return_to', '/')
-
-    const res = await app.request('/track/guitar', {
-      method: 'POST',
-      body: formData,
-    })
-
-    expect(res.status).toBe(302)
-    expect(res.headers.get('location')).toBe('/')
   })
 
   it('GET /?q=... with HX-Request returns filtered HTMX partial and sets HX-Push-Url', async () => {
