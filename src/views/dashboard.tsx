@@ -63,7 +63,6 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
                 hx-trigger="keyup changed delay:200ms, search"
                 hx-target="#trackers-grid"
                 hx-swap="outerHTML"
-                hx-push-url="true"
               />
             </div>
           </div>

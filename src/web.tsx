@@ -127,5 +127,6 @@ app.delete('/track/:id/:eventId', (c) => {
   const trackerId = c.req.param('id')
   const eventId = c.req.param('eventId')
   deleteEvent(trackerId, eventId)
+  c.header('HX-Location', `/track/${trackerId}`)
   return c.body(null, 200)
 })

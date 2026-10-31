@@ -24,7 +24,7 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 - **HTMX Dynamic Swaps**:
   - Habit check-in and inline value logging swap the individual card in-place (`hx-target="#tracker-card-:id"`).
   - Search filter performs debounced live partial replacement (`hx-trigger="keyup changed delay:200ms"`).
-  - Event deletion removes list items asynchronously (`hx-delete` + `hx-swap="outerHTML"`).
+  - Event and tracker deletion refresh views cleanly via `hx-delete` + `HX-Location`.
 - **Zero Custom CSS**: Styled exclusively with vanilla Bootstrap 5 and Bootstrap Icons.
 
 ### 4. Testing & Verification Philosophy

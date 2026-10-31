@@ -121,7 +121,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('id="logModal"')
   })
 
-  it('DELETE /track/:id/:eventId removes event', async () => {
+  it('DELETE /track/:id/:eventId removes event and sets HX-Location', async () => {
     createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
     createEvent({ id: 'e1', tracker_id: 'reading', timestamp: new Date().toISOString() })
 
@@ -129,6 +129,7 @@ describe('Web UI & HTMX endpoints', () => {
       method: 'DELETE',
     })
     expect(res.status).toBe(200)
+    expect(res.headers.get('HX-Location')).toBe('/track/reading')
   })
 
   it('DELETE /track/:id deletes tracker and sets HX-Location', async () => {

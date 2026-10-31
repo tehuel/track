@@ -35,26 +35,20 @@ export function Layout({ title = 'track', children }: LayoutProps) {
           dangerouslySetInnerHTML={{
             __html: `
             (() => {
-              const getStoredTheme = () => localStorage.getItem('theme');
-              const setStoredTheme = theme => localStorage.setItem('theme', theme);
-              const getPreferredTheme = () => {
-                const storedTheme = getStoredTheme();
-                if (storedTheme) return storedTheme;
-                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-              };
-              const setTheme = theme => {
+              const getTheme = () =>
+                localStorage.getItem('theme') ||
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+              const applyTheme = (theme) => {
                 document.documentElement.setAttribute('data-bs-theme', theme);
-              };
-              setTheme(getPreferredTheme());
-              window.toggleTheme = () => {
-                const current = document.documentElement.getAttribute('data-bs-theme');
-                const next = current === 'dark' ? 'light' : 'dark';
-                setStoredTheme(next);
-                setTheme(next);
                 const icon = document.getElementById('theme-icon');
-                if (icon) {
-                  icon.className = next === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
-                }
+                if (icon) icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+              };
+              applyTheme(getTheme());
+              window.addEventListener('DOMContentLoaded', () => applyTheme(getTheme()));
+              window.toggleTheme = () => {
+                const next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', next);
+                applyTheme(next);
               };
             })();
           `,
