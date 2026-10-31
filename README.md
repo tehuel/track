@@ -54,6 +54,44 @@ bun run typecheck
 
 ---
 
+## Self-Contained Binary & Releases
+
+`track` can be compiled into a single, self-contained executable (including the Bun runtime, application code, and embedded static assets) that runs without installing Bun or `node_modules` on the target host.
+
+### Build Locally
+
+```bash
+bun run build
+```
+
+This generates `./dist/track` for your current platform. Run it directly from any directory:
+
+```bash
+PORT=3000 DB_PATH=./tracker.db ./dist/track
+```
+
+### CI & Creating a GitHub Release
+
+Continuous Integration and Releases are managed in a single workflow (`.github/workflows/ci.yml`) split into two jobs:
+
+- **`test` (`Typecheck & Test`)**: Runs automatically on **every** branch push, tag push, and Pull Request targeting `main` (`bun run typecheck` and `bun test`).
+- **`release` (`Build & Release Binaries`)**: Runs **only** after `test` succeeds and when triggered by a version tag (`v*`) or manual dispatch (`workflow_dispatch`).
+
+To publish a new release:
+
+1. **Tag and push a new version**:
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+2. **Automated pipeline**:
+   - Runs the `test` job (`bun run typecheck` and `bun test`).
+   - Runs the `release` job to compile standalone binaries for Linux x64 (`track-linux-x64`) and Linux ARM64 (`track-linux-arm64`), generate `SHA256SUMS` checksums, and publish the GitHub Release with auto-generated release notes.
+
+> You can also trigger a build without creating a release from the **Actions → CI & Release → Run workflow** button (`workflow_dispatch`) to download the compiled binaries as workflow artifacts.
+
+---
+
 ## Running with Docker Compose
 
 To run `track` as a persistent containerized service:

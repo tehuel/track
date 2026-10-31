@@ -1,10 +1,11 @@
 {
   "name": "track",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
+    "build": "bun build --compile --minify src/index.ts --outfile dist/track",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },

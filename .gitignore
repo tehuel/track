@@ -1,5 +1,6 @@
-# Dependencies
+# Dependencies & build output
 node_modules/
+dist/
 
 # Database files
 data/

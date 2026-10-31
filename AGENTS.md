@@ -43,6 +43,7 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
   - `web.tsx` — Web page and HTMX route handlers.
   - `views/` — Hono JSX view templates.
   - `types.ts` — Centralized TypeScript interfaces.
-- `public/` — Static assets (favicons, icons).
+- `public/` — Static assets (favicons, icons, embedded at compile time).
 - `test/` — Bun test suite (`db.test.ts`, `web.test.ts`).
+- `.github/workflows/ci.yml` — Automated CI/CD pipeline (`test` job on all pushes/PRs, `release` job on `v*` tags).
 - `Dockerfile` & `docker-compose.yml` — Containerization and self-hosting configuration.
