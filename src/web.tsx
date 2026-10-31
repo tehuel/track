@@ -39,11 +39,8 @@ webRouter.get('/', (c) => {
   return c.html(<DashboardPage trackers={filtered} query={rawQ.trim()} />)
 })
 
-// Sub-router for all /track operations
-const trackRouter = new Hono()
-
 // POST /track - Create new track
-trackRouter.post('/', async (c) => {
+webRouter.post('/track', async (c) => {
   const body = await c.req.parseBody()
   const name = String(body['name'] || '').trim()
   if (!name) {
@@ -67,7 +64,7 @@ trackRouter.post('/', async (c) => {
 })
 
 // GET /track/:id - Single track detail
-trackRouter.get('/:id', (c) => {
+webRouter.get('/track/:id', (c) => {
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
@@ -79,7 +76,7 @@ trackRouter.get('/:id', (c) => {
 })
 
 // POST /track/:id - Log event (quick check-in from dashboard or modal from detail)
-trackRouter.post('/:id', async (c) => {
+webRouter.post('/track/:id', async (c) => {
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
@@ -133,7 +130,7 @@ trackRouter.post('/:id', async (c) => {
 })
 
 // DELETE /track/:id - Delete track
-trackRouter.delete('/:id', (c) => {
+webRouter.delete('/track/:id', (c) => {
   const id = c.req.param('id')
   deleteTracker(id)
   c.header('HX-Location', '/')
@@ -141,12 +138,9 @@ trackRouter.delete('/:id', (c) => {
 })
 
 // DELETE /track/:id/:eventId - Delete single event
-trackRouter.delete('/:id/:eventId', (c) => {
+webRouter.delete('/track/:id/:eventId', (c) => {
   const trackerId = c.req.param('id')
   const eventId = c.req.param('eventId')
   deleteEvent(trackerId, eventId)
   return c.body(null, 200)
 })
-
-// Mount trackRouter at /track
-webRouter.route('/track', trackRouter)
