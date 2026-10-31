@@ -23,7 +23,7 @@ export function NewTrackerModal() {
           </div>
 
           <form action="/trackers" method="post">
-            <div class="modal-body p-4">
+            <div class="modal-body p-4 pb-0">
               <div class="mb-3">
                 <label for="tracker-name" class="form-label fw-medium">
                   <span>Nombre del track</span>
