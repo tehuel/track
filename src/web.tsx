@@ -10,9 +10,8 @@ import {
   deleteEvent,
 } from './db'
 import type { TrackerType } from './types'
-import { DashboardPage, TrackersGrid } from './views/dashboard'
+import { DashboardPage, TrackersGrid, TrackerCard } from './views/dashboard'
 import { DetailPage } from './views/detail'
-import { TrackerCard } from './views/components/tracker-card'
 
 export const app = new Hono()
 

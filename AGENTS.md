@@ -16,7 +16,7 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 - **Data Access Layer (`src/db.ts`)**: Pure TypeScript functions executing native SQLite prepared queries (`db.query(...)`).
   - Connection singleton with Write-Ahead Logging (WAL) and foreign keys enabled.
   - Uses `:memory:` SQLite automatically when `NODE_ENV === 'test'`.
-- **Views (`src/views/`)**: Server-rendered Hono JSX components (`layout.tsx`, `dashboard.tsx`, `detail.tsx`, `components/`).
+- **Views (`src/views/`)**: Server-rendered Hono JSX components (`layout.tsx`, `dashboard.tsx`, `detail.tsx`).
 - **Entrypoint (`src/index.ts`)**: Initializes Hono server, health endpoints, static asset handlers, and exports default Bun server configuration.
 
 ### 3. Hypermedia & Frontend Architecture (HTMX + Bootstrap 5)

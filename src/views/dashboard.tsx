@@ -1,11 +1,207 @@
-import type { Tracker } from '../types'
+import { TRACKER_TYPES, getTrackerIcon, type Tracker } from '../types'
 import { Layout } from './layout'
-import { TrackerCard } from './components/tracker-card'
-import { NewTrackerModal } from './components/new-tracker-modal'
 
 interface DashboardProps {
   trackers: Tracker[]
   query?: string
+}
+
+interface TrackerCardProps {
+  tracker: Tracker
+  justLogged?: boolean
+}
+
+export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
+  const icon = getTrackerIcon(tracker.type)
+
+  return (
+    <div class="col" id={`tracker-card-${tracker.id}`}>
+      <div class="card h-100 border bg-body rounded-3 shadow-sm position-relative">
+        <div class="card-body p-3 d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <div class="d-flex align-items-center gap-2 text-truncate flex-grow-1">
+                <span class="text-body-secondary lh-1 flex-shrink-0" title={tracker.type}>
+                  <i class={`bi ${icon} fs-5`}></i>
+                </span>
+                <h2 class="h6 card-title mb-0 fw-semibold text-truncate">
+                  <a
+                    href={`/track/${tracker.id}`}
+                    class="stretched-link text-reset text-decoration-none"
+                    title={tracker.name}
+                  >
+                    {tracker.name}
+                  </a>
+                </h2>
+              </div>
+              <i class="bi bi-chevron-right text-body-tertiary small flex-shrink-0"></i>
+            </div>
+
+            {tracker.description && (
+              <p class="card-text text-body-secondary small mb-0 mt-1 text-truncate">
+                {tracker.description}
+              </p>
+            )}
+          </div>
+
+          <div class="pt-3 position-relative z-2">
+            {tracker.type === 'habit' ? (
+              <button
+                type="button"
+                hx-post={`/track/${tracker.id}`}
+                hx-target={`#tracker-card-${tracker.id}`}
+                hx-swap="outerHTML"
+                class={`btn btn-sm w-100 d-flex align-items-center justify-content-center gap-1 ${
+                  justLogged ? 'btn-success' : 'btn-primary'
+                }`}
+              >
+                <i class={`bi ${justLogged ? 'bi-check-all' : 'bi-check2'}`}></i>
+                <span>{justLogged ? '¡Registrado!' : 'Completar'}</span>
+              </button>
+            ) : (
+              <form
+                class="m-0 p-0 d-flex"
+                hx-post={`/track/${tracker.id}`}
+                hx-target={`#tracker-card-${tracker.id}`}
+                hx-swap="outerHTML"
+              >
+                <div class="input-group input-group-sm">
+                  {tracker.type === 'numeric' ? (
+                    <input
+                      type="number"
+                      step="any"
+                      name="value"
+                      class="form-control"
+                      placeholder="Valor..."
+                      required
+                      aria-label="Valor"
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      name="note"
+                      class="form-control"
+                      placeholder="Añadir nota..."
+                      required
+                      aria-label="Nota"
+                    />
+                  )}
+                  <button
+                    type="submit"
+                    class={`btn d-flex align-items-center gap-1 ${
+                      justLogged ? 'btn-success' : 'btn-primary'
+                    }`}
+                    title="Registrar"
+                  >
+                    <i class="bi bi-check-lg"></i>
+                    <span>Registrar</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function NewTrackerModal() {
+  return (
+    <div
+      class="modal fade"
+      id="newTrackerModal"
+      tabindex={-1}
+      aria-labelledby="newTrackerModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-0">
+          <div class="modal-header border-bottom">
+            <h5 class="modal-title d-flex align-items-center gap-2" id="newTrackerModalLabel">
+              <i class="bi bi-plus-circle-fill text-primary"></i>
+              <span>Crear track</span>
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
+          </div>
+
+          <form action="/track" method="post" class="m-0 p-0">
+            <div class="modal-body p-4">
+              <div class="mb-3">
+                <label for="tracker-name" class="form-label fw-medium">
+                  <span>Nombre</span>
+                  <span class="text-danger ms-1">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="tracker-name"
+                  name="name"
+                  placeholder="ej. Meditación"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-medium d-block">Tipo</label>
+                <div class="btn-group w-100" role="group" aria-label="Tipo">
+                  {TRACKER_TYPES.map((t, idx) => (
+                    <>
+                      <input
+                        type="radio"
+                        class="btn-check"
+                        name="type"
+                        id={`tracker-type-${t.value}`}
+                        value={t.value}
+                        autocomplete="off"
+                        checked={idx === 0}
+                      />
+                      <label
+                        class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
+                        for={`tracker-type-${t.value}`}
+                      >
+                        <i class={`bi ${t.icon}`}></i>
+                        <span>{t.label}</span>
+                      </label>
+                    </>
+                  ))}
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <label for="tracker-description" class="form-label fw-medium">
+                  <span>Descripción</span>{' '}
+                  <span class="text-body-secondary fw-normal">(opcional)</span>
+                </label>
+                <textarea
+                  class="form-control"
+                  id="tracker-description"
+                  name="description"
+                  placeholder="Descripción..."
+                  rows={2}
+                  maxlength={500}
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer border-top bg-body-tertiary">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                <span>Crear track</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function TrackersGrid({ trackers }: DashboardProps) {
