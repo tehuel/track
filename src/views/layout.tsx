@@ -58,7 +58,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
 
       <body class="bg-body-secondary min-vh-100 d-flex flex-column">
         {/* Navigation Bar */}
-        <nav class="navbar navbar-expand bg-body border-bottom shadow-sm">
+        <nav class="navbar navbar-expand bg-body border-0">
           <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="/">
               <i class="bi bi-activity text-primary fs-4"></i>
@@ -69,7 +69,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
               {/* Theme Toggle Button */}
               <button
                 type="button"
-                class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                class="btn btn-sm border-0 text-body-secondary d-flex align-items-center justify-content-center"
                 onclick="window.toggleTheme()"
                 title="Cambiar tema"
                 aria-label="Cambiar tema"

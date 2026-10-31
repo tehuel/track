@@ -16,7 +16,7 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
 
   return (
     <div class="col" id={`tracker-card-${tracker.id}`}>
-      <div class="card h-100 border bg-body rounded-3 shadow-sm position-relative">
+      <div class="card h-100 border-0 bg-body rounded-3 position-relative">
         <div class="card-body p-3 d-flex flex-column justify-content-between">
           <div>
             <div class="d-flex align-items-center justify-content-between gap-2">
@@ -116,8 +116,8 @@ function NewTrackerModal() {
       aria-hidden="true"
     >
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow border-0">
-          <div class="modal-header border-bottom">
+        <div class="modal-content border-0">
+          <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="newTrackerModalLabel">
               <i class="bi bi-plus-circle-fill text-primary"></i>
               <span>Crear track</span>
@@ -188,8 +188,8 @@ function NewTrackerModal() {
               </div>
             </div>
 
-            <div class="modal-footer border-top bg-body-tertiary">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <div class="modal-footer border-0 pt-0">
+              <button type="button" class="btn btn-link text-secondary text-decoration-none" data-bs-dismiss="modal">
                 Cancelar
               </button>
               <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
@@ -206,7 +206,7 @@ function NewTrackerModal() {
 export function TrackersGrid({ trackers }: DashboardProps) {
   if (trackers.length === 0) {
     return (
-      <div id="trackers-grid" class="card text-center p-5 border-dashed bg-body shadow-sm">
+      <div id="trackers-grid" class="card text-center p-5 border-0 bg-body rounded-3">
         <div class="py-4">
           <i class="bi bi-card-checklist text-body-tertiary fs-1"></i>
           <h3 class="h5 mt-3 mb-3">No hay tracks</h3>
@@ -244,14 +244,14 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
           {/* Live Search Filter */}
           <div class="col-12 col-sm-6 col-md-4">
             <div class="input-group">
-              <span class="input-group-text bg-body">
+              <span class="input-group-text bg-body border-0 text-body-secondary">
                 <i class="bi bi-search"></i>
               </span>
               <input
                 type="search"
                 name="q"
                 value={query}
-                class="form-control"
+                class="form-control border-0 bg-body"
                 placeholder="Buscar..."
                 aria-label="Buscar tracks"
                 hx-get="/"

@@ -40,8 +40,8 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
       aria-hidden="true"
     >
       <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content shadow border-0">
-          <div class="modal-header border-bottom">
+        <div class="modal-content border-0">
+          <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="logModalLabel">
               <i class={`bi ${icon} text-primary`}></i>
               <span>Registrar: {tracker.name}</span>
@@ -104,8 +104,8 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
               </div>
             </div>
 
-            <div class="modal-footer border-top bg-body-tertiary p-3">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <div class="modal-footer border-0 pt-0">
+              <button type="button" class="btn btn-link text-secondary text-decoration-none" data-bs-dismiss="modal">
                 Cancelar
               </button>
               <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
@@ -129,7 +129,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
         <div class="mb-3">
           <a
             href="/"
-            class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
+            class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 small"
           >
             <i class="bi bi-arrow-left"></i>
             <span>Volver</span>
@@ -163,7 +163,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
             {/* Delete Tracker */}
             <button
               type="button"
-              class="btn btn-outline-danger d-flex align-items-center gap-1"
+              class="btn btn-link link-danger text-decoration-none d-flex align-items-center gap-1"
               hx-delete={`/track/${tracker.id}`}
               hx-confirm="¿Eliminar track?"
               title="Eliminar track"
@@ -176,28 +176,26 @@ export function DetailPage({ tracker, events }: DetailProps) {
 
         {/* History Feed Section */}
         <div class="mb-4">
-          <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="d-flex align-items-baseline gap-2 mb-3">
             <h2 class="h5 mb-0 fw-semibold">Historial de entradas</h2>
-            <span class="badge bg-secondary-subtle text-secondary rounded-pill">
+            <span class="text-body-secondary small">
               {events.length === 1 ? '1 entrada' : `${events.length} entradas`}
             </span>
           </div>
 
           {events.length === 0 ? (
-            <div class="text-center text-body-secondary py-5 border rounded-3 bg-body shadow-sm">
+            <div class="card text-center text-body-secondary py-5 border-0 rounded-3 bg-body">
               <i class="bi bi-calendar-x fs-1 d-block mb-2 text-body-tertiary"></i>
               <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
             </div>
           ) : (
-            <div class="list-group shadow-sm" id="events-list">
+            <div class="list-group list-group-flush rounded-3 overflow-hidden" id="events-list">
               {events.map((event) => (
-                <div class="list-group-item list-group-item-action p-3 d-flex justify-content-between align-items-center gap-3">
+                <div class="list-group-item border-0 p-3 d-flex justify-content-between align-items-center gap-3">
                   <div class="d-flex align-items-center gap-3 flex-grow-1 min-w-0 flex-wrap">
                     <span class="text-body-secondary small">{formatDate(event.timestamp)}</span>
                     {event.value !== null && event.value !== undefined && (
-                      <span class="fw-semibold badge bg-primary-subtle text-primary">
-                        {event.value}
-                      </span>
+                      <span class="font-monospace fw-semibold">{event.value}</span>
                     )}
                     {event.note && <span class="text-break">{event.note}</span>}
                   </div>
