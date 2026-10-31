@@ -14,10 +14,10 @@ import { DashboardPage, TrackersGrid } from './views/dashboard'
 import { DetailPage } from './views/detail'
 import { TrackerCard } from './views/components/tracker-card'
 
-export const webRouter = new Hono()
+export const app = new Hono()
 
 // GET / - Dashboard & Search (supports ?q= query param)
-webRouter.get('/', (c) => {
+app.get('/', (c) => {
   const rawQ = c.req.query('q') || ''
   const q = rawQ.toLowerCase().trim()
   const all = listTrackers()
@@ -39,7 +39,7 @@ webRouter.get('/', (c) => {
 })
 
 // POST /track - Create new track
-webRouter.post('/track', async (c) => {
+app.post('/track', async (c) => {
   const body = await c.req.parseBody()
   const name = String(body['name'] || '').trim()
   if (!name) {
@@ -56,7 +56,7 @@ webRouter.post('/track', async (c) => {
 })
 
 // GET /track/:id - Single track detail
-webRouter.get('/track/:id', (c) => {
+app.get('/track/:id', (c) => {
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
@@ -68,7 +68,7 @@ webRouter.get('/track/:id', (c) => {
 })
 
 // POST /track/:id - Log event (quick check-in from dashboard or modal from detail)
-webRouter.post('/track/:id', async (c) => {
+app.post('/track/:id', async (c) => {
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
@@ -115,7 +115,7 @@ webRouter.post('/track/:id', async (c) => {
 })
 
 // DELETE /track/:id - Delete track
-webRouter.delete('/track/:id', (c) => {
+app.delete('/track/:id', (c) => {
   const id = c.req.param('id')
   deleteTracker(id)
   c.header('HX-Location', '/')
@@ -123,7 +123,7 @@ webRouter.delete('/track/:id', (c) => {
 })
 
 // DELETE /track/:id/:eventId - Delete single event
-webRouter.delete('/track/:id/:eventId', (c) => {
+app.delete('/track/:id/:eventId', (c) => {
   const trackerId = c.req.param('id')
   const eventId = c.req.param('eventId')
   deleteEvent(trackerId, eventId)

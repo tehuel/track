@@ -1,8 +1,5 @@
-import { Hono } from 'hono'
 import { serveStatic } from 'hono/bun'
-import { webRouter } from './web'
-
-const app = new Hono()
+import { app } from './web'
 
 // Health check endpoint
 app.get('/health', (c) => {
@@ -13,9 +10,6 @@ app.get('/health', (c) => {
 app.use('/favicon.ico', serveStatic({ path: './public/favicon.ico' }))
 app.use('/favicon.svg', serveStatic({ path: './public/favicon.svg' }))
 app.use('/static/*', serveStatic({ root: './public' }))
-
-// Mount Web & HTMX routes
-app.route('/', webRouter)
 
 const port = Number(process.env.PORT || 3000)
 

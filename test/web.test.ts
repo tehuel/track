@@ -1,15 +1,10 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
-import { Hono } from 'hono'
-import { webRouter } from '../src/web'
+import { app } from '../src/web'
 import { db, createTracker, createEvent } from '../src/db'
 
 describe('Web UI & HTMX endpoints', () => {
-  let app: Hono
-
   beforeEach(() => {
     db.exec('DELETE FROM trackers')
-    app = new Hono()
-    app.route('/', webRouter)
   })
 
   it('GET / renders dashboard with tracker cards in Spanish and /track/:id links', async () => {
