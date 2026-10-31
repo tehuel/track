@@ -244,22 +244,10 @@ export function DetailPage({ tracker, events }: DetailProps) {
   return (
     <Layout title={`${tracker.name} - track`}>
       <div>
-        {/* Back Link */}
-        <div class="mb-3">
-          <a
-            href="/"
-            class="link-secondary text-decoration-none d-inline-flex align-items-center gap-1 small"
-          >
-            <i class="bi bi-arrow-left"></i>
-            <span>Volver</span>
-          </a>
-        </div>
-
         {/* Tracker Header */}
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
           <div>
             <div class="d-flex align-items-center gap-2">
-              <i class={`bi ${icon} text-primary fs-3`}></i>
               {tracker.color && (
                 <i
                   class="bi bi-circle-fill fs-5 flex-shrink-0"
@@ -273,7 +261,47 @@ export function DetailPage({ tracker, events }: DetailProps) {
             )}
           </div>
 
-          <div class="d-flex align-items-center gap-2 flex-wrap">
+          <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <span class="text-body-secondary lh-1 px-2" title={tracker.type}>
+              <i class={`bi ${icon} fs-5`}></i>
+            </span>
+
+            {/* Edit Tracker */}
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              data-bs-toggle="modal"
+              data-bs-target="#editModal"
+              title="Editar track"
+              aria-label="Editar track"
+            >
+              <i class="bi bi-pencil"></i>
+            </button>
+
+            {/* Delete Tracker */}
+            <button
+              type="button"
+              class="btn btn-outline-danger"
+              hx-delete={`/track/${tracker.id}`}
+              hx-confirm="¿Eliminar track?"
+              title="Eliminar track"
+              aria-label="Eliminar track"
+            >
+              <i class="bi bi-trash3"></i>
+            </button>
+          </div>
+        </div>
+
+        {/* History Feed Section */}
+        <div class="mb-4">
+          <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+            <div class="d-flex align-items-baseline gap-2">
+              <h2 class="h5 mb-0 fw-semibold">Historial de entradas</h2>
+              <span class="text-body-secondary small">
+                {events.length === 1 ? '1 entrada' : `${events.length} entradas`}
+              </span>
+            </div>
+
             {/* Open Modal for detailed log */}
             <button
               type="button"
@@ -284,39 +312,6 @@ export function DetailPage({ tracker, events }: DetailProps) {
               <i class="bi bi-plus-lg"></i>
               <span>Registrar</span>
             </button>
-
-            {/* Edit Tracker */}
-            <button
-              type="button"
-              class="btn btn-outline-secondary d-flex align-items-center gap-1"
-              data-bs-toggle="modal"
-              data-bs-target="#editModal"
-            >
-              <i class="bi bi-pencil"></i>
-              <span>Editar</span>
-            </button>
-
-            {/* Delete Tracker */}
-            <button
-              type="button"
-              class="btn btn-link link-danger text-decoration-none d-flex align-items-center gap-1"
-              hx-delete={`/track/${tracker.id}`}
-              hx-confirm="¿Eliminar track?"
-              title="Eliminar track"
-            >
-              <i class="bi bi-trash3"></i>
-              <span>Eliminar track</span>
-            </button>
-          </div>
-        </div>
-
-        {/* History Feed Section */}
-        <div class="mb-4">
-          <div class="d-flex align-items-baseline gap-2 mb-3">
-            <h2 class="h5 mb-0 fw-semibold">Historial de entradas</h2>
-            <span class="text-body-secondary small">
-              {events.length === 1 ? '1 entrada' : `${events.length} entradas`}
-            </span>
           </div>
 
           {events.length === 0 ? (

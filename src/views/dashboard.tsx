@@ -21,9 +21,6 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
           <div>
             <div class="d-flex align-items-center justify-content-between gap-2">
               <div class="d-flex align-items-center gap-2 text-truncate flex-grow-1">
-                <span class="text-body-secondary lh-1 flex-shrink-0" title={tracker.type}>
-                  <i class={`bi ${icon} fs-5`}></i>
-                </span>
                 {tracker.color && (
                   <i
                     class="bi bi-circle-fill small flex-shrink-0"
@@ -40,7 +37,9 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
                   </a>
                 </h2>
               </div>
-              <i class="bi bi-chevron-right text-body-tertiary small flex-shrink-0"></i>
+              <span class="text-body-secondary lh-1 flex-shrink-0" title={tracker.type}>
+                <i class={`bi ${icon} fs-5`}></i>
+              </span>
             </div>
 
             {tracker.description && (
