@@ -77,11 +77,7 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
               <div class="mb-3">
                 <label for="logModal-note" class="form-label fw-medium">
                   <span>Nota</span>
-                  {isText ? (
-                    <span class="text-danger ms-1">*</span>
-                  ) : (
-                    <span class="text-body-secondary fw-normal ms-1">(opcional)</span>
-                  )}
+                  {isText && <span class="text-danger ms-1">*</span>}
                 </label>
                 <input
                   type="text"

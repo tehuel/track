@@ -175,8 +175,7 @@ function NewTrackerModal() {
 
               <div class="mb-2">
                 <label for="tracker-description" class="form-label fw-medium">
-                  <span>Descripción</span>{' '}
-                  <span class="text-body-secondary fw-normal">(opcional)</span>
+                  Descripción
                 </label>
                 <textarea
                   class="form-control"
