@@ -19,12 +19,12 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('/track/guitar')
   })
 
-  it('GET /?q=... with HX-Request returns filtered HTMX partial and sets HX-Push-Url', async () => {
+  it('GET /?q=... with HX-Target trackers-grid returns filtered HTMX partial and sets HX-Push-Url', async () => {
     createTracker({ id: 'run', name: 'Correr mañana', type: 'numeric' })
     createTracker({ id: 'meditate', name: 'Meditación', type: 'habit' })
 
     const res = await app.request('/?q=correr', {
-      headers: { 'HX-Request': 'true' },
+      headers: { 'HX-Request': 'true', 'HX-Target': 'trackers-grid' },
     })
     expect(res.status).toBe(200)
     expect(res.headers.get('HX-Push-Url')).toBe('/?q=correr')
@@ -38,7 +38,7 @@ describe('Web UI & HTMX endpoints', () => {
     createTracker({ id: 'run', name: 'Correr mañana', type: 'numeric' })
 
     const res = await app.request('/?q=', {
-      headers: { 'HX-Request': 'true' },
+      headers: { 'HX-Request': 'true', 'HX-Target': 'trackers-grid' },
     })
     expect(res.status).toBe(200)
     expect(res.headers.get('HX-Push-Url')).toBe('/')

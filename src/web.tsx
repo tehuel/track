@@ -30,7 +30,7 @@ app.get('/', (c) => {
     : all
 
   // If HTMX requested just the grid partial, return TrackersGrid with clean URL push
-  if (c.req.header('HX-Request')) {
+  if (c.req.header('HX-Target') === 'trackers-grid') {
     c.header('HX-Push-Url', q ? `/?q=${encodeURIComponent(rawQ.trim())}` : '/')
     return c.html(<TrackersGrid trackers={filtered} />)
   }

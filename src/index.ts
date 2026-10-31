@@ -1,4 +1,7 @@
-import { serveStatic } from 'hono/bun'
+// @ts-expect-error Bun embedded file import
+import faviconIco from '../public/favicon.ico' with { type: 'file' }
+// @ts-expect-error Bun embedded file import
+import faviconSvg from '../public/favicon.svg' with { type: 'file' }
 import { app } from './web'
 
 // Health check endpoint
@@ -7,8 +10,8 @@ app.get('/health', (c) => {
 })
 
 // Serve static assets from public/
-app.use('/favicon.ico', serveStatic({ path: './public/favicon.ico' }))
-app.use('/favicon.svg', serveStatic({ path: './public/favicon.svg' }))
+app.get('/favicon.ico', () => new Response(Bun.file(faviconIco)))
+app.get('/favicon.svg', () => new Response(Bun.file(faviconSvg)))
 
 const port = Number(process.env.PORT || 3000)
 

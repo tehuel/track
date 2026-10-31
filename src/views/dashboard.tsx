@@ -290,11 +290,9 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
           {/* Live Search Filter */}
           <div class="col-12 col-sm-6 col-md-4">
             <div class="input-group">
-              <span class="input-group-text bg-body border-0 text-body-secondary">
-                <i class="bi bi-search"></i>
-              </span>
               <input
-                type="search"
+                type="text"
+                id="search-input"
                 name="q"
                 value={query}
                 class="form-control border-0 bg-body"
@@ -304,7 +302,16 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
                 hx-trigger="keyup changed delay:200ms, search"
                 hx-target="#trackers-grid"
                 hx-swap="outerHTML"
+                oninput="document.getElementById('search-icon').className = this.value ? 'bi bi-x-lg' : 'bi bi-search'"
               />
+              <button
+                type="button"
+                class="input-group-text bg-body border-0 text-body-secondary"
+                aria-label="Limpiar búsqueda"
+                onclick="const input = document.getElementById('search-input'); if (input.value) { input.value = ''; document.getElementById('search-icon').className = 'bi bi-search'; input.dispatchEvent(new Event('search')); } input.focus();"
+              >
+                <i id="search-icon" class={`bi ${query ? 'bi-x-lg' : 'bi bi-search'}`}></i>
+              </button>
             </div>
           </div>
 
