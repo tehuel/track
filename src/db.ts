@@ -86,17 +86,16 @@ export function generateUniqueSlug(name: string, database: Database = getDb()): 
   return `${baseSlug}-${crypto.randomUUID().slice(0, 4)}`
 }
 
-export function createTracker(tracker: Tracker, database: Database = getDb()): Tracker {
-  const query = database.query<Tracker, [string, string, string, string | null]>(
-    'INSERT INTO trackers (id, name, type, description) VALUES (?, ?, ?, ?) RETURNING id, name, type, description, created_at'
-  )
-  return query.get(tracker.id, tracker.name, tracker.type, tracker.description ?? null)!
+export function createTracker(tracker: Tracker, database: Database = getDb()): void {
+  database
+    .query<never, [string, string, string, string | null]>(
+      'INSERT INTO trackers (id, name, type, description) VALUES (?, ?, ?, ?)'
+    )
+    .run(tracker.id, tracker.name, tracker.type, tracker.description ?? null)
 }
 
-export function deleteTracker(id: string, database: Database = getDb()): boolean {
-  const query = database.query<never, [string]>('DELETE FROM trackers WHERE id = ?')
-  const result = query.run(id)
-  return result.changes > 0
+export function deleteTracker(id: string, database: Database = getDb()): void {
+  database.query<never, [string]>('DELETE FROM trackers WHERE id = ?').run(id)
 }
 
 // --- Event Queries ---
@@ -112,23 +111,24 @@ export function listEventsByTracker(
   return query.all(trackerId, limit)
 }
 
-export function createEvent(event: TrackerEvent, database: Database = getDb()): TrackerEvent {
-  const query = database.query<TrackerEvent, [string, string, number | null, string | null, string]>(
-    'INSERT INTO tracker_events (id, tracker_id, value, note, timestamp) VALUES (?, ?, ?, ?, ?) RETURNING id, tracker_id, value, note, timestamp'
-  )
-  return query.get(
-    event.id,
-    event.tracker_id,
-    event.value ?? null,
-    event.note ?? null,
-    event.timestamp
-  )!
+export function createEvent(event: TrackerEvent, database: Database = getDb()): void {
+  database
+    .query<never, [string, string, number | null, string | null, string]>(
+      'INSERT INTO tracker_events (id, tracker_id, value, note, timestamp) VALUES (?, ?, ?, ?, ?)'
+    )
+    .run(
+      event.id,
+      event.tracker_id,
+      event.value ?? null,
+      event.note ?? null,
+      event.timestamp
+    )
 }
 
-export function deleteEvent(trackerId: string, eventId: string, database: Database = getDb()): boolean {
-  const query = database.query<never, [string, string]>(
-    'DELETE FROM tracker_events WHERE id = ? AND tracker_id = ?'
-  )
-  const result = query.run(eventId, trackerId)
-  return result.changes > 0
+export function deleteEvent(trackerId: string, eventId: string, database: Database = getDb()): void {
+  database
+    .query<never, [string, string]>(
+      'DELETE FROM tracker_events WHERE id = ? AND tracker_id = ?'
+    )
+    .run(eventId, trackerId)
 }

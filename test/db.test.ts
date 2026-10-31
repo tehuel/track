@@ -21,7 +21,7 @@ describe('Database layer (bun:sqlite)', () => {
   })
 
   it('creates and lists trackers', () => {
-    const created = createTracker(
+    createTracker(
       {
         id: 'water-log',
         name: 'Drink Water',
@@ -31,14 +31,12 @@ describe('Database layer (bun:sqlite)', () => {
       testDb
     )
 
-    expect(created.id).toBe('water-log')
-    expect(created.name).toBe('Drink Water')
-    expect(created.type).toBe('habit')
-    expect(created.description).toBe('Drink 2L daily')
-
     const list = listTrackers(testDb)
     expect(list.length).toBe(1)
     expect(list[0]?.id).toBe('water-log')
+    expect(list[0]?.name).toBe('Drink Water')
+    expect(list[0]?.type).toBe('habit')
+    expect(list[0]?.description).toBe('Drink 2L daily')
   })
 
   it('finds tracker by ID and checks existence', () => {
@@ -73,8 +71,7 @@ describe('Database layer (bun:sqlite)', () => {
 
     expect(listEventsByTracker('reading', 50, testDb).length).toBe(1)
 
-    const deleted = deleteTracker('reading', testDb)
-    expect(deleted).toBe(true)
+    deleteTracker('reading', testDb)
     expect(trackerExists('reading', testDb)).toBe(false)
     expect(listEventsByTracker('reading', 50, testDb).length).toBe(0)
   })
@@ -82,7 +79,7 @@ describe('Database layer (bun:sqlite)', () => {
   it('creates, lists, and deletes tracker events', () => {
     createTracker({ id: 'weight', name: 'Weight', type: 'numeric' }, testDb)
 
-    const event = createEvent(
+    createEvent(
       {
         id: 'weight-1',
         tracker_id: 'weight',
@@ -93,16 +90,13 @@ describe('Database layer (bun:sqlite)', () => {
       testDb
     )
 
-    expect(event.id).toBe('weight-1')
-    expect(event.value).toBe(75.5)
-    expect(event.note).toBe('Morning weigh-in')
-
     const events = listEventsByTracker('weight', 50, testDb)
     expect(events.length).toBe(1)
     expect(events[0]?.id).toBe('weight-1')
+    expect(events[0]?.value).toBe(75.5)
+    expect(events[0]?.note).toBe('Morning weigh-in')
 
-    const deleted = deleteEvent('weight', 'weight-1', testDb)
-    expect(deleted).toBe(true)
+    deleteEvent('weight', 'weight-1', testDb)
     expect(listEventsByTracker('weight', 50, testDb).length).toBe(0)
   })
 })
