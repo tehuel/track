@@ -2,7 +2,6 @@ import { Hono } from 'hono'
 import {
   listTrackers,
   getTrackerById,
-  trackerExists,
   createTracker,
   deleteTracker,
   generateUniqueSlug,
@@ -10,7 +9,7 @@ import {
   createEvent,
   deleteEvent,
 } from './db'
-import type { Tracker, TrackerEvent, TrackerType } from './types'
+import type { TrackerType } from './types'
 import { DashboardPage, TrackersGrid } from './views/dashboard'
 import { DetailPage } from './views/detail'
 import { TrackerCard } from './views/components/tracker-card'
@@ -47,19 +46,12 @@ webRouter.post('/track', async (c) => {
     return c.redirect('/')
   }
 
-  const rawId = body['id'] ? String(body['id']).trim() : ''
-  const id = rawId && !trackerExists(rawId) ? rawId : generateUniqueSlug(name)
-  const type = (String(body['type'] || 'habit') as TrackerType) || 'habit'
-  const description = body['description'] ? String(body['description']).trim() : null
-
-  const tracker: Tracker = {
-    id,
+  createTracker({
+    id: generateUniqueSlug(name),
     name,
-    type,
-    description,
-  }
-
-  createTracker(tracker)
+    type: (String(body['type'] || 'habit') as TrackerType) || 'habit',
+    description: body['description'] ? String(body['description']).trim() : null,
+  })
   return c.redirect('/')
 })
 
@@ -105,15 +97,13 @@ webRouter.post('/track/:id', async (c) => {
     }
   }
 
-  const event: TrackerEvent = {
+  createEvent({
     id: crypto.randomUUID(),
     tracker_id: id,
     value,
     note,
     timestamp,
-  }
-
-  createEvent(event)
+  })
 
   // If HTMX requested card update from dashboard, return the card
   if (c.req.header('HX-Target') === `tracker-card-${id}`) {

@@ -1,3 +1,9 @@
+const TRACKER_TYPES = [
+  { value: 'habit', label: 'Hábito', icon: 'bi-check2-circle' },
+  { value: 'numeric', label: 'Numérico', icon: 'bi-123' },
+  { value: 'text', label: 'Texto', icon: 'bi-card-text' },
+] as const
+
 export function NewTrackerModal() {
   return (
     <div
@@ -40,62 +46,32 @@ export function NewTrackerModal() {
               </div>
 
               <div class="mb-3">
-                <label class="form-label fw-medium d-block">
-                  Tipo
-                </label>
+                <label class="form-label fw-medium d-block">Tipo</label>
                 <div class="btn-group w-100" role="group" aria-label="Tipo">
-                  <input
-                    type="radio"
-                    class="btn-check"
-                    name="type"
-                    id="tracker-type-habit"
-                    value="habit"
-                    autocomplete="off"
-                    checked
-                  />
-                  <label
-                    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
-                    for="tracker-type-habit"
-                  >
-                    <i class="bi bi-check2-circle"></i>
-                    <span>Hábito</span>
-                  </label>
-
-                  <input
-                    type="radio"
-                    class="btn-check"
-                    name="type"
-                    id="tracker-type-numeric"
-                    value="numeric"
-                    autocomplete="off"
-                  />
-                  <label
-                    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
-                    for="tracker-type-numeric"
-                  >
-                    <i class="bi bi-123"></i>
-                    <span>Numérico</span>
-                  </label>
-
-                  <input
-                    type="radio"
-                    class="btn-check"
-                    name="type"
-                    id="tracker-type-text"
-                    value="text"
-                    autocomplete="off"
-                  />
-                  <label
-                    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
-                    for="tracker-type-text"
-                  >
-                    <i class="bi bi-card-text"></i>
-                    <span>Texto</span>
-                  </label>
+                  {TRACKER_TYPES.map((t, idx) => (
+                    <>
+                      <input
+                        type="radio"
+                        class="btn-check"
+                        name="type"
+                        id={`tracker-type-${t.value}`}
+                        value={t.value}
+                        autocomplete="off"
+                        checked={idx === 0}
+                      />
+                      <label
+                        class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
+                        for={`tracker-type-${t.value}`}
+                      >
+                        <i class={`bi ${t.icon}`}></i>
+                        <span>{t.label}</span>
+                      </label>
+                    </>
+                  ))}
                 </div>
               </div>
 
-              <div class="mb-3">
+              <div class="mb-2">
                 <label for="tracker-description" class="form-label fw-medium">
                   <span>Descripción</span>{' '}
                   <span class="text-body-secondary fw-normal">(opcional)</span>
@@ -108,20 +84,6 @@ export function NewTrackerModal() {
                   rows={2}
                   maxlength={500}
                 ></textarea>
-              </div>
-
-              <div class="mb-2">
-                <label for="tracker-id" class="form-label fw-medium">
-                  <span>ID</span>{' '}
-                  <span class="text-body-secondary fw-normal">(opcional)</span>
-                </label>
-                <input
-                  type="text"
-                  class="form-control font-monospace"
-                  id="tracker-id"
-                  name="id"
-                  placeholder="ej. meditacion"
-                />
               </div>
             </div>
 
