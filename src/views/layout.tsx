@@ -1,16 +1,13 @@
 import type { Child } from 'hono/jsx'
-import type { Locale } from '../i18n'
-import { t } from '../i18n'
 
 interface LayoutProps {
   title?: string
-  locale: Locale
   children: Child
 }
 
-export function Layout({ title = 'track', locale, children }: LayoutProps) {
+export function Layout({ title = 'track', children }: LayoutProps) {
   return (
-    <html lang={locale} data-bs-theme="auto">
+    <html lang="es" data-bs-theme="auto">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -71,7 +68,7 @@ export function Layout({ title = 'track', locale, children }: LayoutProps) {
           <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="/">
               <i class="bi bi-activity text-primary fs-4"></i>
-              <span>{t('nav.brand', locale)}</span>
+              <span>track</span>
             </a>
 
             <div class="d-flex align-items-center gap-2">
@@ -80,43 +77,11 @@ export function Layout({ title = 'track', locale, children }: LayoutProps) {
                 type="button"
                 class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
                 onclick="window.toggleTheme()"
-                title="Toggle Theme"
-                aria-label="Toggle theme"
+                title="Cambiar tema"
+                aria-label="Cambiar tema"
               >
                 <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
               </button>
-
-              {/* Language Switcher */}
-              <div
-                class="d-flex align-items-center gap-1 border rounded px-2 py-1 small bg-body shadow-sm"
-                role="group"
-                aria-label="Language selector"
-              >
-                <i class="bi bi-translate text-body-secondary me-1"></i>
-                <a
-                  href="?lang=en"
-                  class={`btn btn-sm p-0 border-0 bg-transparent ${
-                    locale === 'en'
-                      ? 'fw-bold text-primary text-decoration-underline'
-                      : 'text-body-secondary text-decoration-none'
-                  }`}
-                  aria-label="English"
-                >
-                  EN
-                </a>
-                <span class="text-body-tertiary">|</span>
-                <a
-                  href="?lang=es"
-                  class={`btn btn-sm p-0 border-0 bg-transparent ${
-                    locale === 'es'
-                      ? 'fw-bold text-primary text-decoration-underline'
-                      : 'text-body-secondary text-decoration-none'
-                  }`}
-                  aria-label="Español"
-                >
-                  ES
-                </a>
-              </div>
             </div>
           </div>
         </nav>

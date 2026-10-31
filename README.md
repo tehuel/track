@@ -15,7 +15,6 @@ Designed to be run in a local Docker Compose environment or homelab, with authen
   - Chronological event history with fast event deletion.
 - **Responsive Bootstrap 5 UI**:
   - Dark / light theme with automatic system preference detection.
-  - Multi-language support (English and Argentine Spanish).
   - Clean card dashboard and dedicated single-track detail views.
 - **Dual Interface**:
   - Full server-rendered web UI for browsers.

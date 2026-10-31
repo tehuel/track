@@ -1,12 +1,9 @@
 import type { Tracker } from '../types'
-import type { Locale } from '../i18n'
-import { t } from '../i18n'
 import { Layout } from './layout'
 import { getTrackerIcon } from './components/tracker-card'
 
 interface LogEntryProps {
   tracker: Tracker
-  locale: Locale
 }
 
 function getLocalDatetimeString(): string {
@@ -15,15 +12,12 @@ function getLocalDatetimeString(): string {
   return now.toISOString().slice(0, 16)
 }
 
-export function LogEntryPage({ tracker, locale }: LogEntryProps) {
+export function LogEntryPage({ tracker }: LogEntryProps) {
   const icon = getTrackerIcon(tracker.type)
   const defaultTimestamp = getLocalDatetimeString()
 
   return (
-    <Layout
-      title={`${t('log_view.log_entry_title', locale, { name: tracker.name })} - track`}
-      locale={locale}
-    >
+    <Layout title={`Registrar entrada: ${tracker.name} - track`}>
       <div>
         {/* Back Link */}
         <div class="mb-3">
@@ -32,7 +26,7 @@ export function LogEntryPage({ tracker, locale }: LogEntryProps) {
             class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
           >
             <i class="bi bi-arrow-left"></i>
-            <span>{t('log_view.back_to_tracker', locale, { name: tracker.name })}</span>
+            <span>Volver a {tracker.name}</span>
           </a>
         </div>
 
@@ -42,9 +36,7 @@ export function LogEntryPage({ tracker, locale }: LogEntryProps) {
             <div class="card shadow-sm border bg-body rounded-3">
               <div class="card-header bg-body p-3 border-bottom d-flex align-items-center gap-2">
                 <i class={`bi ${icon} text-primary fs-5`}></i>
-                <h1 class="h5 mb-0 fw-semibold">
-                  {t('log_view.log_entry_title', locale, { name: tracker.name })}
-                </h1>
+                <h1 class="h5 mb-0 fw-semibold">Registrar entrada: {tracker.name}</h1>
               </div>
 
               <form action={`/trackers/${tracker.id}/events`} method="post">
@@ -53,7 +45,7 @@ export function LogEntryPage({ tracker, locale }: LogEntryProps) {
                   {tracker.type === 'numeric' && (
                     <div class="mb-3">
                       <label for="event-value" class="form-label fw-medium">
-                        <span>{t('log_view.value_label', locale)}</span>
+                        <span>Valor</span>
                         <span class="text-danger ms-1">*</span>
                       </label>
                       <input
@@ -62,7 +54,7 @@ export function LogEntryPage({ tracker, locale }: LogEntryProps) {
                         class="form-control"
                         id="event-value"
                         name="value"
-                        placeholder={t('log_view.value_placeholder', locale)}
+                        placeholder="ej. 72.5, 5000"
                         autofocus
                         required
                       />
@@ -72,17 +64,15 @@ export function LogEntryPage({ tracker, locale }: LogEntryProps) {
                   {/* Note Input */}
                   <div class="mb-3">
                     <label for="event-note" class="form-label fw-medium">
-                      <span>{t('log_view.note_label', locale)}</span>{' '}
-                      <span class="text-body-secondary fw-normal">
-                        {t('log_view.optional', locale)}
-                      </span>
+                      <span>Nota</span>{' '}
+                      <span class="text-body-secondary fw-normal">(opcional)</span>
                     </label>
                     <input
                       type="text"
                       class="form-control"
                       id="event-note"
                       name="note"
-                      placeholder={t('log_view.note_placeholder', locale)}
+                      placeholder="ej. Completado después de caminar, Gran sesión"
                       autofocus={tracker.type !== 'numeric'}
                     />
                   </div>
@@ -90,7 +80,7 @@ export function LogEntryPage({ tracker, locale }: LogEntryProps) {
                   {/* Timestamp Input */}
                   <div class="mb-2">
                     <label for="event-timestamp" class="form-label fw-medium">
-                      {t('log_view.date_time_label', locale)}
+                      Fecha y hora
                     </label>
                     <input
                       type="datetime-local"
@@ -105,13 +95,13 @@ export function LogEntryPage({ tracker, locale }: LogEntryProps) {
 
                 <div class="card-footer border-top bg-body-tertiary d-flex justify-content-between align-items-center p-3">
                   <a href={`/trackers/${tracker.id}`} class="btn btn-secondary">
-                    {t('log_view.cancel', locale)}
+                    Cancelar
                   </a>
                   <button
                     type="submit"
                     class="btn btn-primary d-flex align-items-center gap-1"
                   >
-                    <span>{t('log_view.save_entry', locale)}</span>
+                    <span>Guardar entrada</span>
                   </button>
                 </div>
               </form>

@@ -1,7 +1,4 @@
 import { Hono } from 'hono'
-import { getCookie, setCookie } from 'hono/cookie'
-import type { Context } from 'hono'
-import type { Locale } from './i18n'
 import {
   listTrackers,
   getTrackerById,
@@ -21,33 +18,14 @@ import { TrackerCard } from './views/components/tracker-card'
 
 export const webRouter = new Hono()
 
-export function resolveLocale(c: Context): Locale {
-  const queryLang = c.req.query('lang')
-  if (queryLang === 'en' || queryLang === 'es') {
-    setCookie(c, 'track_lang', queryLang, { maxAge: 60 * 60 * 24 * 365, path: '/' })
-    return queryLang
-  }
-  const cookieLang = getCookie(c, 'track_lang')
-  if (cookieLang === 'en' || cookieLang === 'es') {
-    return cookieLang
-  }
-  const acceptLang = c.req.header('Accept-Language')
-  if (acceptLang?.toLowerCase().includes('es')) {
-    return 'es'
-  }
-  return 'en'
-}
-
 // GET / - Dashboard
 webRouter.get('/', (c) => {
-  const locale = resolveLocale(c)
   const trackers = listTrackers()
-  return c.html(<DashboardPage trackers={trackers} locale={locale} />)
+  return c.html(<DashboardPage trackers={trackers} />)
 })
 
 // GET /search - Live search HTMX partial
 webRouter.get('/search', (c) => {
-  const locale = resolveLocale(c)
   const q = (c.req.query('q') || '').toLowerCase().trim()
   const all = listTrackers()
   const filtered = q
@@ -58,7 +36,7 @@ webRouter.get('/search', (c) => {
       )
     : all
 
-  return c.html(<TrackersGrid trackers={filtered} locale={locale} />)
+  return c.html(<TrackersGrid trackers={filtered} />)
 })
 
 // POST /trackers - Create new tracker
@@ -87,7 +65,6 @@ webRouter.post('/trackers', async (c) => {
 
 // GET /trackers/:id - Single tracker detail
 webRouter.get('/trackers/:id', (c) => {
-  const locale = resolveLocale(c)
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
@@ -95,24 +72,22 @@ webRouter.get('/trackers/:id', (c) => {
   }
 
   const events = listEventsByTracker(id, 100)
-  return c.html(<DetailPage tracker={tracker} events={events} locale={locale} />)
+  return c.html(<DetailPage tracker={tracker} events={events} />)
 })
 
 // GET /trackers/:id/log - Full-page entry logger
 webRouter.get('/trackers/:id/log', (c) => {
-  const locale = resolveLocale(c)
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
     return c.redirect('/')
   }
 
-  return c.html(<LogEntryPage tracker={tracker} locale={locale} />)
+  return c.html(<LogEntryPage tracker={tracker} />)
 })
 
 // POST /trackers/:id/quick - Quick-log action (Habit, Numeric, or Text)
 webRouter.post('/trackers/:id/quick', async (c) => {
-  const locale = resolveLocale(c)
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
@@ -140,7 +115,7 @@ webRouter.post('/trackers/:id/quick', async (c) => {
   }
 
   createEvent(event)
-  return c.html(<TrackerCard tracker={tracker} locale={locale} justLogged={true} />)
+  return c.html(<TrackerCard tracker={tracker} justLogged={true} />)
 })
 
 // POST /trackers/:id/events - Save entry from detailed form

@@ -1,19 +1,16 @@
 import type { Tracker, TrackerEvent } from '../types'
-import type { Locale } from '../i18n'
-import { t } from '../i18n'
 import { Layout } from './layout'
 import { getTrackerIcon } from './components/tracker-card'
 
 interface DetailProps {
   tracker: Tracker
   events: TrackerEvent[]
-  locale: Locale
 }
 
-function formatDate(iso: string, locale: Locale): string {
+function formatDate(iso: string): string {
   try {
     const d = new Date(iso)
-    return d.toLocaleString(locale === 'es' ? 'es-AR' : 'en-US', {
+    return d.toLocaleString('es-AR', {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
@@ -24,11 +21,11 @@ function formatDate(iso: string, locale: Locale): string {
   }
 }
 
-export function DetailPage({ tracker, events, locale }: DetailProps) {
+export function DetailPage({ tracker, events }: DetailProps) {
   const icon = getTrackerIcon(tracker.type)
 
   return (
-    <Layout title={`${tracker.name} - track`} locale={locale}>
+    <Layout title={`${tracker.name} - track`}>
       <div>
         {/* Back Link */}
         <div class="mb-3">
@@ -37,7 +34,7 @@ export function DetailPage({ tracker, events, locale }: DetailProps) {
             class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1"
           >
             <i class="bi bi-arrow-left"></i>
-            <span>{t('detail.all_trackers', locale)}</span>
+            <span>Todos los tracks</span>
           </a>
         </div>
 
@@ -62,7 +59,7 @@ export function DetailPage({ tracker, events, locale }: DetailProps) {
                   class="btn btn-primary d-flex align-items-center gap-1.5"
                 >
                   <i class="bi bi-check2"></i>
-                  <span>{t('detail.check_in_today', locale)}</span>
+                  <span>Completar hoy</span>
                 </button>
               </form>
             ) : (
@@ -72,9 +69,7 @@ export function DetailPage({ tracker, events, locale }: DetailProps) {
               >
                 <i class="bi bi-plus-lg"></i>
                 <span>
-                  {tracker.type === 'numeric'
-                    ? t('detail.log_value', locale)
-                    : t('detail.log_entry', locale)}
+                  {tracker.type === 'numeric' ? 'Registrar valor' : 'Registrar entrada'}
                 </span>
               </a>
             )}
@@ -86,7 +81,7 @@ export function DetailPage({ tracker, events, locale }: DetailProps) {
                 class="btn btn-outline-secondary d-flex align-items-center gap-1"
               >
                 <i class="bi bi-pencil-square"></i>
-                <span>{t('detail.add_note', locale)}</span>
+                <span>+ Nota</span>
               </a>
             )}
 
@@ -95,11 +90,11 @@ export function DetailPage({ tracker, events, locale }: DetailProps) {
               type="button"
               class="btn btn-outline-danger d-flex align-items-center gap-1"
               hx-delete={`/trackers/${tracker.id}`}
-              hx-confirm={t('prompts.delete_tracker_confirm', locale)}
-              title={t('detail.delete_tracker', locale)}
+              hx-confirm="¿Seguro que querés eliminar este track? Esta acción no se puede deshacer."
+              title="Eliminar track"
             >
               <i class="bi bi-trash3"></i>
-              <span>{t('detail.delete_tracker', locale)}</span>
+              <span>Eliminar track</span>
             </button>
           </div>
         </div>
@@ -107,28 +102,26 @@ export function DetailPage({ tracker, events, locale }: DetailProps) {
         {/* History Feed Section */}
         <div class="mb-4">
           <div class="d-flex align-items-center gap-2 mb-3">
-            <h2 class="h5 mb-0 fw-semibold">{t('detail.event_history', locale)}</h2>
+            <h2 class="h5 mb-0 fw-semibold">Historial de entradas</h2>
             <span class="badge bg-secondary-subtle text-secondary rounded-pill">
-              {events.length === 1
-                ? t('detail.entry_count_singular', locale)
-                : t('detail.entries_count', locale, { count: events.length })}
+              {events.length === 1 ? '1 entrada' : `${events.length} entradas`}
             </span>
           </div>
 
           {events.length === 0 ? (
             <div class="text-center text-body-secondary py-5 border rounded-3 bg-body shadow-sm">
               <i class="bi bi-calendar-x fs-1 d-block mb-2 text-body-tertiary"></i>
-              <h3 class="h6 fw-semibold">{t('detail.no_events_title', locale)}</h3>
-              <p class="small text-body-secondary mb-0">{t('detail.no_events_desc', locale)}</p>
+              <h3 class="h6 fw-semibold">Todavía no hay entradas registradas</h3>
+              <p class="small text-body-secondary mb-0">
+                Tus entradas registradas van a aparecer acá cronológicamente.
+              </p>
             </div>
           ) : (
             <div class="list-group shadow-sm" id="events-list">
               {events.map((event) => (
                 <div class="list-group-item list-group-item-action p-3 d-flex justify-content-between align-items-center gap-3">
                   <div class="d-flex align-items-center gap-3 flex-grow-1 min-w-0 flex-wrap">
-                    <span class="text-body-secondary small">
-                      {formatDate(event.timestamp, locale)}
-                    </span>
+                    <span class="text-body-secondary small">{formatDate(event.timestamp)}</span>
                     {event.value !== null && event.value !== undefined && (
                       <span class="fw-semibold badge bg-primary-subtle text-primary">
                         {event.value}
@@ -143,9 +136,9 @@ export function DetailPage({ tracker, events, locale }: DetailProps) {
                     hx-delete={`/trackers/${tracker.id}/events/${event.id}`}
                     hx-target="closest .list-group-item"
                     hx-swap="outerHTML"
-                    hx-confirm={t('prompts.delete_entry_confirm', locale)}
-                    title={t('detail.delete_entry', locale)}
-                    aria-label={t('detail.delete_entry', locale)}
+                    hx-confirm="¿Seguro que querés eliminar esta entrada?"
+                    title="Eliminar entrada"
+                    aria-label="Eliminar entrada"
                   >
                     <i class="bi bi-trash3"></i>
                   </button>

@@ -19,7 +19,6 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
   - Testable with in-memory SQLite via `createDatabase(':memory:')` and `setDb(...)`.
 - **Validation Layer (`src/schemas.ts`)**: Strict Zod schemas validating tracker creation and event logging.
 - **Views (`src/views/`)**: Server-rendered Hono JSX components (`layout.tsx`, `dashboard.tsx`, `detail.tsx`, `log-entry.tsx`, `components/`).
-- **Internationalization (`src/i18n.ts`)**: English and Argentine Spanish translations resolved via `track_lang` cookie or `?lang=en|es` query parameter.
 - **Entrypoint (`src/index.ts`)**: Initializes Hono server, health endpoints, static asset handlers, and exports default Bun server configuration.
 
 ### 3. Hypermedia & Frontend Architecture (HTMX + Bootstrap 5)
@@ -47,7 +46,6 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
   - `web.tsx` — Web page and HTMX route handlers.
   - `api.ts` — Headless JSON REST API router.
   - `views/` — Hono JSX view templates.
-  - `i18n.ts` — Server-side translations (`en`, `es`).
   - `slug.ts` — Slug generation and collision handling.
   - `schemas.ts` — Zod schemas.
   - `types.ts` — Centralized TypeScript interfaces.

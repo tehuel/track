@@ -1,10 +1,7 @@
 import type { Tracker } from '../../types'
-import type { Locale } from '../../i18n'
-import { t } from '../../i18n'
 
 interface TrackerCardProps {
   tracker: Tracker
-  locale: Locale
   justLogged?: boolean
 }
 
@@ -21,7 +18,7 @@ export function getTrackerIcon(type: Tracker['type']) {
   }
 }
 
-export function TrackerCard({ tracker, locale, justLogged = false }: TrackerCardProps) {
+export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
   const icon = getTrackerIcon(tracker.type)
 
   return (
@@ -70,9 +67,7 @@ export function TrackerCard({ tracker, locale, justLogged = false }: TrackerCard
                   }`}
                 >
                   <i class={`bi ${justLogged ? 'bi-check-all' : 'bi-check2'}`}></i>
-                  <span>
-                    {justLogged ? t('cards.checked_in', locale) : t('cards.check_in', locale)}
-                  </span>
+                  <span>{justLogged ? '¡Registrado!' : 'Completar'}</span>
                 </button>
               )}
 
@@ -90,19 +85,19 @@ export function TrackerCard({ tracker, locale, justLogged = false }: TrackerCard
                       step="any"
                       name="value"
                       class="form-control"
-                      placeholder={t('cards.value_placeholder', locale)}
+                      placeholder="Valor..."
                       required
-                      aria-label="Value"
+                      aria-label="Valor"
                     />
                     <button
                       type="submit"
                       class={`btn d-flex align-items-center gap-1 ${
                         justLogged ? 'btn-success' : 'btn-primary'
                       }`}
-                      title={t('cards.log', locale)}
+                      title="Registrar"
                     >
                       <i class="bi bi-check-lg"></i>
-                      <span>{t('cards.log', locale)}</span>
+                      <span>Registrar</span>
                     </button>
                   </div>
                 </form>
@@ -121,19 +116,19 @@ export function TrackerCard({ tracker, locale, justLogged = false }: TrackerCard
                       type="text"
                       name="note"
                       class="form-control"
-                      placeholder={t('cards.note_placeholder', locale)}
+                      placeholder="Añadir nota..."
                       required
-                      aria-label="Note"
+                      aria-label="Nota"
                     />
                     <button
                       type="submit"
                       class={`btn d-flex align-items-center gap-1 ${
                         justLogged ? 'btn-success' : 'btn-primary'
                       }`}
-                      title={t('cards.log', locale)}
+                      title="Registrar"
                     >
                       <i class="bi bi-check-lg"></i>
-                      <span>{t('cards.log', locale)}</span>
+                      <span>Registrar</span>
                     </button>
                   </div>
                 </form>
@@ -143,8 +138,8 @@ export function TrackerCard({ tracker, locale, justLogged = false }: TrackerCard
               <a
                 href={`/trackers/${tracker.id}/log`}
                 class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center flex-shrink-0"
-                title={t('cards.log_entry_tooltip', locale)}
-                aria-label={t('cards.log_entry_tooltip', locale)}
+                title="Registrar entrada"
+                aria-label="Registrar entrada"
               >
                 <i class="bi bi-pencil-square"></i>
               </a>
