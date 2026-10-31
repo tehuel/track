@@ -10,11 +10,28 @@ export function getTrackerIcon(type: TrackerType): string {
   return TRACKER_TYPES.find((t) => t.value === type)?.icon ?? 'bi-activity'
 }
 
+export const TRACKER_COLORS: { value: string; label: string }[] = [
+  { value: '#dc3545', label: 'Rojo' },
+  { value: '#fd7e14', label: 'Naranja' },
+  { value: '#ffc107', label: 'Amarillo' },
+  { value: '#198754', label: 'Verde' },
+  { value: '#0dcaf0', label: 'Cian' },
+  { value: '#0d6efd', label: 'Azul' },
+  { value: '#6f42c1', label: 'Violeta' },
+  { value: '#d63384', label: 'Rosa' },
+]
+
+export function parseTrackerColor(raw: unknown): string | null {
+  const val = String(raw || '').trim()
+  return TRACKER_COLORS.some((c) => c.value === val) ? val : null
+}
+
 export interface Tracker {
   id: string
   name: string
   type: TrackerType
   description?: string | null
+  color?: string | null
   created_at?: string
 }
 

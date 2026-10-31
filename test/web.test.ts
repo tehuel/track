@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
 import { app } from '../src/web'
-import { db, createTracker, createEvent } from '../src/db'
+import { db, createTracker, createEvent, getTrackerById } from '../src/db'
 
 describe('Web UI & HTMX endpoints', () => {
   beforeEach(() => {
@@ -55,10 +55,11 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('<nav')
   })
 
-  it('POST /track creates a tracker via form submit', async () => {
+  it('POST /track creates a tracker with optional color via form submit', async () => {
     const formData = new FormData()
     formData.append('name', 'Rutina de Yoga')
     formData.append('type', 'habit')
+    formData.append('color', '#198754')
 
     const res = await app.request('/track', {
       method: 'POST',
@@ -67,6 +68,40 @@ describe('Web UI & HTMX endpoints', () => {
 
     expect(res.status).toBe(302) // Redirects to /
     expect(res.headers.get('location')).toBe('/')
+
+    const created = getTrackerById('rutina-de-yoga')
+    expect(created?.color).toBe('#198754')
+
+    const dashRes = await app.request('/')
+    const dashHtml = await dashRes.text()
+    expect(dashHtml).toContain('color:#198754')
+  })
+
+  it('POST /track/:id/edit updates tracker details and color', async () => {
+    createTracker({ id: 'yoga', name: 'Yoga', type: 'habit', color: '#198754' })
+
+    const formData = new FormData()
+    formData.append('name', 'Yoga Matutino')
+    formData.append('description', '30 minutos')
+    formData.append('color', '#6f42c1')
+
+    const res = await app.request('/track/yoga/edit', {
+      method: 'POST',
+      body: formData,
+    })
+
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toBe('/track/yoga')
+
+    const updated = getTrackerById('yoga')
+    expect(updated?.name).toBe('Yoga Matutino')
+    expect(updated?.description).toBe('30 minutos')
+    expect(updated?.color).toBe('#6f42c1')
+
+    const detailRes = await app.request('/track/yoga')
+    const detailHtml = await detailRes.text()
+    expect(detailHtml).toContain('color:#6f42c1')
+    expect(detailHtml).toContain('id="editModal"')
   })
 
   it('POST /track/:id quick-logs habit via HTMX and returns card partial', async () => {

@@ -1,4 +1,4 @@
-import { TRACKER_TYPES, getTrackerIcon, type Tracker } from '../types'
+import { TRACKER_COLORS, TRACKER_TYPES, getTrackerIcon, type Tracker } from '../types'
 import { Layout } from './layout'
 
 interface DashboardProps {
@@ -24,6 +24,12 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
                 <span class="text-body-secondary lh-1 flex-shrink-0" title={tracker.type}>
                   <i class={`bi ${icon} fs-5`}></i>
                 </span>
+                {tracker.color && (
+                  <i
+                    class="bi bi-circle-fill small flex-shrink-0"
+                    style={{ color: tracker.color }}
+                  ></i>
+                )}
                 <h2 class="h6 card-title mb-0 fw-semibold text-truncate">
                   <a
                     href={`/track/${tracker.id}`}
@@ -167,6 +173,47 @@ function NewTrackerModal() {
                       >
                         <i class={`bi ${t.icon}`}></i>
                         <span>{t.label}</span>
+                      </label>
+                    </>
+                  ))}
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-medium d-block">Color</label>
+                <div class="btn-group w-100" role="group" aria-label="Color">
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="color"
+                    id="tracker-color-none"
+                    value=""
+                    autocomplete="off"
+                    checked
+                  />
+                  <label
+                    class="btn btn-outline-secondary d-flex align-items-center justify-content-center py-2"
+                    for="tracker-color-none"
+                    title="Sin color"
+                  >
+                    <i class="bi bi-slash-circle"></i>
+                  </label>
+                  {TRACKER_COLORS.map((c) => (
+                    <>
+                      <input
+                        type="radio"
+                        class="btn-check"
+                        name="color"
+                        id={`tracker-color-${c.value.slice(1)}`}
+                        value={c.value}
+                        autocomplete="off"
+                      />
+                      <label
+                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center py-2"
+                        for={`tracker-color-${c.value.slice(1)}`}
+                        title={c.label}
+                      >
+                        <i class="bi bi-circle-fill" style={{ color: c.value }}></i>
                       </label>
                     </>
                   ))}

@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach } from 'bun:test'
 import {
   db,
   createTracker,
+  updateTracker,
   getTrackerById,
   listTrackers,
   deleteTracker,
@@ -16,20 +17,46 @@ describe('Database layer (bun:sqlite)', () => {
     db.exec('DELETE FROM trackers')
   })
 
-  it('creates and lists trackers', () => {
+  it('creates and lists trackers with optional color', () => {
     createTracker({
       id: 'water-log',
       name: 'Drink Water',
       type: 'habit',
       description: 'Drink 2L daily',
+      color: '#0dcaf0',
+    })
+
+    createTracker({
+      id: 'stretching',
+      name: 'Stretching',
+      type: 'habit',
     })
 
     const list = listTrackers()
-    expect(list.length).toBe(1)
+    expect(list.length).toBe(2)
     expect(list[0]?.id).toBe('water-log')
     expect(list[0]?.name).toBe('Drink Water')
     expect(list[0]?.type).toBe('habit')
     expect(list[0]?.description).toBe('Drink 2L daily')
+    expect(list[0]?.color).toBe('#0dcaf0')
+    expect(list[1]?.id).toBe('stretching')
+    expect(list[1]?.color).toBeNull()
+  })
+
+  it('updates tracker name, description, and color', () => {
+    createTracker({ id: 'sleep', name: 'Sleep', type: 'numeric' })
+    expect(getTrackerById('sleep')?.color).toBeNull()
+
+    updateTracker('sleep', {
+      name: 'Sleep Hours',
+      description: 'Nightly rest',
+      color: '#6f42c1',
+    })
+
+    const updated = getTrackerById('sleep')
+    expect(updated?.name).toBe('Sleep Hours')
+    expect(updated?.description).toBe('Nightly rest')
+    expect(updated?.color).toBe('#6f42c1')
   })
 
   it('finds tracker by ID', () => {

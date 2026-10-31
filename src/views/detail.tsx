@@ -1,4 +1,4 @@
-import { getTrackerIcon, type Tracker, type TrackerEvent } from '../types'
+import { TRACKER_COLORS, getTrackerIcon, type Tracker, type TrackerEvent } from '../types'
 import { Layout } from './layout'
 
 interface DetailProps {
@@ -119,6 +119,125 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
   )
 }
 
+function EditTrackerModal({ tracker }: { tracker: Tracker }) {
+  return (
+    <div
+      class="modal fade"
+      id="editModal"
+      tabindex={-1}
+      aria-labelledby="editModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title d-flex align-items-center gap-2" id="editModalLabel">
+              <i class="bi bi-pencil-square text-primary"></i>
+              <span>Editar track</span>
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
+          </div>
+
+          <form action={`/track/${tracker.id}/edit`} method="post" class="m-0 p-0">
+            <div class="modal-body p-4">
+              <div class="mb-3">
+                <label for="edit-tracker-name" class="form-label fw-medium">
+                  <span>Nombre</span>
+                  <span class="text-danger ms-1">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="edit-tracker-name"
+                  name="name"
+                  value={tracker.name}
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-medium d-block">Color</label>
+                <div class="btn-group w-100" role="group" aria-label="Color">
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="color"
+                    id="edit-tracker-color-none"
+                    value=""
+                    autocomplete="off"
+                    checked={!tracker.color}
+                  />
+                  <label
+                    class="btn btn-outline-secondary d-flex align-items-center justify-content-center py-2"
+                    for="edit-tracker-color-none"
+                    title="Sin color"
+                  >
+                    <i class="bi bi-slash-circle"></i>
+                  </label>
+                  {TRACKER_COLORS.map((c) => (
+                    <>
+                      <input
+                        type="radio"
+                        class="btn-check"
+                        name="color"
+                        id={`edit-tracker-color-${c.value.slice(1)}`}
+                        value={c.value}
+                        autocomplete="off"
+                        checked={tracker.color === c.value}
+                      />
+                      <label
+                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center py-2"
+                        for={`edit-tracker-color-${c.value.slice(1)}`}
+                        title={c.label}
+                      >
+                        <i class="bi bi-circle-fill" style={{ color: c.value }}></i>
+                      </label>
+                    </>
+                  ))}
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <label for="edit-tracker-description" class="form-label fw-medium">
+                  Descripción
+                </label>
+                <textarea
+                  class="form-control"
+                  id="edit-tracker-description"
+                  name="description"
+                  placeholder="Descripción..."
+                  rows={2}
+                  maxlength={500}
+                >
+                  {tracker.description ?? ''}
+                </textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer border-0 pt-0">
+              <button
+                type="button"
+                class="btn btn-link text-secondary text-decoration-none"
+                data-bs-dismiss="modal"
+              >
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                <span>Guardar</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function DetailPage({ tracker, events }: DetailProps) {
   const icon = getTrackerIcon(tracker.type)
 
@@ -141,6 +260,12 @@ export function DetailPage({ tracker, events }: DetailProps) {
           <div>
             <div class="d-flex align-items-center gap-2">
               <i class={`bi ${icon} text-primary fs-3`}></i>
+              {tracker.color && (
+                <i
+                  class="bi bi-circle-fill fs-5 flex-shrink-0"
+                  style={{ color: tracker.color }}
+                ></i>
+              )}
               <h1 class="h3 mb-0 fw-semibold">{tracker.name}</h1>
             </div>
             {tracker.description && (
@@ -158,6 +283,17 @@ export function DetailPage({ tracker, events }: DetailProps) {
             >
               <i class="bi bi-plus-lg"></i>
               <span>Registrar</span>
+            </button>
+
+            {/* Edit Tracker */}
+            <button
+              type="button"
+              class="btn btn-outline-secondary d-flex align-items-center gap-1"
+              data-bs-toggle="modal"
+              data-bs-target="#editModal"
+            >
+              <i class="bi bi-pencil"></i>
+              <span>Editar</span>
             </button>
 
             {/* Delete Tracker */}
@@ -218,6 +354,9 @@ export function DetailPage({ tracker, events }: DetailProps) {
 
         {/* Log Entry Modal */}
         <LogEntryModal tracker={tracker} />
+
+        {/* Edit Tracker Modal */}
+        <EditTrackerModal tracker={tracker} />
       </div>
     </Layout>
   )

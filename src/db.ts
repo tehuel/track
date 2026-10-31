@@ -13,6 +13,7 @@ db.exec(`
     name TEXT NOT NULL,
     type TEXT NOT NULL DEFAULT 'habit',
     description TEXT,
+    color TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -44,7 +45,7 @@ function slugify(text: string): string {
 export function listTrackers(): Tracker[] {
   return db
     .query<Tracker, []>(
-      'SELECT id, name, type, description, created_at FROM trackers ORDER BY created_at ASC'
+      'SELECT id, name, type, description, color, created_at FROM trackers ORDER BY created_at ASC'
     )
     .all()
 }
@@ -52,7 +53,7 @@ export function listTrackers(): Tracker[] {
 export function getTrackerById(id: string): Tracker | null {
   return db
     .query<Tracker, [string]>(
-      'SELECT id, name, type, description, created_at FROM trackers WHERE id = ?'
+      'SELECT id, name, type, description, color, created_at FROM trackers WHERE id = ?'
     )
     .get(id)
 }
@@ -66,9 +67,24 @@ export function generateUniqueSlug(name: string): string {
 }
 
 export function createTracker(tracker: Tracker): void {
-  db.query<never, [string, string, string, string | null]>(
-    'INSERT INTO trackers (id, name, type, description) VALUES (?, ?, ?, ?)'
-  ).run(tracker.id, tracker.name, tracker.type, tracker.description ?? null)
+  db.query<never, [string, string, string, string | null, string | null]>(
+    'INSERT INTO trackers (id, name, type, description, color) VALUES (?, ?, ?, ?, ?)'
+  ).run(
+    tracker.id,
+    tracker.name,
+    tracker.type,
+    tracker.description ?? null,
+    tracker.color ?? null
+  )
+}
+
+export function updateTracker(
+  id: string,
+  data: { name: string; description?: string | null; color?: string | null }
+): void {
+  db.query<never, [string, string | null, string | null, string]>(
+    'UPDATE trackers SET name = ?, description = ?, color = ? WHERE id = ?'
+  ).run(data.name, data.description ?? null, data.color ?? null, id)
 }
 
 export function deleteTracker(id: string): void {

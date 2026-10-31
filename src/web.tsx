@@ -3,13 +3,14 @@ import {
   listTrackers,
   getTrackerById,
   createTracker,
+  updateTracker,
   deleteTracker,
   generateUniqueSlug,
   listEventsByTracker,
   createEvent,
   deleteEvent,
 } from './db'
-import type { TrackerType } from './types'
+import { parseTrackerColor, type TrackerType } from './types'
 import { DashboardPage, TrackersGrid, TrackerCard } from './views/dashboard'
 import { DetailPage } from './views/detail'
 
@@ -50,8 +51,28 @@ app.post('/track', async (c) => {
     name,
     type: (String(body['type'] || 'habit') as TrackerType) || 'habit',
     description: body['description'] ? String(body['description']).trim() : null,
+    color: parseTrackerColor(body['color']),
   })
   return c.redirect('/')
+})
+
+// POST /track/:id/edit - Update track details
+app.post('/track/:id/edit', async (c) => {
+  const id = c.req.param('id')
+  const tracker = getTrackerById(id)
+  if (!tracker) {
+    return c.redirect('/')
+  }
+
+  const body = await c.req.parseBody()
+  const name = String(body['name'] || '').trim() || tracker.name
+
+  updateTracker(id, {
+    name,
+    description: body['description'] ? String(body['description']).trim() : null,
+    color: parseTrackerColor(body['color']),
+  })
+  return c.redirect(`/track/${id}`)
 })
 
 // GET /track/:id - Single track detail
