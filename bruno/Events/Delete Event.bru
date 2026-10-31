@@ -1,0 +1,16 @@
+meta {
+  name: Delete Event
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/trackers/:trackerId/events/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  trackerId: water-plants
+  id: event-uuid-here
+}

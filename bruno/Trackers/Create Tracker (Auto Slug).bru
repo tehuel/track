@@ -1,0 +1,20 @@
+meta {
+  name: Create Tracker (Auto Slug)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/trackers
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Water Plants",
+    "type": "habit",
+    "description": "Remember to water the indoor plants every morning"
+  }
+}
+

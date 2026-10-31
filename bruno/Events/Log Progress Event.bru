@@ -1,0 +1,23 @@
+meta {
+  name: Log Progress Event
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/trackers/:trackerId/events
+  body: json
+  auth: inherit
+}
+
+params:path {
+  trackerId: reading-dune
+}
+
+body:json {
+  {
+    "value": 20,
+    "note": "page 20/100"
+  }
+}
+

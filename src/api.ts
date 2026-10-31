@@ -16,6 +16,11 @@ import type { Tracker, TrackerEvent } from './types'
 
 export const apiRouter = new Hono()
 
+// GET /api/health - Health check endpoint
+apiRouter.get('/health', (c) => {
+  return c.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
 // GET /api/trackers - List all trackers
 apiRouter.get('/trackers', (c) => {
   const trackers = listTrackers()

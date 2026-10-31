@@ -1,0 +1,16 @@
+meta {
+  name: Get Tracker By ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/trackers/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: water-plants
+}
+
