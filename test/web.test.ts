@@ -84,6 +84,22 @@ describe('Web UI & HTMX endpoints', () => {
     expect(dashHtml).toContain('color:#198754')
   })
 
+  it('POST /track via HTMX returns HX-Location: /', async () => {
+    const formData = new FormData()
+    formData.append('name', 'Lectura')
+    formData.append('type', 'numeric')
+
+    const res = await app.request('/track', {
+      method: 'POST',
+      headers: { 'HX-Request': 'true' },
+      body: formData,
+    })
+
+    expect(res.status).toBe(200)
+    expect(res.headers.get('HX-Location')).toBe('/')
+    expect(getTrackerById('lectura')).toBeDefined()
+  })
+
   it('POST /track/:id/edit updates tracker details and color', async () => {
     createTracker({ id: 'yoga', name: 'Yoga', type: 'habit', color: '#198754' })
 
@@ -109,6 +125,23 @@ describe('Web UI & HTMX endpoints', () => {
     const detailHtml = await detailRes.text()
     expect(detailHtml).toContain('color:#6f42c1')
     expect(detailHtml).toContain('id="editModal"')
+  })
+
+  it('POST /track/:id/edit via HTMX returns HX-Location: /track/:id', async () => {
+    createTracker({ id: 'medit', name: 'Meditación', type: 'habit' })
+
+    const formData = new FormData()
+    formData.append('name', 'Meditación Zen')
+
+    const res = await app.request('/track/medit/edit', {
+      method: 'POST',
+      headers: { 'HX-Request': 'true' },
+      body: formData,
+    })
+
+    expect(res.status).toBe(200)
+    expect(res.headers.get('HX-Location')).toBe('/track/medit')
+    expect(getTrackerById('medit')?.name).toBe('Meditación Zen')
   })
 
   it('POST /track/:id quick-logs habit via HTMX, returns card partial without green success and triggers toast', async () => {

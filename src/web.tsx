@@ -43,6 +43,10 @@ app.post('/track', async (c) => {
   const body = await c.req.parseBody()
   const name = String(body['name'] || '').trim()
   if (!name) {
+    if (c.req.header('HX-Request')) {
+      c.header('HX-Location', '/')
+      return c.body(null, 200)
+    }
     return c.redirect('/')
   }
 
@@ -53,6 +57,11 @@ app.post('/track', async (c) => {
     description: body['description'] ? String(body['description']).trim() : null,
     color: parseTrackerColor(body['color']),
   })
+
+  if (c.req.header('HX-Request')) {
+    c.header('HX-Location', '/')
+    return c.body(null, 200)
+  }
   return c.redirect('/')
 })
 
@@ -61,6 +70,10 @@ app.post('/track/:id/edit', async (c) => {
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
   if (!tracker) {
+    if (c.req.header('HX-Request')) {
+      c.header('HX-Location', '/')
+      return c.body(null, 200)
+    }
     return c.redirect('/')
   }
 
@@ -72,6 +85,11 @@ app.post('/track/:id/edit', async (c) => {
     description: body['description'] ? String(body['description']).trim() : null,
     color: parseTrackerColor(body['color']),
   })
+
+  if (c.req.header('HX-Request')) {
+    c.header('HX-Location', `/track/${id}`)
+    return c.body(null, 200)
+  }
   return c.redirect(`/track/${id}`)
 })
 

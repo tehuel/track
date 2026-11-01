@@ -89,6 +89,16 @@
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
   });
 
+  // Clean up any open modal and backdrops before HTMX swaps page content
+  document.addEventListener('htmx:beforeSwap', () => {
+    if (!window.bootstrap) return;
+    document.querySelectorAll('.modal.show').forEach((modalEl) => {
+      bootstrap.Modal.getInstance(modalEl)?.hide();
+    });
+    document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+    document.body.classList.remove('modal-open');
+  });
+
   // Loading spinner feedback during HTMX requests
   document.addEventListener('htmx:beforeRequest', (evt) => toggleLoading(evt.detail.elt, true));
   document.addEventListener('htmx:afterRequest', (evt) => toggleLoading(evt.detail.elt, false));

@@ -134,7 +134,13 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
 function NewTrackerModal() {
   return (
     <Modal id="newTrackerModal" title="Crear track">
-      <form action="/track" method="post" class="m-0 p-0">
+      <form
+        action="/track"
+        method="post"
+        hx-post="/track"
+        hx-disabled-elt="find button"
+        class="m-0 p-0"
+      >
         <div class="modal-body p-4">
           <div class="mb-3">
             <label for="tracker-name" class="form-label fw-medium">
@@ -197,6 +203,11 @@ function NewTrackerModal() {
 
         <ModalFooter>
           <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+            <span
+              class="spinner-border spinner-border-sm d-none"
+              role="status"
+              aria-hidden="true"
+            ></span>
             <span>Crear track</span>
           </button>
         </ModalFooter>

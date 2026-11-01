@@ -115,7 +115,13 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
 function EditTrackerModal({ tracker }: { tracker: Tracker }) {
   return (
     <Modal id="editModal" title="Editar track">
-      <form action={`/track/${tracker.id}/edit`} method="post" class="m-0 p-0">
+      <form
+        action={`/track/${tracker.id}/edit`}
+        method="post"
+        hx-post={`/track/${tracker.id}/edit`}
+        hx-disabled-elt="find button"
+        class="m-0 p-0"
+      >
         <div class="modal-body p-4">
           <div class="mb-3">
             <label for="edit-tracker-name" class="form-label fw-medium">
@@ -157,6 +163,11 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
 
         <ModalFooter>
           <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+            <span
+              class="spinner-border spinner-border-sm d-none"
+              role="status"
+              aria-hidden="true"
+            ></span>
             <span>Guardar cambios</span>
           </button>
         </ModalFooter>
