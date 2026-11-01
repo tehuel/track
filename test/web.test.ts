@@ -17,7 +17,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('<!DOCTYPE html>')
     expect(html).toContain('Tocar Guitarra')
     expect(html).toContain('htmx.org')
-    expect(html).toContain('Nuevo track')
+    expect(html).toContain('Crear track')
     expect(html).toContain('/track/guitar')
     expect(html).toContain('title="Hábito"')
     expect(html).toContain('title="Numérico"')

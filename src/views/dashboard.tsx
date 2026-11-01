@@ -143,9 +143,8 @@ function NewTrackerModal() {
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
-            <h5 class="modal-title d-flex align-items-center gap-2" id="newTrackerModalLabel">
-              <Icon name="plus-lg" class="text-primary" />
-              <span>Crear track</span>
+            <h5 class="modal-title" id="newTrackerModalLabel">
+              Crear track
             </h5>
             <button
               type="button"
@@ -355,7 +354,7 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
               data-bs-target="#newTrackerModal"
             >
               <Icon name="plus-lg" />
-              <span>Nuevo track</span>
+              <span>Crear track</span>
             </button>
           </div>
         </div>

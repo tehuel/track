@@ -50,9 +50,8 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
-            <h5 class="modal-title d-flex align-items-center gap-2" id="logModalLabel">
-              <Icon name={icon} class="text-primary" title={typeLabel} />
-              <span>Registrar: {tracker.name}</span>
+            <h5 class="modal-title" id="logModalLabel">
+              Registrar entrada
             </h5>
             <button
               type="button"
@@ -130,7 +129,7 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
                   role="status"
                   aria-hidden="true"
                 ></span>
-                <span>Guardar</span>
+                <span>Registrar entrada</span>
               </button>
             </div>
           </form>
@@ -152,9 +151,8 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
-            <h5 class="modal-title d-flex align-items-center gap-2" id="editModalLabel">
-              <Icon name="pencil" class="text-primary" />
-              <span>Editar track</span>
+            <h5 class="modal-title" id="editModalLabel">
+              Editar track
             </h5>
             <button
               type="button"
@@ -256,7 +254,7 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
                 Cancelar
               </button>
               <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
-                <span>Guardar</span>
+                <span>Guardar cambios</span>
               </button>
             </div>
           </form>
@@ -285,7 +283,7 @@ export function EventsSection({ tracker, events }: DetailProps) {
           data-bs-target="#logModal"
         >
           <Icon name="plus-lg" />
-          <span>Registrar</span>
+          <span>Registrar entrada</span>
         </button>
       </div>
 
