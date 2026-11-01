@@ -1,5 +1,12 @@
-import { TRACKER_COLORS, getTrackerIcon, type Tracker, type TrackerEvent } from '../types'
+import {
+  TRACKER_COLORS,
+  getTrackerIcon,
+  getTrackerTypeLabel,
+  type Tracker,
+  type TrackerEvent,
+} from '../types'
 import { Layout } from './layout'
+import { Icon } from './icons'
 
 interface DetailProps {
   tracker: Tracker
@@ -28,6 +35,7 @@ function formatDate(iso: string): string {
 
 function LogEntryModal({ tracker }: { tracker: Tracker }) {
   const icon = getTrackerIcon(tracker.type)
+  const typeLabel = getTrackerTypeLabel(tracker.type)
   const defaultTimestamp = getLocalDatetimeString()
   const isText = tracker.type === 'text'
 
@@ -43,7 +51,7 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="logModalLabel">
-              <i class={`bi ${icon} text-primary`}></i>
+              <Icon name={icon} class="text-primary" title={typeLabel} />
               <span>Registrar: {tracker.name}</span>
             </h5>
             <button
@@ -145,7 +153,7 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="editModalLabel">
-              <i class="bi bi-pencil-square text-primary"></i>
+              <Icon name="pencil" class="text-primary" />
               <span>Editar track</span>
             </h5>
             <button
@@ -190,7 +198,7 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
                     for="edit-tracker-color-none"
                     title="Sin color"
                   >
-                    <i class="bi bi-slash-circle"></i>
+                    <Icon name="slash-circle" />
                   </label>
                   {TRACKER_COLORS.map((c) => (
                     <>
@@ -208,7 +216,14 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
                         for={`edit-tracker-color-${c.value.slice(1)}`}
                         title={c.label}
                       >
-                        <i class="bi bi-circle-fill" style={{ color: c.value }}></i>
+                        <span
+                          class="rounded-circle d-inline-block"
+                          style={{
+                            width: '1rem',
+                            height: '1rem',
+                            backgroundColor: c.value,
+                          }}
+                        ></span>
                       </label>
                     </>
                   ))}
@@ -269,15 +284,17 @@ export function EventsSection({ tracker, events }: DetailProps) {
           data-bs-toggle="modal"
           data-bs-target="#logModal"
         >
-          <i class="bi bi-plus-lg"></i>
+          <Icon name="plus-lg" />
           <span>Registrar</span>
         </button>
       </div>
 
       {events.length === 0 ? (
         <div class="card text-center text-body-secondary py-5 border-0 rounded-3 bg-body">
-          <i class="bi bi-calendar-x fs-1 d-block mb-2 text-body-tertiary"></i>
-          <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
+          <div class="d-flex flex-column align-items-center">
+            <Icon name="activity" class="fs-1 d-block mb-2 text-body-tertiary mx-auto" />
+            <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
+          </div>
         </div>
       ) : (
         <div class="list-group list-group-flush rounded-3 overflow-hidden" id="events-list">
@@ -301,7 +318,7 @@ export function EventsSection({ tracker, events }: DetailProps) {
                 title="Eliminar entrada"
                 aria-label="Eliminar entrada"
               >
-                <i class="bi bi-trash3"></i>
+                <Icon name="trash3" />
               </button>
             </div>
           ))}
@@ -313,6 +330,7 @@ export function EventsSection({ tracker, events }: DetailProps) {
 
 export function DetailPage({ tracker, events }: DetailProps) {
   const icon = getTrackerIcon(tracker.type)
+  const typeLabel = getTrackerTypeLabel(tracker.type)
 
   return (
     <Layout title={`${tracker.name} - track`}>
@@ -322,10 +340,14 @@ export function DetailPage({ tracker, events }: DetailProps) {
           <div>
             <div class="d-flex align-items-center gap-2">
               {tracker.color && (
-                <i
-                  class="bi bi-circle-fill fs-5 flex-shrink-0"
-                  style={{ color: tracker.color }}
-                ></i>
+                <span
+                  class="rounded-circle flex-shrink-0 d-inline-block"
+                  style={{
+                    width: '0.875rem',
+                    height: '0.875rem',
+                    backgroundColor: tracker.color,
+                  }}
+                ></span>
               )}
               <h1 class="h3 mb-0 fw-semibold">{tracker.name}</h1>
             </div>
@@ -335,8 +357,8 @@ export function DetailPage({ tracker, events }: DetailProps) {
           </div>
 
           <div class="d-flex align-items-center gap-2 flex-shrink-0">
-            <span class="text-body-secondary lh-1 px-2" title={tracker.type}>
-              <i class={`bi ${icon} fs-5`}></i>
+            <span class="text-body-secondary lh-1 px-2" title={typeLabel}>
+              <Icon name={icon} class="fs-5" />
             </span>
 
             {/* Edit Tracker */}
@@ -348,7 +370,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
               title="Editar track"
               aria-label="Editar track"
             >
-              <i class="bi bi-pencil"></i>
+              <Icon name="pencil" />
             </button>
 
             {/* Delete Tracker */}
@@ -360,7 +382,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
               title="Eliminar track"
               aria-label="Eliminar track"
             >
-              <i class="bi bi-trash3"></i>
+              <Icon name="trash3" />
             </button>
           </div>
         </div>

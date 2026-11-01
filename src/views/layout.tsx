@@ -1,4 +1,6 @@
 import type { Child } from 'hono/jsx'
+import { raw } from 'hono/html'
+import { Icon } from './icons'
 
 interface LayoutProps {
   title?: string
@@ -7,53 +9,49 @@ interface LayoutProps {
 
 export function Layout({ title = 'track', children }: LayoutProps) {
   return (
-    <html lang="es" data-bs-theme="auto">
+    <>
+      {raw('<!DOCTYPE html>')}
+      <html lang="es" data-bs-theme="auto">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{title}</title>
 
-        {/* Favicons */}
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="alternate icon" href="/favicon.ico" />
-
-        {/* Bootstrap 5 CSS & Icons */}
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        />
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-        />
-
-        {/* HTMX */}
-        <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
-
-        {/* Bootstrap Theme Manager */}
+        {/* Bootstrap Theme Manager (runs immediately before stylesheets to prevent FOUC / forced reflow) */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
             (() => {
-              const getTheme = () =>
-                localStorage.getItem('theme') ||
+              const theme = localStorage.getItem('theme') ||
                 (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-              const applyTheme = (theme) => {
-                document.documentElement.setAttribute('data-bs-theme', theme);
-                const icon = document.getElementById('theme-icon');
-                if (icon) icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
-              };
-              applyTheme(getTheme());
-              window.addEventListener('DOMContentLoaded', () => applyTheme(getTheme()));
+              document.documentElement.setAttribute('data-bs-theme', theme);
               window.toggleTheme = () => {
                 const next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
                 localStorage.setItem('theme', next);
-                applyTheme(next);
+                document.documentElement.setAttribute('data-bs-theme', next);
               };
             })();
           `,
           }}
         />
+
+        {/* Preconnect to CDN */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+        {/* Favicons */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="alternate icon" href="/favicon.ico" />
+
+        {/* Bootstrap 5 CSS */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        />
+
+        {/* HTMX & Bootstrap 5 JS (deferred to download in parallel and execute without blocking parser) */}
+        <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" defer></script>
       </head>
 
       <body class="bg-body-secondary min-vh-100 d-flex flex-column">
@@ -61,7 +59,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         <nav class="navbar navbar-expand bg-body border-0">
           <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="/">
-              <i class="bi bi-activity text-primary fs-4"></i>
+              <Icon name="activity" class="text-primary fs-4" />
               <span>track</span>
             </a>
 
@@ -74,7 +72,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 title="Cambiar tema"
                 aria-label="Cambiar tema"
               >
-                <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
+                <Icon name="circle-half" />
               </button>
             </div>
           </div>
@@ -94,7 +92,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
           >
             <div class="d-flex">
               <div class="toast-body d-flex align-items-center gap-2">
-                <i class="bi bi-check-circle-fill"></i>
+                <Icon name="check-lg" />
                 <span id="toast-message">Entrada registrada</span>
               </div>
               <button
@@ -106,9 +104,6 @@ export function Layout({ title = 'track', children }: LayoutProps) {
             </div>
           </div>
         </div>
-
-        {/* Bootstrap 5 JS Bundle */}
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
         {/* App UI Helpers: Toast notifications & Loading states */}
         <script
@@ -140,7 +135,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                   btn.disabled = true;
                   const spinner = btn.querySelector('.spinner-border');
                   if (spinner) spinner.classList.remove('d-none');
-                  const icon = btn.querySelector('i.bi');
+                  const icon = btn.querySelector('.bi');
                   if (icon) icon.classList.add('d-none');
                 }
               });
@@ -155,7 +150,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                     btn.disabled = false;
                     const spinner = btn.querySelector('.spinner-border');
                     if (spinner) spinner.classList.add('d-none');
-                    const icon = btn.querySelector('i.bi');
+                    const icon = btn.querySelector('.bi');
                     if (icon) icon.classList.remove('d-none');
                   }
                 }
@@ -166,5 +161,6 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         />
       </body>
     </html>
+  </>
   )
 }
