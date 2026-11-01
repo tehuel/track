@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 import {
   listTrackers,
   getTrackerById,
@@ -10,11 +10,66 @@ import {
   createEvent,
   deleteEvent,
 } from './db'
-import { parseTrackerColor, type TrackerType } from './types'
+import { parseTrackerColor, parseTrackerType, type Tracker } from './types'
 import { DashboardPage, TrackersGrid, TrackerCard } from './views/dashboard'
 import { DetailPage, EventsSection } from './views/detail'
 
 export const app = new Hono()
+
+const EVENTS_LIMIT = 100
+
+// --- Helpers ---------------------------------------------------------------
+
+type FormBody = Record<string, string | File | (string | File)[]>
+
+/** Trimmed string field; empty values become `null`. */
+function field(body: FormBody, key: string): string | null {
+  return String(body[key] ?? '').trim() || null
+}
+
+/** Navigate after a mutation: `HX-Location` for HTMX, 302 redirect otherwise. */
+function navigate(c: Context, path: string) {
+  if (c.req.header('HX-Request')) {
+    c.header('HX-Location', path)
+    return c.body(null, 200)
+  }
+  return c.redirect(path)
+}
+
+function toast(c: Context, message: string) {
+  c.header('HX-Trigger', JSON.stringify({ showToast: message }))
+}
+
+function renderEventsSection(c: Context, tracker: Tracker) {
+  const events = listEventsByTracker(tracker.id, EVENTS_LIMIT)
+  return c.html(<EventsSection tracker={tracker} events={events} />)
+}
+
+/** Shared parsing for the create and edit tracker forms. */
+function parseTrackerForm(body: FormBody) {
+  return {
+    name: field(body, 'name'),
+    description: field(body, 'description'),
+    color: parseTrackerColor(body['color']),
+  }
+}
+
+/** Parses and validates an event for the given tracker type. Returns `null` if invalid. */
+function parseEventForm(tracker: Tracker, body: FormBody) {
+  const rawValue = field(body, 'value')
+  const parsedValue = rawValue === null ? NaN : Number(rawValue)
+  const value = Number.isFinite(parsedValue) ? parsedValue : null
+  const note = field(body, 'note')
+  const rawTimestamp = field(body, 'timestamp')
+  const date = rawTimestamp ? new Date(rawTimestamp) : new Date()
+  const timestamp = Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString()
+
+  if (tracker.type === 'numeric' && value === null) return null
+  if (tracker.type === 'text' && !note) return null
+  return { value, note, timestamp }
+}
+
+// --- Routes ----------------------------------------------------------------
 
 // GET / - Dashboard & Search (supports ?q= query param)
 app.get('/', (c) => {
@@ -41,125 +96,80 @@ app.get('/', (c) => {
 // POST /track - Create new track
 app.post('/track', async (c) => {
   const body = await c.req.parseBody()
-  const name = String(body['name'] || '').trim()
-  if (!name) {
-    return c.redirect('/')
-  }
+  const { name, ...rest } = parseTrackerForm(body)
+  if (!name) return c.text('El nombre es obligatorio', 400)
 
   createTracker({
     id: generateUniqueSlug(name),
     name,
-    type: (String(body['type'] || 'habit') as TrackerType) || 'habit',
-    description: body['description'] ? String(body['description']).trim() : null,
-    color: parseTrackerColor(body['color']),
+    type: parseTrackerType(body['type']),
+    ...rest,
   })
-  return c.redirect('/')
+  return navigate(c, '/')
 })
 
 // POST /track/:id/edit - Update track details
 app.post('/track/:id/edit', async (c) => {
   const id = c.req.param('id')
-  const tracker = getTrackerById(id)
-  if (!tracker) {
-    return c.redirect('/')
-  }
+  if (!getTrackerById(id)) return navigate(c, '/')
 
-  const body = await c.req.parseBody()
-  const name = String(body['name'] || '').trim() || tracker.name
+  const { name, ...rest } = parseTrackerForm(await c.req.parseBody())
+  if (!name) return c.text('El nombre es obligatorio', 400)
 
-  updateTracker(id, {
-    name,
-    description: body['description'] ? String(body['description']).trim() : null,
-    color: parseTrackerColor(body['color']),
-  })
-  return c.redirect(`/track/${id}`)
+  updateTracker(id, { name, ...rest })
+  return navigate(c, `/track/${id}`)
 })
 
 // GET /track/:id - Single track detail
 app.get('/track/:id', (c) => {
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
-  if (!tracker) {
-    return c.redirect('/')
-  }
+  if (!tracker) return c.redirect('/')
 
-  const events = listEventsByTracker(id, 100)
+  const events = listEventsByTracker(id, EVENTS_LIMIT)
   return c.html(<DetailPage tracker={tracker} events={events} />)
 })
 
-// POST /track/:id - Log event (quick check-in from dashboard or modal from detail)
+// POST /track/:id - Log event (quick log from dashboard card or modal from detail)
 app.post('/track/:id', async (c) => {
   const id = c.req.param('id')
   const tracker = getTrackerById(id)
-  if (!tracker) {
-    return c.redirect('/')
+  if (!tracker) return navigate(c, '/')
+
+  const input = parseEventForm(tracker, await c.req.parseBody())
+  if (!input) return c.text('Entrada inválida', 400)
+
+  createEvent({ id: crypto.randomUUID(), tracker_id: id, ...input })
+  toast(c, `Entrada registrada en ${tracker.name}`)
+
+  switch (c.req.header('HX-Target')) {
+    case `tracker-card-${id}`:
+      return c.html(<TrackerCard tracker={tracker} />)
+    case 'events-section':
+      return renderEventsSection(c, tracker)
+    default:
+      return navigate(c, `/track/${id}`)
   }
-
-  const body = await c.req.parseBody()
-  const parsedVal = parseFloat(String(body['value'] ?? ''))
-  const value = Number.isNaN(parsedVal) ? null : parsedVal
-  const note = String(body['note'] || '').trim() || null
-  const parsedDate = body['timestamp'] ? new Date(String(body['timestamp'])) : null
-  const timestamp =
-    parsedDate && !Number.isNaN(parsedDate.getTime())
-      ? parsedDate.toISOString()
-      : new Date().toISOString()
-
-  createEvent({
-    id: crypto.randomUUID(),
-    tracker_id: id,
-    value,
-    note,
-    timestamp,
-  })
-
-  // If HTMX requested card update from dashboard, return the card
-  if (c.req.header('HX-Target') === `tracker-card-${id}`) {
-    c.header('HX-Trigger', JSON.stringify({ showToast: `Entrada registrada en ${tracker.name}` }))
-    return c.html(<TrackerCard tracker={tracker} />)
-  }
-
-  // If HTMX requested events section update from detail view, return the events section
-  if (c.req.header('HX-Target') === 'events-section') {
-    c.header(
-      'HX-Trigger',
-      JSON.stringify({
-        showToast: `Entrada registrada en ${tracker.name}`,
-        closeModal: true,
-      })
-    )
-    const events = listEventsByTracker(id, 100)
-    return c.html(<EventsSection tracker={tracker} events={events} />)
-  }
-
-  // Otherwise, default redirect to the track detail page
-  return c.redirect(`/track/${id}`)
 })
 
 // DELETE /track/:id - Delete track
 app.delete('/track/:id', (c) => {
-  const id = c.req.param('id')
-  deleteTracker(id)
-  c.header('HX-Location', '/')
-  return c.body(null, 200)
+  deleteTracker(c.req.param('id'))
+  return navigate(c, '/')
 })
 
 // DELETE /track/:id/:eventId - Delete single event
 app.delete('/track/:id/:eventId', (c) => {
   const trackerId = c.req.param('id')
-  const eventId = c.req.param('eventId')
-  deleteEvent(trackerId, eventId)
+  deleteEvent(trackerId, c.req.param('eventId'))
 
-  // If HTMX requested events section update, return updated partial and show toast
   if (c.req.header('HX-Target') === 'events-section') {
     const tracker = getTrackerById(trackerId)
     if (tracker) {
-      c.header('HX-Trigger', JSON.stringify({ showToast: 'Entrada eliminada' }))
-      const events = listEventsByTracker(trackerId, 100)
-      return c.html(<EventsSection tracker={tracker} events={events} />)
+      toast(c, 'Entrada eliminada')
+      return renderEventsSection(c, tracker)
     }
   }
 
-  c.header('HX-Location', `/track/${trackerId}`)
-  return c.body(null, 200)
+  return navigate(c, `/track/${trackerId}`)
 })

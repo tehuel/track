@@ -52,6 +52,64 @@ export function ModalFooter({ children }: { children: Child }) {
   )
 }
 
+interface SubmitButtonProps {
+  label: string
+  type?: 'submit' | 'button'
+  class?: string
+  title?: string
+  [hxAttr: `hx-${string}`]: string | undefined
+}
+
+/**
+ * Primary button with a hidden spinner. `public/app.js` toggles the spinner and
+ * disables the button while its HTMX request is in flight.
+ */
+export function SubmitButton({
+  label,
+  type = 'submit',
+  class: className = 'btn btn-primary d-flex align-items-center gap-1',
+  ...rest
+}: SubmitButtonProps) {
+  return (
+    <button type={type} class={className} {...rest}>
+      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+      <span>{label}</span>
+    </button>
+  )
+}
+
+interface FormModalProps extends ModalProps {
+  /** Endpoint receiving the HTMX POST. */
+  action: string
+  submitLabel: string
+  /** Optional partial swap target (e.g. `#events-section`). */
+  target?: string
+}
+
+/**
+ * Modal wrapping a single HTMX form. On a successful response `public/app.js`
+ * closes the modal and resets the form; on error (4xx/5xx) it stays open.
+ * Without `target` the server answers with `HX-Location`, so `hx-swap="none"`
+ * keeps stray responses from replacing the form's own markup.
+ */
+export function FormModal({ id, title, action, submitLabel, target, children }: FormModalProps) {
+  return (
+    <Modal id={id} title={title}>
+      <form
+        hx-post={action}
+        hx-target={target}
+        hx-swap={target ? 'outerHTML' : 'none'}
+        class="m-0 p-0"
+      >
+        <div class="modal-body p-4">{children}</div>
+        <ModalFooter>
+          <SubmitButton label={submitLabel} />
+        </ModalFooter>
+      </form>
+    </Modal>
+  )
+}
+
 interface ColorPickerProps {
   selectedColor?: string | null
   idPrefix?: string

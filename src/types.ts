@@ -6,6 +6,11 @@ export const TRACKER_TYPES: { value: TrackerType; label: string; icon: string }[
   { value: 'text', label: 'Texto', icon: 'justify-left' },
 ]
 
+export function parseTrackerType(raw: unknown): TrackerType {
+  const val = String(raw || '').trim()
+  return TRACKER_TYPES.find((t) => t.value === val)?.value ?? 'habit'
+}
+
 export function getTrackerIcon(type: TrackerType): string {
   return TRACKER_TYPES.find((t) => t.value === type)?.icon ?? 'activity'
 }
