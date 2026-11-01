@@ -1,6 +1,7 @@
 import type { Child } from 'hono/jsx'
 import { raw } from 'hono/html'
 import { Icon } from './icons'
+import { Modal, ModalFooter } from './modal'
 
 interface LayoutProps {
   title?: string
@@ -81,6 +82,18 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         {/* Main Content Area */}
         <main class="container py-4 flex-grow-1">{children}</main>
 
+        {/* Global Confirmation Modal */}
+        <Modal id="confirmModal" title="Confirmar eliminación">
+          <div class="modal-body p-4">
+            <p id="confirmModalQuestion" class="mb-0 text-body"></p>
+          </div>
+          <ModalFooter>
+            <button type="button" class="btn btn-danger" id="confirmModalBtn">
+              Eliminar
+            </button>
+          </ModalFooter>
+        </Modal>
+
         {/* Toast Notification Container */}
         <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
           <div
@@ -110,6 +123,18 @@ export function Layout({ title = 'track', children }: LayoutProps) {
           dangerouslySetInnerHTML={{
             __html: `
             (() => {
+              // Button loading feedback during HTMX requests
+              const toggleLoading = (elt, loading) => {
+                const btn = elt?.matches?.('button')
+                  ? elt
+                  : elt?.querySelector?.('button[type="submit"]') || elt?.querySelector?.('button');
+                if (btn) {
+                  btn.disabled = loading;
+                  btn.querySelector('.spinner-border')?.classList.toggle('d-none', !loading);
+                  btn.querySelector('.bi')?.classList.toggle('d-none', loading);
+                }
+              };
+
               document.addEventListener('showToast', (evt) => {
                 const toastEl = document.getElementById('app-toast');
                 if (!toastEl || !window.bootstrap) return;
@@ -118,43 +143,68 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 }).show();
               });
 
-              document.addEventListener('closeModal', () => {
-                const modalEl = document.getElementById('logModal');
-                if (!modalEl || !window.bootstrap) return;
-                bootstrap.Modal.getInstance(modalEl)?.hide();
-                modalEl.querySelector('form')?.reset();
-              });
-
-              // Loading indicator & disable button during HTMX request
-              document.addEventListener('htmx:beforeRequest', (evt) => {
-                const elt = evt.detail.elt;
-                const btn = elt.matches('button')
-                  ? elt
-                  : elt.querySelector('button[type="submit"]') || elt.querySelector('button');
-                if (btn) {
-                  btn.disabled = true;
-                  const spinner = btn.querySelector('.spinner-border');
-                  if (spinner) spinner.classList.remove('d-none');
-                  const icon = btn.querySelector('.bi');
-                  if (icon) icon.classList.add('d-none');
+              // Close active or targeted modal and reset its form and buttons
+              document.addEventListener('closeModal', (evt) => {
+                if (!window.bootstrap) return;
+                const targetId = evt.detail?.value || evt.detail?.id || evt.detail;
+                const modalEl = (typeof targetId === 'string' && document.getElementById(targetId)) ||
+                  document.querySelector('.modal.show');
+                if (modalEl) {
+                  bootstrap.Modal.getInstance(modalEl)?.hide();
+                  modalEl.querySelector('form')?.reset();
+                  toggleLoading(modalEl, false);
                 }
               });
 
-              document.addEventListener('htmx:afterRequest', (evt) => {
-                if (!evt.detail.successful) {
-                  const elt = evt.detail.elt;
-                  const btn = elt.matches('button')
-                    ? elt
-                    : elt.querySelector('button[type="submit"]') || elt.querySelector('button');
-                  if (btn) {
-                    btn.disabled = false;
-                    const spinner = btn.querySelector('.spinner-border');
-                    if (spinner) spinner.classList.add('d-none');
-                    const icon = btn.querySelector('.bi');
-                    if (icon) icon.classList.remove('d-none');
+              // Autofocus input when modal is shown
+              document.addEventListener('shown.bs.modal', (evt) => {
+                const target = evt.target;
+                const input = target.querySelector('[autofocus]') ||
+                  target.querySelector('input:not([type="hidden"]):not([disabled]), textarea, select');
+                input?.focus();
+              });
+
+              // Reset form and button loading state when any modal is hidden/dismissed
+              document.addEventListener('hidden.bs.modal', (evt) => {
+                const modalEl = evt.target;
+                if (!modalEl) return;
+                modalEl.querySelector('form')?.reset();
+                toggleLoading(modalEl, false);
+              });
+
+              // Refresh datetime-local to current local time and restore button state when opening modal
+              document.addEventListener('show.bs.modal', (evt) => {
+                toggleLoading(evt.target, false);
+                if (evt.target?.id === 'logModal') {
+                  const timeInput = evt.target.querySelector('input[type="datetime-local"]');
+                  if (timeInput) {
+                    const now = new Date();
+                    const offset = now.getTimezoneOffset() * 60000;
+                    timeInput.value = new Date(now.getTime() - offset).toISOString().slice(0, 16);
                   }
                 }
               });
+
+              // Custom confirmation modal for hx-confirm
+              document.addEventListener('htmx:confirm', (evt) => {
+                if (!evt.detail.question) return;
+                const modalEl = document.getElementById('confirmModal');
+                if (!modalEl || !window.bootstrap) return;
+                evt.preventDefault();
+                const questionEl = document.getElementById('confirmModalQuestion');
+                if (questionEl) questionEl.textContent = evt.detail.question;
+                const confirmBtn = document.getElementById('confirmModalBtn');
+                if (confirmBtn) {
+                  confirmBtn.onclick = () => {
+                    bootstrap.Modal.getInstance(modalEl)?.hide();
+                    evt.detail.issueRequest(true);
+                  };
+                }
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+              });
+
+              document.addEventListener('htmx:beforeRequest', (evt) => toggleLoading(evt.detail.elt, true));
+              document.addEventListener('htmx:afterRequest', (evt) => toggleLoading(evt.detail.elt, false));
             })();
           `,
           }}
