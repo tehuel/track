@@ -81,6 +81,46 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         {/* Main Content Area */}
         <main class="container py-4 flex-grow-1">{children}</main>
 
+        {/* Global Confirmation Modal */}
+        <div
+          class="modal fade"
+          id="confirmModal"
+          tabindex={-1}
+          aria-labelledby="confirmModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+              <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="confirmModalLabel">
+                  Confirmar eliminación
+                </h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Cerrar"
+                ></button>
+              </div>
+              <div class="modal-body p-4">
+                <p id="confirmModalQuestion" class="mb-0 text-body"></p>
+              </div>
+              <div class="modal-footer border-0 pt-0">
+                <button
+                  type="button"
+                  class="btn btn-link text-secondary text-decoration-none"
+                  data-bs-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmModalBtn">
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Toast Notification Container */}
         <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
           <div
@@ -148,6 +188,23 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                     timeInput.value = new Date(now.getTime() - offset).toISOString().slice(0, 16);
                   }
                 }
+              });
+
+              // Custom confirmation modal for hx-confirm
+              document.addEventListener('htmx:confirm', (evt) => {
+                const modalEl = document.getElementById('confirmModal');
+                if (!modalEl || !window.bootstrap) return;
+                evt.preventDefault();
+                const questionEl = document.getElementById('confirmModalQuestion');
+                if (questionEl) questionEl.textContent = evt.detail.question;
+                const confirmBtn = document.getElementById('confirmModalBtn');
+                if (confirmBtn) {
+                  confirmBtn.onclick = () => {
+                    bootstrap.Modal.getInstance(modalEl)?.hide();
+                    evt.detail.issueRequest(true);
+                  };
+                }
+                bootstrap.Modal.getOrCreateInstance(modalEl).show();
               });
 
               // Button loading feedback during HTMX requests

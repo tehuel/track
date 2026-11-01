@@ -153,12 +153,15 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('hx-disabled-elt="find button"')
   })
 
-  it('Layout renders toast container and script handles showToast and loading', async () => {
+  it('Layout renders toast container, confirmation modal, and script handlers', async () => {
     const res = await app.request('/')
     expect(res.status).toBe(200)
     const html = await res.text()
     expect(html).toContain('id="app-toast"')
     expect(html).toContain('toast-container')
+    expect(html).toContain('id="confirmModal"')
+    expect(html).toContain('Confirmar eliminación')
+    expect(html).toContain('htmx:confirm')
     expect(html).toContain('htmx:beforeRequest')
   })
 
