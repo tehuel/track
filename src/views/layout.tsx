@@ -1,4 +1,5 @@
 import type { Child } from 'hono/jsx'
+import { raw } from 'hono/html'
 import { Icon } from './icons'
 
 interface LayoutProps {
@@ -8,11 +9,31 @@ interface LayoutProps {
 
 export function Layout({ title = 'track', children }: LayoutProps) {
   return (
-    <html lang="es" data-bs-theme="auto">
+    <>
+      {raw('<!DOCTYPE html>')}
+      <html lang="es" data-bs-theme="auto">
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{title}</title>
+
+        {/* Bootstrap Theme Manager (runs immediately before stylesheets to prevent FOUC / forced reflow) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+            (() => {
+              const theme = localStorage.getItem('theme') ||
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+              document.documentElement.setAttribute('data-bs-theme', theme);
+              window.toggleTheme = () => {
+                const next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', next);
+                document.documentElement.setAttribute('data-bs-theme', next);
+              };
+            })();
+          `,
+          }}
+        />
 
         {/* Favicons */}
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -25,30 +46,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         />
 
         {/* HTMX */}
-        <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js"></script>
-
-        {/* Bootstrap Theme Manager */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            (() => {
-              const getTheme = () =>
-                localStorage.getItem('theme') ||
-                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-              const applyTheme = (theme) => {
-                document.documentElement.setAttribute('data-bs-theme', theme);
-              };
-              applyTheme(getTheme());
-              window.addEventListener('DOMContentLoaded', () => applyTheme(getTheme()));
-              window.toggleTheme = () => {
-                const next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-                localStorage.setItem('theme', next);
-                applyTheme(next);
-              };
-            })();
-          `,
-          }}
-        />
+        <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
       </head>
 
       <body class="bg-body-secondary min-vh-100 d-flex flex-column">
@@ -161,5 +159,6 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         />
       </body>
     </html>
+  </>
   )
 }

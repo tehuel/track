@@ -14,6 +14,7 @@ describe('Web UI & HTMX endpoints', () => {
     const res = await app.request('/')
     expect(res.status).toBe(200)
     const html = await res.text()
+    expect(html).toContain('<!DOCTYPE html>')
     expect(html).toContain('Tocar Guitarra')
     expect(html).toContain('htmx.org')
     expect(html).toContain('Nuevo track')
