@@ -1,5 +1,4 @@
 import {
-  TRACKER_COLORS,
   TRACKER_TYPES,
   getTrackerIcon,
   getTrackerTypeLabel,
@@ -7,6 +6,7 @@ import {
 } from '../types'
 import { Layout } from './layout'
 import { Icon } from './icons'
+import { ColorPicker } from './modal'
 
 interface DashboardProps {
   trackers: Tracker[]
@@ -198,53 +198,7 @@ function NewTrackerModal() {
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label class="form-label fw-medium d-block">Color</label>
-                <div class="btn-group w-100" role="group" aria-label="Color">
-                  <input
-                    type="radio"
-                    class="btn-check"
-                    name="color"
-                    id="tracker-color-none"
-                    value=""
-                    autocomplete="off"
-                    checked
-                  />
-                  <label
-                    class="btn btn-outline-secondary d-flex align-items-center justify-content-center py-2"
-                    for="tracker-color-none"
-                    title="Sin color"
-                  >
-                    <Icon name="slash-circle" />
-                  </label>
-                  {TRACKER_COLORS.map((c) => (
-                    <>
-                      <input
-                        type="radio"
-                        class="btn-check"
-                        name="color"
-                        id={`tracker-color-${c.value.slice(1)}`}
-                        value={c.value}
-                        autocomplete="off"
-                      />
-                      <label
-                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center py-2"
-                        for={`tracker-color-${c.value.slice(1)}`}
-                        title={c.label}
-                      >
-                        <span
-                          class="rounded-circle d-inline-block"
-                          style={{
-                            width: '1rem',
-                            height: '1rem',
-                            backgroundColor: c.value,
-                          }}
-                        ></span>
-                      </label>
-                    </>
-                  ))}
-                </div>
-              </div>
+              <ColorPicker idPrefix="tracker-color" />
 
               <div class="mb-2">
                 <label for="tracker-description" class="form-label fw-medium">
