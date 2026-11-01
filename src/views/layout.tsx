@@ -118,11 +118,16 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 }).show();
               });
 
-              document.addEventListener('closeModal', () => {
-                const modalEl = document.getElementById('logModal');
-                if (!modalEl || !window.bootstrap) return;
-                bootstrap.Modal.getInstance(modalEl)?.hide();
-                modalEl.querySelector('form')?.reset();
+              // Close active or targeted modal and reset its form
+              document.addEventListener('closeModal', (evt) => {
+                if (!window.bootstrap) return;
+                const targetId = evt.detail?.value || evt.detail?.id || evt.detail;
+                const modalEl = (typeof targetId === 'string' && document.getElementById(targetId)) ||
+                  document.querySelector('.modal.show');
+                if (modalEl) {
+                  bootstrap.Modal.getInstance(modalEl)?.hide();
+                  modalEl.querySelector('form')?.reset();
+                }
               });
 
               // Autofocus input when modal is shown
