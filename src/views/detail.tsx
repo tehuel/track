@@ -291,8 +291,10 @@ export function EventsSection({ tracker, events }: DetailProps) {
 
       {events.length === 0 ? (
         <div class="card text-center text-body-secondary py-5 border-0 rounded-3 bg-body">
-          <Icon name="card-text" class="fs-1 d-block mb-2 text-body-tertiary" />
-          <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
+          <div class="d-flex flex-column align-items-center">
+            <Icon name="activity" class="fs-1 d-block mb-2 text-body-tertiary mx-auto" />
+            <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
+          </div>
         </div>
       ) : (
         <div class="list-group list-group-flush rounded-3 overflow-hidden" id="events-list">

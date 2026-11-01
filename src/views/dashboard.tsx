@@ -280,16 +280,16 @@ export function TrackersGrid({ trackers }: DashboardProps) {
   if (trackers.length === 0) {
     return (
       <div id="trackers-grid" class="card text-center p-5 border-0 bg-body rounded-3">
-        <div class="py-4">
-          <Icon name="activity" class="text-body-tertiary fs-1" />
-          <h3 class="h5 mt-3 mb-3">No hay tracks</h3>
+        <div class="py-4 d-flex flex-column align-items-center">
+          <Icon name="activity" class="text-body-tertiary fs-1 mb-3 d-block mx-auto" />
+          <h3 class="h5 mb-3">No hay tracks</h3>
           <button
             type="button"
-            class="btn btn-primary"
+            class="btn btn-primary d-inline-flex align-items-center gap-1"
             data-bs-toggle="modal"
             data-bs-target="#newTrackerModal"
           >
-            <Icon name="plus-lg" class="me-1" />
+            <Icon name="plus-lg" />
             <span>Crear track</span>
           </button>
         </div>
