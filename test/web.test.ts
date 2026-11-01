@@ -162,7 +162,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('btn-primary')
     expect(html).toContain('Completar')
     expect(html).toContain('spinner-border')
-    expect(html).toContain('hx-disabled-elt="this"')
+    expect(html).not.toContain('hx-disabled-elt')
   })
 
   it('POST /track/:id quick-logs numeric tracker via HTMX, returns card partial without green success and triggers toast', async () => {
@@ -183,7 +183,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).not.toContain('btn-success')
     expect(html).toContain('btn-primary')
     expect(html).toContain('spinner-border')
-    expect(html).toContain('hx-disabled-elt="find button"')
+    expect(html).not.toContain('hx-disabled-elt')
   })
 
   it('Layout renders toast container, confirmation modal, and script tags', async () => {

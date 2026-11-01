@@ -6,7 +6,7 @@ import {
 } from '../types'
 import { Layout } from './layout'
 import { Icon } from './icons'
-import { ColorPicker, Modal, ModalFooter } from './modal'
+import { ColorPicker, FormModal } from './modal'
 
 interface DetailProps {
   tracker: Tracker
@@ -31,140 +31,107 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
   const isText = tracker.type === 'text'
 
   return (
-    <Modal id="logModal" title="Registrar entrada">
-      <form
-        action={`/track/${tracker.id}`}
-        method="post"
-        hx-post={`/track/${tracker.id}`}
-        hx-target="#events-section"
-        hx-swap="outerHTML"
-        hx-disabled-elt="find button"
-        class="m-0 p-0"
-      >
-        <div class="modal-body p-4">
-          {tracker.type === 'numeric' && (
-            <div class="mb-3">
-              <label for="logModal-value" class="form-label fw-medium">
-                <span>Valor</span>
-                <span class="text-danger ms-1">*</span>
-              </label>
-              <input
-                type="number"
-                step="any"
-                class="form-control"
-                id="logModal-value"
-                name="value"
-                placeholder="Valor..."
-                required
-              />
-            </div>
-          )}
-
-          <div class="mb-3">
-            <label for="logModal-note" class="form-label fw-medium">
-              <span>Nota</span>
-              {isText && <span class="text-danger ms-1">*</span>}
-            </label>
-            <input
-              type="text"
-              class="form-control"
-              id="logModal-note"
-              name="note"
-              placeholder="Nota..."
-              required={isText}
-            />
-          </div>
-
-          <div class="mb-2">
-            <label for="logModal-timestamp" class="form-label fw-medium">
-              Fecha y hora
-            </label>
-            <input
-              type="datetime-local"
-              class="form-control"
-              id="logModal-timestamp"
-              name="timestamp"
-              required
-            />
-          </div>
+    <FormModal
+      id="logModal"
+      title="Registrar entrada"
+      action={`/track/${tracker.id}`}
+      target="#events-section"
+      submitLabel="Registrar entrada"
+    >
+      {tracker.type === 'numeric' && (
+        <div class="mb-3">
+          <label for="logModal-value" class="form-label fw-medium">
+            <span>Valor</span>
+            <span class="text-danger ms-1">*</span>
+          </label>
+          <input
+            type="number"
+            step="any"
+            class="form-control"
+            id="logModal-value"
+            name="value"
+            placeholder="Valor..."
+            required
+          />
         </div>
+      )}
 
-        <ModalFooter>
-          <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
-            <span
-              class="spinner-border spinner-border-sm d-none"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            <span>Registrar entrada</span>
-          </button>
-        </ModalFooter>
-      </form>
-    </Modal>
+      <div class="mb-3">
+        <label for="logModal-note" class="form-label fw-medium">
+          <span>Nota</span>
+          {isText && <span class="text-danger ms-1">*</span>}
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          id="logModal-note"
+          name="note"
+          placeholder="Nota..."
+          required={isText}
+        />
+      </div>
+
+      <div class="mb-2">
+        <label for="logModal-timestamp" class="form-label fw-medium">
+          Fecha y hora
+        </label>
+        <input
+          type="datetime-local"
+          class="form-control"
+          id="logModal-timestamp"
+          name="timestamp"
+          required
+        />
+      </div>
+    </FormModal>
   )
 }
 
 function EditTrackerModal({ tracker }: { tracker: Tracker }) {
   return (
-    <Modal id="editModal" title="Editar track">
-      <form
-        action={`/track/${tracker.id}/edit`}
-        method="post"
-        hx-post={`/track/${tracker.id}/edit`}
-        hx-disabled-elt="find button"
-        class="m-0 p-0"
-      >
-        <div class="modal-body p-4">
-          <div class="mb-3">
-            <label for="edit-tracker-name" class="form-label fw-medium">
-              <span>Nombre</span>
-              <span class="text-danger ms-1">*</span>
-            </label>
-            <input
-              type="text"
-              class="form-control"
-              id="edit-tracker-name"
-              name="name"
-              value={tracker.name}
-              required
-              autofocus
-            />
-          </div>
+    <FormModal
+      id="editModal"
+      title="Editar track"
+      action={`/track/${tracker.id}/edit`}
+      submitLabel="Guardar cambios"
+    >
+      <div class="mb-3">
+        <label for="edit-tracker-name" class="form-label fw-medium">
+          <span>Nombre</span>
+          <span class="text-danger ms-1">*</span>
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          id="edit-tracker-name"
+          name="name"
+          value={tracker.name}
+          required
+          autofocus
+        />
+      </div>
 
-          <ColorPicker
-            selectedColor={tracker.color}
-            idPrefix="edit-tracker-color"
-          />
+      <ColorPicker
+        selectedColor={tracker.color}
+        idPrefix="edit-tracker-color"
+      />
 
-          <div class="mb-2">
-            <label for="edit-tracker-description" class="form-label fw-medium">
-              Descripción
-            </label>
-            <textarea
-              class="form-control"
-              id="edit-tracker-description"
-              name="description"
-              placeholder="Descripción..."
-              rows={2}
-              maxlength={500}
-            >
-              {tracker.description ?? ''}
-            </textarea>
-          </div>
-        </div>
-
-        <ModalFooter>
-          <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
-            <span
-              class="spinner-border spinner-border-sm d-none"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            <span>Guardar cambios</span>
-          </button>
-        </ModalFooter>
-      </form>
-    </Modal>
+      <div class="mb-2">
+        <label for="edit-tracker-description" class="form-label fw-medium">
+          Descripción
+        </label>
+        <textarea
+          class="form-control"
+          id="edit-tracker-description"
+          name="description"
+          placeholder="Descripción..."
+          rows={2}
+          maxlength={500}
+        >
+          {tracker.description ?? ''}
+        </textarea>
+      </div>
+    </FormModal>
   )
 }
 

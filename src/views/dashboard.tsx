@@ -6,7 +6,7 @@ import {
 } from '../types'
 import { Layout } from './layout'
 import { Icon } from './icons'
-import { ColorPicker, Modal, ModalFooter } from './modal'
+import { ColorPicker, FormModal, SubmitButton } from './modal'
 
 interface DashboardProps {
   trackers: Tracker[]
@@ -65,28 +65,20 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
 
           <div class="pt-3 position-relative z-2">
             {tracker.type === 'habit' ? (
-              <button
+              <SubmitButton
                 type="button"
+                label="Completar"
                 hx-post={`/track/${tracker.id}`}
                 hx-target={`#tracker-card-${tracker.id}`}
                 hx-swap="outerHTML"
-                hx-disabled-elt="this"
                 class="btn btn-sm btn-primary w-100 d-flex align-items-center justify-content-center gap-1"
-              >
-                <span
-                  class="spinner-border spinner-border-sm d-none"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-                <span>Completar</span>
-              </button>
+              />
             ) : (
               <form
                 class="m-0 p-0 d-flex"
                 hx-post={`/track/${tracker.id}`}
                 hx-target={`#tracker-card-${tracker.id}`}
                 hx-swap="outerHTML"
-                hx-disabled-elt="find button"
               >
                 <div class="input-group input-group-sm">
                   {tracker.type === 'numeric' ? (
@@ -109,18 +101,7 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                       aria-label="Nota"
                     />
                   )}
-                  <button
-                    type="submit"
-                    class="btn btn-primary d-flex align-items-center gap-1"
-                    title="Registrar"
-                  >
-                    <span
-                      class="spinner-border spinner-border-sm d-none"
-                      role="status"
-                      aria-hidden="true"
-                    ></span>
-                    <span>Registrar</span>
-                  </button>
+                  <SubmitButton label="Registrar" />
                 </div>
               </form>
             )}
@@ -133,86 +114,65 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
 
 function NewTrackerModal() {
   return (
-    <Modal id="newTrackerModal" title="Crear track">
-      <form
-        action="/track"
-        method="post"
-        hx-post="/track"
-        hx-disabled-elt="find button"
-        class="m-0 p-0"
-      >
-        <div class="modal-body p-4">
-          <div class="mb-3">
-            <label for="tracker-name" class="form-label fw-medium">
-              <span>Nombre</span>
-              <span class="text-danger ms-1">*</span>
-            </label>
-            <input
-              type="text"
-              class="form-control"
-              id="tracker-name"
-              name="name"
-              placeholder="ej. Meditación"
-              required
-              autofocus
-            />
-          </div>
+    <FormModal id="newTrackerModal" title="Crear track" action="/track" submitLabel="Crear track">
+      <div class="mb-3">
+        <label for="tracker-name" class="form-label fw-medium">
+          <span>Nombre</span>
+          <span class="text-danger ms-1">*</span>
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          id="tracker-name"
+          name="name"
+          placeholder="ej. Meditación"
+          required
+          autofocus
+        />
+      </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-medium d-block">Tipo</label>
-            <div class="btn-group w-100" role="group" aria-label="Tipo">
-              {TRACKER_TYPES.map((t, idx) => (
-                <>
-                  <input
-                    type="radio"
-                    class="btn-check"
-                    name="type"
-                    id={`tracker-type-${t.value}`}
-                    value={t.value}
-                    autocomplete="off"
-                    checked={idx === 0}
-                  />
-                  <label
-                    class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
-                    for={`tracker-type-${t.value}`}
-                  >
-                    <Icon name={t.icon} />
-                    <span>{t.label}</span>
-                  </label>
-                </>
-              ))}
-            </div>
-          </div>
-
-          <ColorPicker idPrefix="tracker-color" />
-
-          <div class="mb-2">
-            <label for="tracker-description" class="form-label fw-medium">
-              Descripción
-            </label>
-            <textarea
-              class="form-control"
-              id="tracker-description"
-              name="description"
-              placeholder="Descripción..."
-              rows={2}
-              maxlength={500}
-            ></textarea>
-          </div>
+      <div class="mb-3">
+        <label class="form-label fw-medium d-block">Tipo</label>
+        <div class="btn-group w-100" role="group" aria-label="Tipo">
+          {TRACKER_TYPES.map((t, idx) => (
+            <>
+              <input
+                type="radio"
+                class="btn-check"
+                name="type"
+                id={`tracker-type-${t.value}`}
+                value={t.value}
+                autocomplete="off"
+                checked={idx === 0}
+              />
+              <label
+                class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
+                for={`tracker-type-${t.value}`}
+              >
+                <Icon name={t.icon} />
+                <span>{t.label}</span>
+              </label>
+            </>
+          ))}
         </div>
+      </div>
 
-        <ModalFooter>
-          <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
-            <span
-              class="spinner-border spinner-border-sm d-none"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            <span>Crear track</span>
-          </button>
-        </ModalFooter>
-      </form>
-    </Modal>
+      <ColorPicker idPrefix="tracker-color" />
+
+      <div class="mb-2">
+        <label for="tracker-description" class="form-label fw-medium">
+          Descripción
+        </label>
+        <textarea
+          class="form-control"
+          id="tracker-description"
+          name="description"
+          placeholder="Descripción..."
+          rows={2}
+          maxlength={500}
+        ></textarea>
+      </div>
+    </FormModal>
   )
 }
 
