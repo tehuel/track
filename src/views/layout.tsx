@@ -26,11 +26,6 @@ export function Layout({ title = 'track', children }: LayoutProps) {
               const theme = localStorage.getItem('theme') ||
                 (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
               document.documentElement.setAttribute('data-bs-theme', theme);
-              window.toggleTheme = () => {
-                const next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-                localStorage.setItem('theme', next);
-                document.documentElement.setAttribute('data-bs-theme', next);
-              };
             })();
           `,
           }}
@@ -50,9 +45,10 @@ export function Layout({ title = 'track', children }: LayoutProps) {
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         />
 
-        {/* HTMX & Bootstrap 5 JS (deferred to download in parallel and execute without blocking parser) */}
+        {/* HTMX, Bootstrap 5 & App UI JS (deferred to download in parallel and execute without blocking parser) */}
         <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" defer></script>
+        <script src="/app.js" defer></script>
       </head>
 
       <body class="bg-body-secondary min-vh-100 d-flex flex-column">
@@ -117,98 +113,6 @@ export function Layout({ title = 'track', children }: LayoutProps) {
             </div>
           </div>
         </div>
-
-        {/* App UI Helpers: Toast notifications & Loading states */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            (() => {
-              // Button loading feedback during HTMX requests
-              const toggleLoading = (elt, loading) => {
-                const btn = elt?.matches?.('button')
-                  ? elt
-                  : elt?.querySelector?.('button[type="submit"]') || elt?.querySelector?.('button');
-                if (btn) {
-                  btn.disabled = loading;
-                  btn.querySelector('.spinner-border')?.classList.toggle('d-none', !loading);
-                  btn.querySelector('.bi')?.classList.toggle('d-none', loading);
-                }
-              };
-
-              document.addEventListener('showToast', (evt) => {
-                const toastEl = document.getElementById('app-toast');
-                if (!toastEl || !window.bootstrap) return;
-                const msg = evt.detail?.value || evt.detail;
-                if (msg) document.getElementById('toast-message').textContent = msg;
-                bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 }).show();
-              });
-
-              // Close active or targeted modal and reset its form and buttons
-              document.addEventListener('closeModal', (evt) => {
-                if (!window.bootstrap) return;
-                const targetId = evt.detail?.value || evt.detail?.id || evt.detail;
-                const modalEl = (typeof targetId === 'string' && document.getElementById(targetId)) ||
-                  document.querySelector('.modal.show');
-                if (modalEl) {
-                  bootstrap.Modal.getInstance(modalEl)?.hide();
-                  modalEl.querySelector('form')?.reset();
-                  toggleLoading(modalEl, false);
-                }
-              });
-
-              // Autofocus input when modal is shown
-              document.addEventListener('shown.bs.modal', (evt) => {
-                const target = evt.target;
-                const input = target.querySelector('[autofocus]') ||
-                  target.querySelector('input:not([type="hidden"]):not([disabled]), textarea, select');
-                input?.focus();
-              });
-
-              // Reset form and button loading state when any modal is hidden/dismissed
-              document.addEventListener('hidden.bs.modal', (evt) => {
-                const modalEl = evt.target;
-                if (!modalEl) return;
-                modalEl.querySelector('form')?.reset();
-                toggleLoading(modalEl, false);
-              });
-
-              // Refresh datetime-local to current local time and restore button state when opening modal
-              document.addEventListener('show.bs.modal', (evt) => {
-                toggleLoading(evt.target, false);
-                if (evt.target?.id === 'logModal') {
-                  const timeInput = evt.target.querySelector('input[type="datetime-local"]');
-                  if (timeInput) {
-                    const now = new Date();
-                    const offset = now.getTimezoneOffset() * 60000;
-                    timeInput.value = new Date(now.getTime() - offset).toISOString().slice(0, 16);
-                  }
-                }
-              });
-
-              // Custom confirmation modal for hx-confirm
-              document.addEventListener('htmx:confirm', (evt) => {
-                if (!evt.detail.question) return;
-                const modalEl = document.getElementById('confirmModal');
-                if (!modalEl || !window.bootstrap) return;
-                evt.preventDefault();
-                const questionEl = document.getElementById('confirmModalQuestion');
-                if (questionEl) questionEl.textContent = evt.detail.question;
-                const confirmBtn = document.getElementById('confirmModalBtn');
-                if (confirmBtn) {
-                  confirmBtn.onclick = () => {
-                    bootstrap.Modal.getInstance(modalEl)?.hide();
-                    evt.detail.issueRequest(true);
-                  };
-                }
-                bootstrap.Modal.getOrCreateInstance(modalEl).show();
-              });
-
-              document.addEventListener('htmx:beforeRequest', (evt) => toggleLoading(evt.detail.elt, true));
-              document.addEventListener('htmx:afterRequest', (evt) => toggleLoading(evt.detail.elt, false));
-            })();
-          `,
-          }}
-        />
       </body>
     </html>
   </>

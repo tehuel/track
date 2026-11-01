@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
-import { app } from '../src/web'
+import { app } from '../src/index'
 import { db, createTracker, createEvent, getTrackerById } from '../src/db'
 
 describe('Web UI & HTMX endpoints', () => {
@@ -153,7 +153,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('hx-disabled-elt="find button"')
   })
 
-  it('Layout renders toast container, confirmation modal, and script handlers', async () => {
+  it('Layout renders toast container, confirmation modal, and script tags', async () => {
     const res = await app.request('/')
     expect(res.status).toBe(200)
     const html = await res.text()
@@ -161,9 +161,18 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('toast-container')
     expect(html).toContain('id="confirmModal"')
     expect(html).toContain('Confirmar eliminación')
-    expect(html).toContain('htmx:confirm')
-    expect(html).toContain('if (!evt.detail.question) return;')
-    expect(html).toContain('htmx:beforeRequest')
+    expect(html).toContain('src="/app.js"')
+  })
+
+  it('GET /app.js serves JavaScript UI helpers', async () => {
+    const res = await app.request('/app.js')
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Content-Type')).toContain('application/javascript')
+    const js = await res.text()
+    expect(js).toContain('htmx:confirm')
+    expect(js).toContain('if (!evt.detail.question) return;')
+    expect(js).toContain('htmx:beforeRequest')
+    expect(js).toContain('toggleTheme')
   })
 
   it('POST /track/:id with HX-Target events-section updates only entries list and triggers toast and modal close', async () => {
