@@ -8,10 +8,9 @@ interface DashboardProps {
 
 interface TrackerCardProps {
   tracker: Tracker
-  justLogged?: boolean
 }
 
-export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
+export function TrackerCard({ tracker }: TrackerCardProps) {
   const icon = getTrackerIcon(tracker.type)
 
   return (
