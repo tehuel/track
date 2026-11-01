@@ -12,7 +12,7 @@ import {
 } from './db'
 import { parseTrackerColor, type TrackerType } from './types'
 import { DashboardPage, TrackersGrid, TrackerCard } from './views/dashboard'
-import { DetailPage } from './views/detail'
+import { DetailPage, EventsSection } from './views/detail'
 
 export const app = new Hono()
 
@@ -115,7 +115,21 @@ app.post('/track/:id', async (c) => {
 
   // If HTMX requested card update from dashboard, return the card
   if (c.req.header('HX-Target') === `tracker-card-${id}`) {
-    return c.html(<TrackerCard tracker={tracker} justLogged={true} />)
+    c.header('HX-Trigger', JSON.stringify({ showToast: `Entrada registrada en ${tracker.name}` }))
+    return c.html(<TrackerCard tracker={tracker} />)
+  }
+
+  // If HTMX requested events section update from detail view, return the events section
+  if (c.req.header('HX-Target') === 'events-section') {
+    c.header(
+      'HX-Trigger',
+      JSON.stringify({
+        showToast: `Entrada registrada en ${tracker.name}`,
+        closeModal: true,
+      })
+    )
+    const events = listEventsByTracker(id, 100)
+    return c.html(<EventsSection tracker={tracker} events={events} />)
   }
 
   // Otherwise, default redirect to the track detail page
@@ -135,6 +149,17 @@ app.delete('/track/:id/:eventId', (c) => {
   const trackerId = c.req.param('id')
   const eventId = c.req.param('eventId')
   deleteEvent(trackerId, eventId)
+
+  // If HTMX requested events section update, return updated partial and show toast
+  if (c.req.header('HX-Target') === 'events-section') {
+    const tracker = getTrackerById(trackerId)
+    if (tracker) {
+      c.header('HX-Trigger', JSON.stringify({ showToast: 'Entrada eliminada' }))
+      const events = listEventsByTracker(trackerId, 100)
+      return c.html(<EventsSection tracker={tracker} events={events} />)
+    }
+  }
+
   c.header('HX-Location', `/track/${trackerId}`)
   return c.body(null, 200)
 })

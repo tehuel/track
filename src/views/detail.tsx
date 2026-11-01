@@ -54,7 +54,15 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
             ></button>
           </div>
 
-          <form action={`/track/${tracker.id}`} method="post" class="m-0 p-0">
+          <form
+            action={`/track/${tracker.id}`}
+            method="post"
+            hx-post={`/track/${tracker.id}`}
+            hx-target="#events-section"
+            hx-swap="outerHTML"
+            hx-disabled-elt="find button"
+            class="m-0 p-0"
+          >
             <div class="modal-body p-4">
               {tracker.type === 'numeric' && (
                 <div class="mb-3">
@@ -109,6 +117,11 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
                 Cancelar
               </button>
               <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                <span
+                  class="spinner-border spinner-border-sm d-none"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
                 <span>Guardar</span>
               </button>
             </div>
@@ -238,6 +251,66 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
   )
 }
 
+export function EventsSection({ tracker, events }: DetailProps) {
+  return (
+    <div class="mb-4" id="events-section">
+      <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+        <div class="d-flex align-items-baseline gap-2">
+          <h2 class="h5 mb-0 fw-semibold">Historial de entradas</h2>
+          <span class="text-body-secondary small">
+            {events.length === 1 ? '1 entrada' : `${events.length} entradas`}
+          </span>
+        </div>
+
+        {/* Open Modal for detailed log */}
+        <button
+          type="button"
+          class="btn btn-primary d-flex align-items-center gap-1"
+          data-bs-toggle="modal"
+          data-bs-target="#logModal"
+        >
+          <i class="bi bi-plus-lg"></i>
+          <span>Registrar</span>
+        </button>
+      </div>
+
+      {events.length === 0 ? (
+        <div class="card text-center text-body-secondary py-5 border-0 rounded-3 bg-body">
+          <i class="bi bi-calendar-x fs-1 d-block mb-2 text-body-tertiary"></i>
+          <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
+        </div>
+      ) : (
+        <div class="list-group list-group-flush rounded-3 overflow-hidden" id="events-list">
+          {events.map((event) => (
+            <div class="list-group-item border-0 p-3 d-flex justify-content-between align-items-center gap-3">
+              <div class="d-flex align-items-center gap-3 flex-grow-1 min-w-0 flex-wrap">
+                <span class="text-body-secondary small">{formatDate(event.timestamp)}</span>
+                {event.value !== null && event.value !== undefined && (
+                  <span class="font-monospace fw-semibold">{event.value}</span>
+                )}
+                {event.note && <span class="text-break">{event.note}</span>}
+              </div>
+
+              <button
+                type="button"
+                class="btn btn-link link-danger p-1 text-decoration-none lh-1 flex-shrink-0"
+                hx-delete={`/track/${tracker.id}/${event.id}`}
+                hx-target="#events-section"
+                hx-swap="outerHTML"
+                hx-confirm="¿Eliminar entrada?"
+                title="Eliminar entrada"
+                aria-label="Eliminar entrada"
+              >
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function DetailPage({ tracker, events }: DetailProps) {
   const icon = getTrackerIcon(tracker.type)
 
@@ -293,59 +366,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
         </div>
 
         {/* History Feed Section */}
-        <div class="mb-4">
-          <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-            <div class="d-flex align-items-baseline gap-2">
-              <h2 class="h5 mb-0 fw-semibold">Historial de entradas</h2>
-              <span class="text-body-secondary small">
-                {events.length === 1 ? '1 entrada' : `${events.length} entradas`}
-              </span>
-            </div>
-
-            {/* Open Modal for detailed log */}
-            <button
-              type="button"
-              class="btn btn-primary d-flex align-items-center gap-1"
-              data-bs-toggle="modal"
-              data-bs-target="#logModal"
-            >
-              <i class="bi bi-plus-lg"></i>
-              <span>Registrar</span>
-            </button>
-          </div>
-
-          {events.length === 0 ? (
-            <div class="card text-center text-body-secondary py-5 border-0 rounded-3 bg-body">
-              <i class="bi bi-calendar-x fs-1 d-block mb-2 text-body-tertiary"></i>
-              <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
-            </div>
-          ) : (
-            <div class="list-group list-group-flush rounded-3 overflow-hidden" id="events-list">
-              {events.map((event) => (
-                <div class="list-group-item border-0 p-3 d-flex justify-content-between align-items-center gap-3">
-                  <div class="d-flex align-items-center gap-3 flex-grow-1 min-w-0 flex-wrap">
-                    <span class="text-body-secondary small">{formatDate(event.timestamp)}</span>
-                    {event.value !== null && event.value !== undefined && (
-                      <span class="font-monospace fw-semibold">{event.value}</span>
-                    )}
-                    {event.note && <span class="text-break">{event.note}</span>}
-                  </div>
-
-                  <button
-                    type="button"
-                    class="btn btn-link link-danger p-1 text-decoration-none lh-1 flex-shrink-0"
-                    hx-delete={`/track/${tracker.id}/${event.id}`}
-                    hx-confirm="¿Eliminar entrada?"
-                    title="Eliminar entrada"
-                    aria-label="Eliminar entrada"
-                  >
-                    <i class="bi bi-trash3"></i>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <EventsSection tracker={tracker} events={events} />
 
         {/* Log Entry Modal */}
         <LogEntryModal tracker={tracker} />

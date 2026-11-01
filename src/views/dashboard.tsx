@@ -8,10 +8,9 @@ interface DashboardProps {
 
 interface TrackerCardProps {
   tracker: Tracker
-  justLogged?: boolean
 }
 
-export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
+export function TrackerCard({ tracker }: TrackerCardProps) {
   const icon = getTrackerIcon(tracker.type)
 
   return (
@@ -56,12 +55,16 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
                 hx-post={`/track/${tracker.id}`}
                 hx-target={`#tracker-card-${tracker.id}`}
                 hx-swap="outerHTML"
-                class={`btn btn-sm w-100 d-flex align-items-center justify-content-center gap-1 ${
-                  justLogged ? 'btn-success' : 'btn-primary'
-                }`}
+                hx-disabled-elt="this"
+                class="btn btn-sm btn-primary w-100 d-flex align-items-center justify-content-center gap-1"
               >
-                <i class={`bi ${justLogged ? 'bi-check-all' : 'bi-check2'}`}></i>
-                <span>{justLogged ? '¡Registrado!' : 'Completar'}</span>
+                <span
+                  class="spinner-border spinner-border-sm d-none"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                <i class="bi bi-check2"></i>
+                <span>Completar</span>
               </button>
             ) : (
               <form
@@ -69,6 +72,7 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
                 hx-post={`/track/${tracker.id}`}
                 hx-target={`#tracker-card-${tracker.id}`}
                 hx-swap="outerHTML"
+                hx-disabled-elt="find button"
               >
                 <div class="input-group input-group-sm">
                   {tracker.type === 'numeric' ? (
@@ -93,11 +97,14 @@ export function TrackerCard({ tracker, justLogged = false }: TrackerCardProps) {
                   )}
                   <button
                     type="submit"
-                    class={`btn d-flex align-items-center gap-1 ${
-                      justLogged ? 'btn-success' : 'btn-primary'
-                    }`}
+                    class="btn btn-primary d-flex align-items-center gap-1"
                     title="Registrar"
                   >
+                    <span
+                      class="spinner-border spinner-border-sm d-none"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                     <i class="bi bi-check-lg"></i>
                     <span>Registrar</span>
                   </button>
