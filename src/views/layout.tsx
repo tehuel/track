@@ -35,6 +35,10 @@ export function Layout({ title = 'track', children }: LayoutProps) {
           }}
         />
 
+        {/* Preconnect to CDN */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
         {/* Favicons */}
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="alternate icon" href="/favicon.ico" />
@@ -45,8 +49,9 @@ export function Layout({ title = 'track', children }: LayoutProps) {
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         />
 
-        {/* HTMX */}
+        {/* HTMX & Bootstrap 5 JS (deferred to download in parallel and execute without blocking parser) */}
         <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" defer></script>
       </head>
 
       <body class="bg-body-secondary min-vh-100 d-flex flex-column">
@@ -99,9 +104,6 @@ export function Layout({ title = 'track', children }: LayoutProps) {
             </div>
           </div>
         </div>
-
-        {/* Bootstrap 5 JS Bundle */}
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
         {/* App UI Helpers: Toast notifications & Loading states */}
         <script
