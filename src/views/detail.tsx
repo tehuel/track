@@ -34,8 +34,6 @@ function formatDate(iso: string): string {
 }
 
 function LogEntryModal({ tracker }: { tracker: Tracker }) {
-  const icon = getTrackerIcon(tracker.type)
-  const typeLabel = getTrackerTypeLabel(tracker.type)
   const defaultTimestamp = getLocalDatetimeString()
   const isText = tracker.type === 'text'
 
