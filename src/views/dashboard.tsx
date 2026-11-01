@@ -6,6 +6,7 @@ import {
   type Tracker,
 } from '../types'
 import { Layout } from './layout'
+import { Icon } from './icons'
 
 interface DashboardProps {
   trackers: Tracker[]
@@ -28,10 +29,11 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
             <div class="d-flex align-items-center justify-content-between gap-2">
               <div class="d-flex align-items-center gap-2 text-truncate flex-grow-1">
                 {tracker.color && (
-                  <i
-                    class="bi bi-circle-fill small flex-shrink-0"
+                  <Icon
+                    name="circle-fill"
+                    class="small flex-shrink-0"
                     style={{ color: tracker.color }}
-                  ></i>
+                  />
                 )}
                 <h2 class="h6 card-title mb-0 fw-semibold text-truncate">
                   <a
@@ -47,7 +49,7 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                 class="text-body-secondary lh-1 flex-shrink-0 position-relative z-2"
                 title={typeLabel}
               >
-                <i class={`bi ${icon} fs-5`}></i>
+                <Icon name={icon} class="fs-5" />
               </span>
             </div>
 
@@ -73,7 +75,7 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                   role="status"
                   aria-hidden="true"
                 ></span>
-                <i class="bi bi-check2"></i>
+                <Icon name="check2" />
                 <span>Completar</span>
               </button>
             ) : (
@@ -115,7 +117,7 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                       role="status"
                       aria-hidden="true"
                     ></span>
-                    <i class="bi bi-check-lg"></i>
+                    <Icon name="check-lg" />
                     <span>Registrar</span>
                   </button>
                 </div>
@@ -141,7 +143,7 @@ function NewTrackerModal() {
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="newTrackerModalLabel">
-              <i class="bi bi-plus-circle-fill text-primary"></i>
+              <Icon name="plus-circle-fill" class="text-primary" />
               <span>Crear track</span>
             </h5>
             <button
@@ -187,7 +189,7 @@ function NewTrackerModal() {
                         class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
                         for={`tracker-type-${t.value}`}
                       >
-                        <i class={`bi ${t.icon}`}></i>
+                        <Icon name={t.icon} />
                         <span>{t.label}</span>
                       </label>
                     </>
@@ -212,7 +214,7 @@ function NewTrackerModal() {
                     for="tracker-color-none"
                     title="Sin color"
                   >
-                    <i class="bi bi-slash-circle"></i>
+                    <Icon name="slash-circle" />
                   </label>
                   {TRACKER_COLORS.map((c) => (
                     <>
@@ -229,7 +231,7 @@ function NewTrackerModal() {
                         for={`tracker-color-${c.value.slice(1)}`}
                         title={c.label}
                       >
-                        <i class="bi bi-circle-fill" style={{ color: c.value }}></i>
+                        <Icon name="circle-fill" style={{ color: c.value }} />
                       </label>
                     </>
                   ))}
@@ -271,7 +273,7 @@ export function TrackersGrid({ trackers }: DashboardProps) {
     return (
       <div id="trackers-grid" class="card text-center p-5 border-0 bg-body rounded-3">
         <div class="py-4">
-          <i class="bi bi-card-checklist text-body-tertiary fs-1"></i>
+          <Icon name="card-checklist" class="text-body-tertiary fs-1" />
           <h3 class="h5 mt-3 mb-3">No hay tracks</h3>
           <button
             type="button"
@@ -279,7 +281,7 @@ export function TrackersGrid({ trackers }: DashboardProps) {
             data-bs-toggle="modal"
             data-bs-target="#newTrackerModal"
           >
-            <i class="bi bi-plus-lg me-1"></i>
+            <Icon name="plus-lg" class="me-1" />
             <span>Crear track</span>
           </button>
         </div>
@@ -319,15 +321,20 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
                 hx-trigger="keyup changed delay:200ms, search"
                 hx-target="#trackers-grid"
                 hx-swap="outerHTML"
-                oninput="document.getElementById('search-icon').className = this.value ? 'bi bi-x-lg' : 'bi bi-search'"
+                oninput="const hasVal = Boolean(this.value); document.getElementById('search-icon-clear').classList.toggle('d-none', !hasVal); document.getElementById('search-icon-search').classList.toggle('d-none', hasVal);"
               />
               <button
                 type="button"
                 class="input-group-text bg-body border-0 text-body-secondary"
                 aria-label="Limpiar búsqueda"
-                onclick="const input = document.getElementById('search-input'); if (input.value) { input.value = ''; document.getElementById('search-icon').className = 'bi bi-search'; input.dispatchEvent(new Event('search')); } input.focus();"
+                onclick="const input = document.getElementById('search-input'); if (input.value) { input.value = ''; document.getElementById('search-icon-search').classList.remove('d-none'); document.getElementById('search-icon-clear').classList.add('d-none'); input.dispatchEvent(new Event('search')); } input.focus();"
               >
-                <i id="search-icon" class={`bi ${query ? 'bi-x-lg' : 'bi bi-search'}`}></i>
+                <span id="search-icon-search" class={query ? 'd-none' : ''}>
+                  <Icon name="search" />
+                </span>
+                <span id="search-icon-clear" class={query ? '' : 'd-none'}>
+                  <Icon name="x-lg" />
+                </span>
               </button>
             </div>
           </div>
@@ -339,7 +346,7 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
               data-bs-toggle="modal"
               data-bs-target="#newTrackerModal"
             >
-              <i class="bi bi-plus-lg"></i>
+              <Icon name="plus-lg" />
               <span>Nuevo track</span>
             </button>
           </div>

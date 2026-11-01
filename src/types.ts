@@ -1,13 +1,13 @@
 export type TrackerType = 'habit' | 'numeric' | 'text'
 
 export const TRACKER_TYPES: { value: TrackerType; label: string; icon: string }[] = [
-  { value: 'habit', label: 'Hábito', icon: 'bi-check2-circle' },
-  { value: 'numeric', label: 'Numérico', icon: 'bi-hash' },
-  { value: 'text', label: 'Texto', icon: 'bi-card-text' },
+  { value: 'habit', label: 'Hábito', icon: 'check2-circle' },
+  { value: 'numeric', label: 'Numérico', icon: 'hash' },
+  { value: 'text', label: 'Texto', icon: 'card-text' },
 ]
 
 export function getTrackerIcon(type: TrackerType): string {
-  return TRACKER_TYPES.find((t) => t.value === type)?.icon ?? 'bi-activity'
+  return TRACKER_TYPES.find((t) => t.value === type)?.icon ?? 'activity'
 }
 
 export function getTrackerTypeLabel(type: TrackerType): string {

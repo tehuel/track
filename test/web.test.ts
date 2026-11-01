@@ -21,6 +21,8 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('title="Hábito"')
     expect(html).toContain('title="Numérico"')
     expect(html).toContain('bi-hash')
+    expect(html).toContain('<svg')
+    expect(html).not.toContain('bootstrap-icons')
   })
 
   it('GET /?q=... with HX-Target trackers-grid returns filtered HTMX partial and sets HX-Push-Url', async () => {

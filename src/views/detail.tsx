@@ -6,6 +6,7 @@ import {
   type TrackerEvent,
 } from '../types'
 import { Layout } from './layout'
+import { Icon } from './icons'
 
 interface DetailProps {
   tracker: Tracker
@@ -50,7 +51,7 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="logModalLabel">
-              <i class={`bi ${icon} text-primary`} title={typeLabel}></i>
+              <Icon name={icon} class="text-primary" title={typeLabel} />
               <span>Registrar: {tracker.name}</span>
             </h5>
             <button
@@ -152,7 +153,7 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="editModalLabel">
-              <i class="bi bi-pencil-square text-primary"></i>
+              <Icon name="pencil-square" class="text-primary" />
               <span>Editar track</span>
             </h5>
             <button
@@ -197,7 +198,7 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
                     for="edit-tracker-color-none"
                     title="Sin color"
                   >
-                    <i class="bi bi-slash-circle"></i>
+                    <Icon name="slash-circle" />
                   </label>
                   {TRACKER_COLORS.map((c) => (
                     <>
@@ -215,7 +216,7 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
                         for={`edit-tracker-color-${c.value.slice(1)}`}
                         title={c.label}
                       >
-                        <i class="bi bi-circle-fill" style={{ color: c.value }}></i>
+                        <Icon name="circle-fill" style={{ color: c.value }} />
                       </label>
                     </>
                   ))}
@@ -276,14 +277,14 @@ export function EventsSection({ tracker, events }: DetailProps) {
           data-bs-toggle="modal"
           data-bs-target="#logModal"
         >
-          <i class="bi bi-plus-lg"></i>
+          <Icon name="plus-lg" />
           <span>Registrar</span>
         </button>
       </div>
 
       {events.length === 0 ? (
         <div class="card text-center text-body-secondary py-5 border-0 rounded-3 bg-body">
-          <i class="bi bi-calendar-x fs-1 d-block mb-2 text-body-tertiary"></i>
+          <Icon name="calendar-x" class="fs-1 d-block mb-2 text-body-tertiary" />
           <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
         </div>
       ) : (
@@ -308,7 +309,7 @@ export function EventsSection({ tracker, events }: DetailProps) {
                 title="Eliminar entrada"
                 aria-label="Eliminar entrada"
               >
-                <i class="bi bi-trash3"></i>
+                <Icon name="trash3" />
               </button>
             </div>
           ))}
@@ -330,10 +331,11 @@ export function DetailPage({ tracker, events }: DetailProps) {
           <div>
             <div class="d-flex align-items-center gap-2">
               {tracker.color && (
-                <i
-                  class="bi bi-circle-fill fs-5 flex-shrink-0"
+                <Icon
+                  name="circle-fill"
+                  class="fs-5 flex-shrink-0"
                   style={{ color: tracker.color }}
-                ></i>
+                />
               )}
               <h1 class="h3 mb-0 fw-semibold">{tracker.name}</h1>
             </div>
@@ -344,7 +346,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
 
           <div class="d-flex align-items-center gap-2 flex-shrink-0">
             <span class="text-body-secondary lh-1 px-2" title={typeLabel}>
-              <i class={`bi ${icon} fs-5`}></i>
+              <Icon name={icon} class="fs-5" />
             </span>
 
             {/* Edit Tracker */}
@@ -356,7 +358,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
               title="Editar track"
               aria-label="Editar track"
             >
-              <i class="bi bi-pencil"></i>
+              <Icon name="pencil" />
             </button>
 
             {/* Delete Tracker */}
@@ -368,7 +370,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
               title="Eliminar track"
               aria-label="Eliminar track"
             >
-              <i class="bi bi-trash3"></i>
+              <Icon name="trash3" />
             </button>
           </div>
         </div>

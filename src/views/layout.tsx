@@ -1,4 +1,5 @@
 import type { Child } from 'hono/jsx'
+import { Icon } from './icons'
 
 interface LayoutProps {
   title?: string
@@ -17,14 +18,10 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="alternate icon" href="/favicon.ico" />
 
-        {/* Bootstrap 5 CSS & Icons */}
+        {/* Bootstrap 5 CSS */}
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        />
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
         />
 
         {/* HTMX */}
@@ -40,8 +37,12 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
               const applyTheme = (theme) => {
                 document.documentElement.setAttribute('data-bs-theme', theme);
-                const icon = document.getElementById('theme-icon');
-                if (icon) icon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+                const sun = document.getElementById('theme-icon-sun');
+                const moon = document.getElementById('theme-icon-moon');
+                if (sun && moon) {
+                  sun.classList.toggle('d-none', theme !== 'dark');
+                  moon.classList.toggle('d-none', theme === 'dark');
+                }
               };
               applyTheme(getTheme());
               window.addEventListener('DOMContentLoaded', () => applyTheme(getTheme()));
@@ -61,7 +62,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         <nav class="navbar navbar-expand bg-body border-0">
           <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="/">
-              <i class="bi bi-activity text-primary fs-4"></i>
+              <Icon name="activity" class="text-primary fs-4" />
               <span>track</span>
             </a>
 
@@ -74,7 +75,12 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 title="Cambiar tema"
                 aria-label="Cambiar tema"
               >
-                <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
+                <span id="theme-icon-sun" class="d-none">
+                  <Icon name="sun-fill" />
+                </span>
+                <span id="theme-icon-moon">
+                  <Icon name="moon-stars-fill" />
+                </span>
               </button>
             </div>
           </div>
@@ -94,7 +100,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
           >
             <div class="d-flex">
               <div class="toast-body d-flex align-items-center gap-2">
-                <i class="bi bi-check-circle-fill"></i>
+                <Icon name="check-circle-fill" />
                 <span id="toast-message">Entrada registrada</span>
               </div>
               <button
@@ -140,7 +146,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                   btn.disabled = true;
                   const spinner = btn.querySelector('.spinner-border');
                   if (spinner) spinner.classList.remove('d-none');
-                  const icon = btn.querySelector('i.bi');
+                  const icon = btn.querySelector('.bi');
                   if (icon) icon.classList.add('d-none');
                 }
               });
@@ -155,7 +161,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                     btn.disabled = false;
                     const spinner = btn.querySelector('.spinner-border');
                     if (spinner) spinner.classList.add('d-none');
-                    const icon = btn.querySelector('i.bi');
+                    const icon = btn.querySelector('.bi');
                     if (icon) icon.classList.remove('d-none');
                   }
                 }
