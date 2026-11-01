@@ -78,7 +78,6 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                   role="status"
                   aria-hidden="true"
                 ></span>
-                <Icon name="check-lg" />
                 <span>Completar</span>
               </button>
             ) : (
@@ -120,7 +119,6 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                       role="status"
                       aria-hidden="true"
                     ></span>
-                    <Icon name="check-lg" />
                     <span>Registrar</span>
                   </button>
                 </div>
