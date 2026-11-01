@@ -82,13 +82,15 @@ interface FormModalProps extends ModalProps {
   /** Endpoint receiving the HTMX POST. */
   action: string
   submitLabel: string
-  /** Optional partial swap target. Without it the server answers with `HX-Location`. */
+  /** Optional partial swap target (e.g. `#events-section`). */
   target?: string
 }
 
 /**
  * Modal wrapping a single HTMX form. On a successful response `public/app.js`
  * closes the modal and resets the form; on error (4xx/5xx) it stays open.
+ * Without `target` the server answers with `HX-Location`, so `hx-swap="none"`
+ * keeps stray responses from replacing the form's own markup.
  */
 export function FormModal({ id, title, action, submitLabel, target, children }: FormModalProps) {
   return (
@@ -96,7 +98,7 @@ export function FormModal({ id, title, action, submitLabel, target, children }: 
       <form
         hx-post={action}
         hx-target={target}
-        hx-swap={target ? 'outerHTML' : undefined}
+        hx-swap={target ? 'outerHTML' : 'none'}
         class="m-0 p-0"
       >
         <div class="modal-body p-4">{children}</div>

@@ -155,8 +155,7 @@ app.post('/track/:id', async (c) => {
 // DELETE /track/:id - Delete track
 app.delete('/track/:id', (c) => {
   deleteTracker(c.req.param('id'))
-  c.header('HX-Location', '/')
-  return c.body(null, 200)
+  return navigate(c, '/')
 })
 
 // DELETE /track/:id/:eventId - Delete single event
@@ -164,12 +163,13 @@ app.delete('/track/:id/:eventId', (c) => {
   const trackerId = c.req.param('id')
   deleteEvent(trackerId, c.req.param('eventId'))
 
-  const tracker = getTrackerById(trackerId)
-  if (tracker && c.req.header('HX-Target') === 'events-section') {
-    toast(c, 'Entrada eliminada')
-    return renderEventsSection(c, tracker)
+  if (c.req.header('HX-Target') === 'events-section') {
+    const tracker = getTrackerById(trackerId)
+    if (tracker) {
+      toast(c, 'Entrada eliminada')
+      return renderEventsSection(c, tracker)
+    }
   }
 
-  c.header('HX-Location', `/track/${trackerId}`)
-  return c.body(null, 200)
+  return navigate(c, `/track/${trackerId}`)
 })

@@ -290,25 +290,45 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).not.toContain('Capítulo 1')
   })
 
-  it('DELETE /track/:id/:eventId removes event and sets HX-Location', async () => {
+  it('DELETE /track/:id/:eventId via HTMX removes event and sets HX-Location', async () => {
     createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
     createEvent({ id: 'e1', tracker_id: 'reading', timestamp: new Date().toISOString() })
 
     const res = await app.request('/track/reading/e1', {
       method: 'DELETE',
+      headers: { 'HX-Request': 'true' },
     })
     expect(res.status).toBe(200)
     expect(res.headers.get('HX-Location')).toBe('/track/reading')
   })
 
-  it('DELETE /track/:id deletes tracker and sets HX-Location', async () => {
+  it('DELETE /track/:id/:eventId without HTMX returns a 302 redirect', async () => {
+    createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
+    createEvent({ id: 'e1', tracker_id: 'reading', timestamp: new Date().toISOString() })
+
+    const res = await app.request('/track/reading/e1', { method: 'DELETE' })
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toBe('/track/reading')
+  })
+
+  it('DELETE /track/:id via HTMX deletes tracker and sets HX-Location', async () => {
     createTracker({ id: 'temp', name: 'Temporal', type: 'habit' })
 
     const res = await app.request('/track/temp', {
       method: 'DELETE',
+      headers: { 'HX-Request': 'true' },
     })
     expect(res.status).toBe(200)
     expect(res.headers.get('HX-Location')).toBe('/')
+    expect(getTrackerById('temp')).toBeNull()
+  })
+
+  it('DELETE /track/:id without HTMX returns a 302 redirect to /', async () => {
+    createTracker({ id: 'temp', name: 'Temporal', type: 'habit' })
+
+    const res = await app.request('/track/temp', { method: 'DELETE' })
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toBe('/')
   })
 
   it('POST /track rejects empty name with 400 and sanitizes unknown types', async () => {
