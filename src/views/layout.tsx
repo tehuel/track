@@ -37,12 +37,6 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
               const applyTheme = (theme) => {
                 document.documentElement.setAttribute('data-bs-theme', theme);
-                const sun = document.getElementById('theme-icon-sun');
-                const moon = document.getElementById('theme-icon-moon');
-                if (sun && moon) {
-                  sun.classList.toggle('d-none', theme !== 'dark');
-                  moon.classList.toggle('d-none', theme === 'dark');
-                }
               };
               applyTheme(getTheme());
               window.addEventListener('DOMContentLoaded', () => applyTheme(getTheme()));
@@ -75,12 +69,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 title="Cambiar tema"
                 aria-label="Cambiar tema"
               >
-                <span id="theme-icon-sun" class="d-none">
-                  <Icon name="sun-fill" />
-                </span>
-                <span id="theme-icon-moon">
-                  <Icon name="moon-stars-fill" />
-                </span>
+                <Icon name="circle-half" />
               </button>
             </div>
           </div>
@@ -100,7 +89,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
           >
             <div class="d-flex">
               <div class="toast-body d-flex align-items-center gap-2">
-                <Icon name="check-circle-fill" />
+                <Icon name="check-lg" />
                 <span id="toast-message">Entrada registrada</span>
               </div>
               <button

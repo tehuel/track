@@ -153,7 +153,7 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="editModalLabel">
-              <Icon name="pencil-square" class="text-primary" />
+              <Icon name="pencil" class="text-primary" />
               <span>Editar track</span>
             </h5>
             <button
@@ -216,7 +216,14 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
                         for={`edit-tracker-color-${c.value.slice(1)}`}
                         title={c.label}
                       >
-                        <Icon name="circle-fill" style={{ color: c.value }} />
+                        <span
+                          class="rounded-circle d-inline-block"
+                          style={{
+                            width: '1rem',
+                            height: '1rem',
+                            backgroundColor: c.value,
+                          }}
+                        ></span>
                       </label>
                     </>
                   ))}
@@ -284,7 +291,7 @@ export function EventsSection({ tracker, events }: DetailProps) {
 
       {events.length === 0 ? (
         <div class="card text-center text-body-secondary py-5 border-0 rounded-3 bg-body">
-          <Icon name="calendar-x" class="fs-1 d-block mb-2 text-body-tertiary" />
+          <Icon name="card-text" class="fs-1 d-block mb-2 text-body-tertiary" />
           <h3 class="h6 fw-semibold mb-0">Sin entradas</h3>
         </div>
       ) : (
@@ -331,11 +338,14 @@ export function DetailPage({ tracker, events }: DetailProps) {
           <div>
             <div class="d-flex align-items-center gap-2">
               {tracker.color && (
-                <Icon
-                  name="circle-fill"
-                  class="fs-5 flex-shrink-0"
-                  style={{ color: tracker.color }}
-                />
+                <span
+                  class="rounded-circle flex-shrink-0 d-inline-block"
+                  style={{
+                    width: '0.875rem',
+                    height: '0.875rem',
+                    backgroundColor: tracker.color,
+                  }}
+                ></span>
               )}
               <h1 class="h3 mb-0 fw-semibold">{tracker.name}</h1>
             </div>

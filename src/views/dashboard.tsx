@@ -29,11 +29,14 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
             <div class="d-flex align-items-center justify-content-between gap-2">
               <div class="d-flex align-items-center gap-2 text-truncate flex-grow-1">
                 {tracker.color && (
-                  <Icon
-                    name="circle-fill"
-                    class="small flex-shrink-0"
-                    style={{ color: tracker.color }}
-                  />
+                  <span
+                    class="rounded-circle flex-shrink-0 d-inline-block"
+                    style={{
+                      width: '0.625rem',
+                      height: '0.625rem',
+                      backgroundColor: tracker.color,
+                    }}
+                  ></span>
                 )}
                 <h2 class="h6 card-title mb-0 fw-semibold text-truncate">
                   <a
@@ -75,7 +78,7 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                   role="status"
                   aria-hidden="true"
                 ></span>
-                <Icon name="check2" />
+                <Icon name="check-lg" />
                 <span>Completar</span>
               </button>
             ) : (
@@ -143,7 +146,7 @@ function NewTrackerModal() {
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="newTrackerModalLabel">
-              <Icon name="plus-circle-fill" class="text-primary" />
+              <Icon name="plus-lg" class="text-primary" />
               <span>Crear track</span>
             </h5>
             <button
@@ -231,7 +234,14 @@ function NewTrackerModal() {
                         for={`tracker-color-${c.value.slice(1)}`}
                         title={c.label}
                       >
-                        <Icon name="circle-fill" style={{ color: c.value }} />
+                        <span
+                          class="rounded-circle d-inline-block"
+                          style={{
+                            width: '1rem',
+                            height: '1rem',
+                            backgroundColor: c.value,
+                          }}
+                        ></span>
                       </label>
                     </>
                   ))}
@@ -273,7 +283,7 @@ export function TrackersGrid({ trackers }: DashboardProps) {
     return (
       <div id="trackers-grid" class="card text-center p-5 border-0 bg-body rounded-3">
         <div class="py-4">
-          <Icon name="card-checklist" class="text-body-tertiary fs-1" />
+          <Icon name="activity" class="text-body-tertiary fs-1" />
           <h3 class="h5 mt-3 mb-3">No hay tracks</h3>
           <button
             type="button"
