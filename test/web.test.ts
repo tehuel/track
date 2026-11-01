@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
 import { app } from '../src/index'
-import { db, createTracker, createEvent, getTrackerById } from '../src/db'
+import { db, createTracker, createEvent, getTrackerById, listEventsByTracker } from '../src/db'
 
 describe('Web UI & HTMX endpoints', () => {
   beforeEach(() => {
@@ -208,7 +208,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(js).toContain('toggleTheme')
   })
 
-  it('POST /track/:id with HX-Target events-section updates only entries list and triggers toast and modal close', async () => {
+  it('POST /track/:id with HX-Target events-section updates only entries list and triggers toast', async () => {
     createTracker({ id: 'running', name: 'Correr', type: 'numeric' })
 
     const formData = new FormData()
@@ -224,7 +224,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(res.status).toBe(200)
     const triggerHeader = res.headers.get('HX-Trigger') || ''
     expect(triggerHeader).toContain('showToast')
-    expect(triggerHeader).toContain('closeModal')
+    expect(triggerHeader).not.toContain('closeModal') // modal closes client-side on success
 
     const html = await res.text()
     expect(html).toContain('id="events-section"')
@@ -309,5 +309,59 @@ describe('Web UI & HTMX endpoints', () => {
     })
     expect(res.status).toBe(200)
     expect(res.headers.get('HX-Location')).toBe('/')
+  })
+
+  it('POST /track rejects empty name with 400 and sanitizes unknown types', async () => {
+    const empty = new FormData()
+    empty.append('name', '   ')
+    const res = await app.request('/track', { method: 'POST', body: empty })
+    expect(res.status).toBe(400)
+
+    const bogus = new FormData()
+    bogus.append('name', 'Agua')
+    bogus.append('type', 'bogus')
+    bogus.append('description', '   ')
+    await app.request('/track', { method: 'POST', body: bogus })
+    const created = getTrackerById('agua')
+    expect(created?.type).toBe('habit')
+    expect(created?.description).toBeNull()
+  })
+
+  it('POST /track/:id/edit rejects empty name with 400 and keeps tracker unchanged', async () => {
+    createTracker({ id: 'yoga', name: 'Yoga', type: 'habit' })
+    const formData = new FormData()
+    formData.append('name', '')
+    const res = await app.request('/track/yoga/edit', {
+      method: 'POST',
+      headers: { 'HX-Request': 'true' },
+      body: formData,
+    })
+    expect(res.status).toBe(400)
+    expect(getTrackerById('yoga')?.name).toBe('Yoga')
+  })
+
+  it('POST /track/:id validates required fields per tracker type', async () => {
+    createTracker({ id: 'pages', name: 'Páginas', type: 'numeric' })
+    createTracker({ id: 'diary', name: 'Diario', type: 'text' })
+
+    const noValue = new FormData()
+    noValue.append('note', 'sin valor')
+    const r1 = await app.request('/track/pages', {
+      method: 'POST',
+      headers: { 'HX-Target': 'tracker-card-pages' },
+      body: noValue,
+    })
+    expect(r1.status).toBe(400)
+
+    const noNote = new FormData()
+    noNote.append('note', '  ')
+    const r2 = await app.request('/track/diary', {
+      method: 'POST',
+      headers: { 'HX-Target': 'tracker-card-diary' },
+      body: noNote,
+    })
+    expect(r2.status).toBe(400)
+    expect(listEventsByTracker('pages')).toHaveLength(0)
+    expect(listEventsByTracker('diary')).toHaveLength(0)
   })
 })
