@@ -133,6 +133,18 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 input?.focus();
               });
 
+              // Refresh datetime-local to current local time when opening log modal
+              document.addEventListener('show.bs.modal', (evt) => {
+                if (evt.target?.id === 'logModal') {
+                  const timeInput = evt.target.querySelector('input[type="datetime-local"]');
+                  if (timeInput) {
+                    const now = new Date();
+                    const offset = now.getTimezoneOffset() * 60000;
+                    timeInput.value = new Date(now.getTime() - offset).toISOString().slice(0, 16);
+                  }
+                }
+              });
+
               // Loading indicator & disable button during HTMX request
               document.addEventListener('htmx:beforeRequest', (evt) => {
                 const elt = evt.detail.elt;
