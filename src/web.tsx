@@ -149,6 +149,17 @@ app.delete('/track/:id/:eventId', (c) => {
   const trackerId = c.req.param('id')
   const eventId = c.req.param('eventId')
   deleteEvent(trackerId, eventId)
+
+  // If HTMX requested events section update, return updated partial and show toast
+  if (c.req.header('HX-Target') === 'events-section') {
+    const tracker = getTrackerById(trackerId)
+    if (tracker) {
+      c.header('HX-Trigger', JSON.stringify({ showToast: 'Entrada eliminada' }))
+      const events = listEventsByTracker(trackerId, 100)
+      return c.html(<EventsSection tracker={tracker} events={events} />)
+    }
+  }
+
   c.header('HX-Location', `/track/${trackerId}`)
   return c.body(null, 200)
 })

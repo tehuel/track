@@ -295,6 +295,8 @@ export function EventsSection({ tracker, events }: DetailProps) {
                 type="button"
                 class="btn btn-link link-danger p-1 text-decoration-none lh-1 flex-shrink-0"
                 hx-delete={`/track/${tracker.id}/${event.id}`}
+                hx-target="#events-section"
+                hx-swap="outerHTML"
                 hx-confirm="¿Eliminar entrada?"
                 title="Eliminar entrada"
                 aria-label="Eliminar entrada"

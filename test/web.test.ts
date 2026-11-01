@@ -216,6 +216,25 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('id="logModal"')
   })
 
+  it('DELETE /track/:id/:eventId with HX-Target events-section updates list in-place and triggers toast', async () => {
+    createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
+    createEvent({ id: 'e1', tracker_id: 'reading', note: 'Capítulo 1', timestamp: new Date().toISOString() })
+    createEvent({ id: 'e2', tracker_id: 'reading', note: 'Capítulo 2', timestamp: new Date().toISOString() })
+
+    const res = await app.request('/track/reading/e1', {
+      method: 'DELETE',
+      headers: { 'HX-Target': 'events-section' },
+    })
+
+    expect(res.status).toBe(200)
+    expect(res.headers.get('HX-Trigger')).toContain('Entrada eliminada')
+    const html = await res.text()
+    expect(html).toContain('id="events-section"')
+    expect(html).toContain('1 entrada')
+    expect(html).toContain('Capítulo 2')
+    expect(html).not.toContain('Capítulo 1')
+  })
+
   it('DELETE /track/:id/:eventId removes event and sets HX-Location', async () => {
     createTracker({ id: 'reading', name: 'Lectura', type: 'habit' })
     createEvent({ id: 'e1', tracker_id: 'reading', timestamp: new Date().toISOString() })
