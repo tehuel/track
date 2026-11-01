@@ -150,35 +150,20 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 }
               });
 
-              // Loading indicator & disable button during HTMX request
-              document.addEventListener('htmx:beforeRequest', (evt) => {
-                const elt = evt.detail.elt;
-                const btn = elt.matches('button')
+              // Button loading feedback during HTMX requests
+              const toggleLoading = (elt, loading) => {
+                const btn = elt?.matches?.('button')
                   ? elt
-                  : elt.querySelector('button[type="submit"]') || elt.querySelector('button');
+                  : elt?.querySelector?.('button[type="submit"]') || elt?.querySelector?.('button');
                 if (btn) {
-                  btn.disabled = true;
-                  const spinner = btn.querySelector('.spinner-border');
-                  if (spinner) spinner.classList.remove('d-none');
-                  const icon = btn.querySelector('.bi');
-                  if (icon) icon.classList.add('d-none');
+                  btn.disabled = loading;
+                  btn.querySelector('.spinner-border')?.classList.toggle('d-none', !loading);
+                  btn.querySelector('.bi')?.classList.toggle('d-none', loading);
                 }
-              });
-
+              };
+              document.addEventListener('htmx:beforeRequest', (evt) => toggleLoading(evt.detail.elt, true));
               document.addEventListener('htmx:afterRequest', (evt) => {
-                if (!evt.detail.successful) {
-                  const elt = evt.detail.elt;
-                  const btn = elt.matches('button')
-                    ? elt
-                    : elt.querySelector('button[type="submit"]') || elt.querySelector('button');
-                  if (btn) {
-                    btn.disabled = false;
-                    const spinner = btn.querySelector('.spinner-border');
-                    if (spinner) spinner.classList.add('d-none');
-                    const icon = btn.querySelector('.bi');
-                    if (icon) icon.classList.remove('d-none');
-                  }
-                }
+                if (!evt.detail.successful) toggleLoading(evt.detail.elt, false);
               });
             })();
           `,
