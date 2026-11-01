@@ -1,5 +1,6 @@
 import type { Child } from 'hono/jsx'
 import { raw } from 'hono/html'
+import { APP_JS_PATH } from '../assets'
 import { Icon } from './icons'
 import { Modal, ModalFooter } from './modal'
 
@@ -48,7 +49,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         {/* HTMX, Bootstrap 5 & App UI JS (deferred to download in parallel and execute without blocking parser) */}
         <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" defer></script>
-        <script src="/app.js" defer></script>
+        <script src={APP_JS_PATH} defer></script>
       </head>
 
       <body class="bg-body-secondary min-vh-100 d-flex flex-column">

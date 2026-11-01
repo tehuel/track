@@ -194,18 +194,21 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('toast-container')
     expect(html).toContain('id="confirmModal"')
     expect(html).toContain('Confirmar eliminación')
-    expect(html).toContain('src="/app.js"')
+    expect(html).toContain('src="/app.js?v=')
   })
 
-  it('GET /app.js serves JavaScript UI helpers', async () => {
-    const res = await app.request('/app.js')
-    expect(res.status).toBe(200)
-    expect(res.headers.get('Content-Type')).toContain('application/javascript')
-    const js = await res.text()
-    expect(js).toContain('htmx:confirm')
-    expect(js).toContain('if (!evt.detail.question) return;')
-    expect(js).toContain('htmx:beforeRequest')
-    expect(js).toContain('toggleTheme')
+  it('GET /app.js serves JavaScript UI helpers with version-less and versioned URLs', async () => {
+    for (const path of ['/app.js', '/app.js?v=anything']) {
+      const res = await app.request(path)
+      expect(res.status).toBe(200)
+      expect(res.headers.get('Content-Type')).toContain('application/javascript')
+      expect(res.headers.get('Cache-Control')).toContain('immutable')
+      const js = await res.text()
+      expect(js).toContain('htmx:confirm')
+      expect(js).toContain('if (!evt.detail.question) return;')
+      expect(js).toContain('htmx:afterRequest')
+      expect(js).toContain('toggleTheme')
+    }
   })
 
   it('POST /track/:id with HX-Target events-section updates only entries list and triggers toast', async () => {
