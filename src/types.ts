@@ -2,12 +2,16 @@ export type TrackerType = 'habit' | 'numeric' | 'text'
 
 export const TRACKER_TYPES: { value: TrackerType; label: string; icon: string }[] = [
   { value: 'habit', label: 'Hábito', icon: 'bi-check2-circle' },
-  { value: 'numeric', label: 'Numérico', icon: 'bi-123' },
+  { value: 'numeric', label: 'Numérico', icon: 'bi-hash' },
   { value: 'text', label: 'Texto', icon: 'bi-card-text' },
 ]
 
 export function getTrackerIcon(type: TrackerType): string {
   return TRACKER_TYPES.find((t) => t.value === type)?.icon ?? 'bi-activity'
+}
+
+export function getTrackerTypeLabel(type: TrackerType): string {
+  return TRACKER_TYPES.find((t) => t.value === type)?.label ?? type
 }
 
 export const TRACKER_COLORS: { value: string; label: string }[] = [

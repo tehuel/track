@@ -1,4 +1,10 @@
-import { TRACKER_COLORS, getTrackerIcon, type Tracker, type TrackerEvent } from '../types'
+import {
+  TRACKER_COLORS,
+  getTrackerIcon,
+  getTrackerTypeLabel,
+  type Tracker,
+  type TrackerEvent,
+} from '../types'
 import { Layout } from './layout'
 
 interface DetailProps {
@@ -28,6 +34,7 @@ function formatDate(iso: string): string {
 
 function LogEntryModal({ tracker }: { tracker: Tracker }) {
   const icon = getTrackerIcon(tracker.type)
+  const typeLabel = getTrackerTypeLabel(tracker.type)
   const defaultTimestamp = getLocalDatetimeString()
   const isText = tracker.type === 'text'
 
@@ -43,7 +50,7 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
         <div class="modal-content border-0">
           <div class="modal-header border-0 pb-0">
             <h5 class="modal-title d-flex align-items-center gap-2" id="logModalLabel">
-              <i class={`bi ${icon} text-primary`}></i>
+              <i class={`bi ${icon} text-primary`} title={typeLabel}></i>
               <span>Registrar: {tracker.name}</span>
             </h5>
             <button
@@ -313,6 +320,7 @@ export function EventsSection({ tracker, events }: DetailProps) {
 
 export function DetailPage({ tracker, events }: DetailProps) {
   const icon = getTrackerIcon(tracker.type)
+  const typeLabel = getTrackerTypeLabel(tracker.type)
 
   return (
     <Layout title={`${tracker.name} - track`}>
@@ -335,7 +343,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
           </div>
 
           <div class="d-flex align-items-center gap-2 flex-shrink-0">
-            <span class="text-body-secondary lh-1 px-2" title={tracker.type}>
+            <span class="text-body-secondary lh-1 px-2" title={typeLabel}>
               <i class={`bi ${icon} fs-5`}></i>
             </span>
 

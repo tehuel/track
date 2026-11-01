@@ -1,4 +1,10 @@
-import { TRACKER_COLORS, TRACKER_TYPES, getTrackerIcon, type Tracker } from '../types'
+import {
+  TRACKER_COLORS,
+  TRACKER_TYPES,
+  getTrackerIcon,
+  getTrackerTypeLabel,
+  type Tracker,
+} from '../types'
 import { Layout } from './layout'
 
 interface DashboardProps {
@@ -12,6 +18,7 @@ interface TrackerCardProps {
 
 export function TrackerCard({ tracker }: TrackerCardProps) {
   const icon = getTrackerIcon(tracker.type)
+  const typeLabel = getTrackerTypeLabel(tracker.type)
 
   return (
     <div class="col" id={`tracker-card-${tracker.id}`}>
@@ -36,7 +43,10 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                   </a>
                 </h2>
               </div>
-              <span class="text-body-secondary lh-1 flex-shrink-0" title={tracker.type}>
+              <span
+                class="text-body-secondary lh-1 flex-shrink-0 position-relative z-2"
+                title={typeLabel}
+              >
                 <i class={`bi ${icon} fs-5`}></i>
               </span>
             </div>

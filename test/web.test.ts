@@ -9,6 +9,7 @@ describe('Web UI & HTMX endpoints', () => {
 
   it('GET / renders dashboard with tracker cards in Spanish and /track/:id links', async () => {
     createTracker({ id: 'guitar', name: 'Tocar Guitarra', type: 'habit' })
+    createTracker({ id: 'pushups', name: 'Flexiones', type: 'numeric' })
 
     const res = await app.request('/')
     expect(res.status).toBe(200)
@@ -17,6 +18,9 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('htmx.org')
     expect(html).toContain('Nuevo track')
     expect(html).toContain('/track/guitar')
+    expect(html).toContain('title="Hábito"')
+    expect(html).toContain('title="Numérico"')
+    expect(html).toContain('bi-hash')
   })
 
   it('GET /?q=... with HX-Target trackers-grid returns filtered HTMX partial and sets HX-Push-Url', async () => {
@@ -214,6 +218,8 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('Terminado capítulo 3')
     expect(html).toContain('Historial de entradas')
     expect(html).toContain('id="logModal"')
+    expect(html).toContain('title="Hábito"')
+    expect(html).not.toContain('title="habit"')
   })
 
   it('DELETE /track/:id/:eventId with HX-Target events-section updates list in-place and triggers toast', async () => {
