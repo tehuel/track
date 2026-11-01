@@ -150,6 +150,18 @@ export function Layout({ title = 'track', children }: LayoutProps) {
           dangerouslySetInnerHTML={{
             __html: `
             (() => {
+              // Button loading feedback during HTMX requests
+              const toggleLoading = (elt, loading) => {
+                const btn = elt?.matches?.('button')
+                  ? elt
+                  : elt?.querySelector?.('button[type="submit"]') || elt?.querySelector?.('button');
+                if (btn) {
+                  btn.disabled = loading;
+                  btn.querySelector('.spinner-border')?.classList.toggle('d-none', !loading);
+                  btn.querySelector('.bi')?.classList.toggle('d-none', loading);
+                }
+              };
+
               document.addEventListener('showToast', (evt) => {
                 const toastEl = document.getElementById('app-toast');
                 if (!toastEl || !window.bootstrap) return;
@@ -158,7 +170,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 }).show();
               });
 
-              // Close active or targeted modal and reset its form
+              // Close active or targeted modal and reset its form and buttons
               document.addEventListener('closeModal', (evt) => {
                 if (!window.bootstrap) return;
                 const targetId = evt.detail?.value || evt.detail?.id || evt.detail;
@@ -167,6 +179,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 if (modalEl) {
                   bootstrap.Modal.getInstance(modalEl)?.hide();
                   modalEl.querySelector('form')?.reset();
+                  toggleLoading(modalEl, false);
                 }
               });
 
@@ -178,8 +191,9 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 input?.focus();
               });
 
-              // Refresh datetime-local to current local time when opening log modal
+              // Refresh datetime-local to current local time and restore button state when opening modal
               document.addEventListener('show.bs.modal', (evt) => {
+                toggleLoading(evt.target, false);
                 if (evt.target?.id === 'logModal') {
                   const timeInput = evt.target.querySelector('input[type="datetime-local"]');
                   if (timeInput) {
@@ -208,21 +222,8 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 bootstrap.Modal.getOrCreateInstance(modalEl).show();
               });
 
-              // Button loading feedback during HTMX requests
-              const toggleLoading = (elt, loading) => {
-                const btn = elt?.matches?.('button')
-                  ? elt
-                  : elt?.querySelector?.('button[type="submit"]') || elt?.querySelector?.('button');
-                if (btn) {
-                  btn.disabled = loading;
-                  btn.querySelector('.spinner-border')?.classList.toggle('d-none', !loading);
-                  btn.querySelector('.bi')?.classList.toggle('d-none', loading);
-                }
-              };
               document.addEventListener('htmx:beforeRequest', (evt) => toggleLoading(evt.detail.elt, true));
-              document.addEventListener('htmx:afterRequest', (evt) => {
-                if (!evt.detail.successful) toggleLoading(evt.detail.elt, false);
-              });
+              document.addEventListener('htmx:afterRequest', (evt) => toggleLoading(evt.detail.elt, false));
             })();
           `,
           }}
