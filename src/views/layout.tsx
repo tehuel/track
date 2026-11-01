@@ -192,6 +192,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
 
               // Custom confirmation modal for hx-confirm
               document.addEventListener('htmx:confirm', (evt) => {
+                if (!evt.detail.question) return;
                 const modalEl = document.getElementById('confirmModal');
                 if (!modalEl || !window.bootstrap) return;
                 evt.preventDefault();

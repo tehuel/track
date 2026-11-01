@@ -162,6 +162,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('id="confirmModal"')
     expect(html).toContain('Confirmar eliminación')
     expect(html).toContain('htmx:confirm')
+    expect(html).toContain('if (!evt.detail.question) return;')
     expect(html).toContain('htmx:beforeRequest')
   })
 
