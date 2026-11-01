@@ -58,16 +58,14 @@
     toggleLoading(modalEl, false);
   });
 
-  // Refresh datetime-local to current local time and restore button state when opening modal
+  // Initialize datetime-local inputs to client local time when opening modal
   document.addEventListener('show.bs.modal', (evt) => {
     toggleLoading(evt.target, false);
-    if (evt.target?.id === 'logModal') {
-      const timeInput = evt.target.querySelector('input[type="datetime-local"]');
-      if (timeInput) {
-        const now = new Date();
-        const offset = now.getTimezoneOffset() * 60000;
-        timeInput.value = new Date(now.getTime() - offset).toISOString().slice(0, 16);
-      }
+    const timeInput = evt.target?.querySelector?.('input[type="datetime-local"]');
+    if (timeInput) {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      timeInput.value = new Date(now.getTime() - offset).toISOString().slice(0, 16);
     }
   });
 

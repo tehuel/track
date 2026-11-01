@@ -13,12 +13,6 @@ interface DetailProps {
   events: TrackerEvent[]
 }
 
-function getLocalDatetimeString(): string {
-  const now = new Date()
-  now.setMinutes(now.getMinutes() - now.getTimezoneOffset())
-  return now.toISOString().slice(0, 16)
-}
-
 function formatDate(iso: string): string {
   try {
     const d = new Date(iso)
@@ -34,7 +28,6 @@ function formatDate(iso: string): string {
 }
 
 function LogEntryModal({ tracker }: { tracker: Tracker }) {
-  const defaultTimestamp = getLocalDatetimeString()
   const isText = tracker.type === 'text'
 
   return (
@@ -91,7 +84,6 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
               class="form-control"
               id="logModal-timestamp"
               name="timestamp"
-              value={defaultTimestamp}
               required
             />
           </div>
