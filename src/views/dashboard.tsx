@@ -168,6 +168,7 @@ function NewTrackerModal() {
                   name="name"
                   placeholder="ej. Meditación"
                   required
+                  autofocus
                 />
               </div>
 

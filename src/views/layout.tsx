@@ -125,6 +125,14 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 modalEl.querySelector('form')?.reset();
               });
 
+              // Autofocus input when modal is shown
+              document.addEventListener('shown.bs.modal', (evt) => {
+                const target = evt.target;
+                const input = target.querySelector('[autofocus]') ||
+                  target.querySelector('input:not([type="hidden"]):not([disabled]), textarea, select');
+                input?.focus();
+              });
+
               // Loading indicator & disable button during HTMX request
               document.addEventListener('htmx:beforeRequest', (evt) => {
                 const elt = evt.detail.elt;

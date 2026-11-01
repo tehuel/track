@@ -176,6 +176,7 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
                   name="name"
                   value={tracker.name}
                   required
+                  autofocus
                 />
               </div>
 
