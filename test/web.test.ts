@@ -155,6 +155,32 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('htmx:beforeRequest')
   })
 
+  it('POST /track/:id with HX-Target events-section updates only entries list and triggers toast and modal close', async () => {
+    createTracker({ id: 'running', name: 'Correr', type: 'numeric' })
+
+    const formData = new FormData()
+    formData.append('value', '10.5')
+    formData.append('note', 'Entrenamiento matutino')
+
+    const res = await app.request('/track/running', {
+      method: 'POST',
+      headers: { 'HX-Target': 'events-section' },
+      body: formData,
+    })
+
+    expect(res.status).toBe(200)
+    const triggerHeader = res.headers.get('HX-Trigger') || ''
+    expect(triggerHeader).toContain('showToast')
+    expect(triggerHeader).toContain('closeModal')
+
+    const html = await res.text()
+    expect(html).toContain('id="events-section"')
+    expect(html).toContain('10.5')
+    expect(html).toContain('Entrenamiento matutino')
+    expect(html).toContain('1 entrada')
+    expect(html).not.toContain('<nav')
+  })
+
   it('POST /track/:id saves detailed event from modal and redirects to /track/:id', async () => {
     createTracker({ id: 'weight', name: 'Peso', type: 'numeric' })
 

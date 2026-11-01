@@ -123,6 +123,13 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 }).show();
               });
 
+              document.addEventListener('closeModal', () => {
+                const modalEl = document.getElementById('logModal');
+                if (!modalEl || !window.bootstrap) return;
+                bootstrap.Modal.getInstance(modalEl)?.hide();
+                modalEl.querySelector('form')?.reset();
+              });
+
               // Loading indicator & disable button during HTMX request
               document.addEventListener('htmx:beforeRequest', (evt) => {
                 const elt = evt.detail.elt;
