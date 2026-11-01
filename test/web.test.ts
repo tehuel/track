@@ -207,6 +207,9 @@ describe('Web UI & HTMX endpoints', () => {
       expect(js).toContain('htmx:confirm')
       expect(js).toContain('if (!evt.detail.question) return;')
       expect(js).toContain('htmx:afterRequest')
+      expect(js).toContain("evt.key === 'Enter'")
+      expect(js).toContain("evt.key === 'Escape'")
+      expect(js).toContain('confirmPending')
       expect(js).toContain('toggleTheme')
     }
   })
