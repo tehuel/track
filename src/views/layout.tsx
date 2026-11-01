@@ -191,6 +191,14 @@ export function Layout({ title = 'track', children }: LayoutProps) {
                 input?.focus();
               });
 
+              // Reset form and button loading state when any modal is hidden/dismissed
+              document.addEventListener('hidden.bs.modal', (evt) => {
+                const modalEl = evt.target;
+                if (!modalEl) return;
+                modalEl.querySelector('form')?.reset();
+                toggleLoading(modalEl, false);
+              });
+
               // Refresh datetime-local to current local time and restore button state when opening modal
               document.addEventListener('show.bs.modal', (evt) => {
                 toggleLoading(evt.target, false);
