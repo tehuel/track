@@ -6,11 +6,9 @@
     document.documentElement.setAttribute('data-bs-theme', next);
   };
 
-  // Button loading feedback during HTMX requests
+  // Button loading feedback during HTMX requests (the element itself or a form's submit button)
   const toggleLoading = (elt, loading) => {
-    const btn = elt?.matches?.('button')
-      ? elt
-      : elt?.querySelector?.('button[type="submit"]') || elt?.querySelector?.('button');
+    const btn = elt?.matches?.('button') ? elt : elt?.matches?.('form') && elt.querySelector('[type="submit"]');
     if (btn) {
       btn.disabled = loading;
       btn.querySelector('.spinner-border')?.classList.toggle('d-none', !loading);
@@ -27,47 +25,22 @@
     bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 }).show();
   });
 
-  // Close active or targeted modal and reset its form and buttons
-  document.addEventListener('closeModal', (evt) => {
-    if (!window.bootstrap) return;
-    const targetId = evt.detail?.value || evt.detail?.id || evt.detail;
-    const modalEl =
-      (typeof targetId === 'string' && document.getElementById(targetId)) ||
-      document.querySelector('.modal.show');
-    if (modalEl) {
-      bootstrap.Modal.getInstance(modalEl)?.hide();
-      modalEl.querySelector('form')?.reset();
-      toggleLoading(modalEl, false);
-    }
-  });
-
-  // Autofocus input when modal is shown
-  document.addEventListener('shown.bs.modal', (evt) => {
-    const target = evt.target;
-    const input =
-      target?.querySelector?.('[autofocus]') ||
-      target?.querySelector?.('input:not([type="hidden"]):not([disabled]), textarea, select');
-    input?.focus();
-  });
-
-  // Reset form and button loading state when any modal is hidden/dismissed
-  document.addEventListener('hidden.bs.modal', (evt) => {
-    const modalEl = evt.target;
-    if (!modalEl) return;
-    modalEl.querySelector('form')?.reset();
-    toggleLoading(modalEl, false);
-  });
-
-  // Initialize datetime-local inputs to client local time when opening modal
+  // Modal lifecycle: focus + default datetime on open, reset form on close
   document.addEventListener('show.bs.modal', (evt) => {
-    toggleLoading(evt.target, false);
-    const timeInput = evt.target?.querySelector?.('input[type="datetime-local"]');
+    const timeInput = evt.target.querySelector('input[type="datetime-local"]');
     if (timeInput) {
       const now = new Date();
-      const offset = now.getTimezoneOffset() * 60000;
-      timeInput.value = new Date(now.getTime() - offset).toISOString().slice(0, 16);
+      timeInput.value = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
     }
   });
+
+  document.addEventListener('shown.bs.modal', (evt) => {
+    evt.target.querySelector('[autofocus], input:not([type="hidden"]), textarea, select')?.focus();
+  });
+
+  document.addEventListener('hidden.bs.modal', (evt) => evt.target.querySelector('form')?.reset());
 
   // Custom confirmation modal for hx-confirm
   document.addEventListener('htmx:confirm', (evt) => {
@@ -75,31 +48,30 @@
     const modalEl = document.getElementById('confirmModal');
     if (!modalEl || !window.bootstrap) return;
     evt.preventDefault();
-    const questionEl = document.getElementById('confirmModalQuestion');
-    if (questionEl) questionEl.textContent = evt.detail.question;
-    const confirmBtn = document.getElementById('confirmModalBtn');
-    if (confirmBtn) {
-      confirmBtn.onclick = () => {
-        bootstrap.Modal.getInstance(modalEl)?.hide();
-        evt.detail.issueRequest(true);
-      };
-    }
+    document.getElementById('confirmModalQuestion').textContent = evt.detail.question;
+    document.getElementById('confirmModalBtn').onclick = () => {
+      bootstrap.Modal.getInstance(modalEl)?.hide();
+      evt.detail.issueRequest(true);
+    };
     bootstrap.Modal.getOrCreateInstance(modalEl).show();
   });
 
-  // Clean up any open modal and backdrops before HTMX swaps page content
-  document.addEventListener('htmx:beforeSwap', () => {
-    if (!window.bootstrap) return;
-    document.querySelectorAll('.modal.show').forEach((modalEl) => {
-      bootstrap.Modal.getInstance(modalEl)?.hide();
-    });
-    document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
-    document.body.classList.remove('modal-open');
+  // HTMX request lifecycle: spinner feedback, and close the hosting modal on success
+  document.addEventListener('htmx:beforeRequest', (evt) => toggleLoading(evt.detail.elt, true));
+  document.addEventListener('htmx:afterRequest', (evt) => {
+    toggleLoading(evt.detail.elt, false);
+    const modalEl = evt.detail.successful && evt.detail.elt.closest?.('.modal');
+    if (modalEl && window.bootstrap) bootstrap.Modal.getInstance(modalEl)?.hide();
   });
 
-  // Loading spinner feedback during HTMX requests
-  document.addEventListener('htmx:beforeRequest', (evt) => toggleLoading(evt.detail.elt, true));
-  document.addEventListener('htmx:afterRequest', (evt) => toggleLoading(evt.detail.elt, false));
+  // HX-Location replaces <body> while a modal may still be fading out: drop leftovers
+  document.addEventListener('htmx:beforeSwap', (evt) => {
+    if (evt.detail.target !== document.body) return;
+    document.querySelectorAll('.modal-backdrop').forEach((el) => el.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+  });
 
   // Search input icon toggle and clear button
   document.addEventListener('input', (evt) => {
