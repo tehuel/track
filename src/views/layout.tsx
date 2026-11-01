@@ -83,8 +83,80 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         {/* Main Content Area */}
         <main class="container py-4 flex-grow-1">{children}</main>
 
+        {/* Toast Notification Container */}
+        <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+          <div
+            id="app-toast"
+            class="toast align-items-center text-bg-success border-0 shadow"
+            role="alert"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <div class="d-flex">
+              <div class="toast-body d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill"></i>
+                <span id="toast-message">Entrada registrada</span>
+              </div>
+              <button
+                type="button"
+                class="btn-close btn-close-white me-2 m-auto"
+                data-bs-dismiss="toast"
+                aria-label="Cerrar"
+              ></button>
+            </div>
+          </div>
+        </div>
+
         {/* Bootstrap 5 JS Bundle */}
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+        {/* App UI Helpers: Toast notifications & Loading states */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+            (() => {
+              document.addEventListener('showToast', (evt) => {
+                const toastEl = document.getElementById('app-toast');
+                if (!toastEl || !window.bootstrap) return;
+                const msg = evt.detail?.value || evt.detail;
+                if (msg) document.getElementById('toast-message').textContent = msg;
+                bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 }).show();
+              });
+
+              // Loading indicator & disable button during HTMX request
+              document.addEventListener('htmx:beforeRequest', (evt) => {
+                const elt = evt.detail.elt;
+                const btn = elt.matches('button')
+                  ? elt
+                  : elt.querySelector('button[type="submit"]') || elt.querySelector('button');
+                if (btn) {
+                  btn.disabled = true;
+                  const spinner = btn.querySelector('.spinner-border');
+                  if (spinner) spinner.classList.remove('d-none');
+                  const icon = btn.querySelector('i.bi');
+                  if (icon) icon.classList.add('d-none');
+                }
+              });
+
+              document.addEventListener('htmx:afterRequest', (evt) => {
+                if (!evt.detail.successful) {
+                  const elt = evt.detail.elt;
+                  const btn = elt.matches('button')
+                    ? elt
+                    : elt.querySelector('button[type="submit"]') || elt.querySelector('button');
+                  if (btn) {
+                    btn.disabled = false;
+                    const spinner = btn.querySelector('.spinner-border');
+                    if (spinner) spinner.classList.add('d-none');
+                    const icon = btn.querySelector('i.bi');
+                    if (icon) icon.classList.remove('d-none');
+                  }
+                }
+              });
+            })();
+          `,
+          }}
+        />
       </body>
     </html>
   )

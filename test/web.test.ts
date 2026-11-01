@@ -104,7 +104,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(detailHtml).toContain('id="editModal"')
   })
 
-  it('POST /track/:id quick-logs habit via HTMX and returns card partial', async () => {
+  it('POST /track/:id quick-logs habit via HTMX, returns card partial without green success and triggers toast', async () => {
     createTracker({ id: 'pushups', name: 'Flexiones', type: 'habit' })
 
     const formData = new FormData()
@@ -115,10 +115,44 @@ describe('Web UI & HTMX endpoints', () => {
     })
 
     expect(res.status).toBe(200)
+    expect(res.headers.get('HX-Trigger')).toContain('showToast')
     const html = await res.text()
     expect(html).toContain('tracker-card-pushups')
-    expect(html).toContain('btn-success')
-    expect(html).toContain('¡Registrado!')
+    expect(html).not.toContain('btn-success')
+    expect(html).toContain('btn-primary')
+    expect(html).toContain('Completar')
+    expect(html).toContain('spinner-border')
+    expect(html).toContain('hx-disabled-elt="this"')
+  })
+
+  it('POST /track/:id quick-logs numeric tracker via HTMX, returns card partial without green success and triggers toast', async () => {
+    createTracker({ id: 'pages', name: 'Páginas leídas', type: 'numeric' })
+
+    const formData = new FormData()
+    formData.append('value', '15')
+    const res = await app.request('/track/pages', {
+      method: 'POST',
+      headers: { 'HX-Target': 'tracker-card-pages' },
+      body: formData,
+    })
+
+    expect(res.status).toBe(200)
+    expect(res.headers.get('HX-Trigger')).toContain('showToast')
+    const html = await res.text()
+    expect(html).toContain('tracker-card-pages')
+    expect(html).not.toContain('btn-success')
+    expect(html).toContain('btn-primary')
+    expect(html).toContain('spinner-border')
+    expect(html).toContain('hx-disabled-elt="find button"')
+  })
+
+  it('Layout renders toast container and script handles showToast and loading', async () => {
+    const res = await app.request('/')
+    expect(res.status).toBe(200)
+    const html = await res.text()
+    expect(html).toContain('id="app-toast"')
+    expect(html).toContain('toast-container')
+    expect(html).toContain('htmx:beforeRequest')
   })
 
   it('POST /track/:id saves detailed event from modal and redirects to /track/:id', async () => {

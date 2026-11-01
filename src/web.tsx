@@ -115,7 +115,8 @@ app.post('/track/:id', async (c) => {
 
   // If HTMX requested card update from dashboard, return the card
   if (c.req.header('HX-Target') === `tracker-card-${id}`) {
-    return c.html(<TrackerCard tracker={tracker} justLogged={true} />)
+    c.header('HX-Trigger', JSON.stringify({ showToast: `Entrada registrada en ${tracker.name}` }))
+    return c.html(<TrackerCard tracker={tracker} />)
   }
 
   // Otherwise, default redirect to the track detail page

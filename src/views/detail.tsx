@@ -109,6 +109,11 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
                 Cancelar
               </button>
               <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                <span
+                  class="spinner-border spinner-border-sm d-none"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
                 <span>Guardar</span>
               </button>
             </div>
