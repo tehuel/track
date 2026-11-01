@@ -258,13 +258,12 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
                 hx-trigger="keyup changed delay:200ms, search"
                 hx-target="#trackers-grid"
                 hx-swap="outerHTML"
-                oninput="const hasVal = Boolean(this.value); document.getElementById('search-icon-clear').classList.toggle('d-none', !hasVal); document.getElementById('search-icon-search').classList.toggle('d-none', hasVal);"
               />
               <button
                 type="button"
+                id="search-clear-btn"
                 class="input-group-text bg-body border-0 text-body-secondary"
                 aria-label="Limpiar búsqueda"
-                onclick="const input = document.getElementById('search-input'); if (input.value) { input.value = ''; document.getElementById('search-icon-search').classList.remove('d-none'); document.getElementById('search-icon-clear').classList.add('d-none'); input.dispatchEvent(new Event('search')); } input.focus();"
               >
                 <span id="search-icon-search" class={query ? 'd-none' : ''}>
                   <Icon name="search" />

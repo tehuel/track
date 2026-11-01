@@ -92,4 +92,28 @@
   // Loading spinner feedback during HTMX requests
   document.addEventListener('htmx:beforeRequest', (evt) => toggleLoading(evt.detail.elt, true));
   document.addEventListener('htmx:afterRequest', (evt) => toggleLoading(evt.detail.elt, false));
+
+  // Search input icon toggle and clear button
+  document.addEventListener('input', (evt) => {
+    if (evt.target?.id === 'search-input') {
+      const hasVal = Boolean(evt.target.value);
+      document.getElementById('search-icon-clear')?.classList.toggle('d-none', !hasVal);
+      document.getElementById('search-icon-search')?.classList.toggle('d-none', hasVal);
+    }
+  });
+
+  document.addEventListener('click', (evt) => {
+    const clearBtn = evt.target?.closest?.('#search-clear-btn');
+    if (!clearBtn) return;
+    const input = document.getElementById('search-input');
+    if (input) {
+      if (input.value) {
+        input.value = '';
+        document.getElementById('search-icon-search')?.classList.remove('d-none');
+        document.getElementById('search-icon-clear')?.classList.add('d-none');
+        input.dispatchEvent(new Event('search'));
+      }
+      input.focus();
+    }
+  });
 })();
