@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/tehuel/track/compare/v1.2.0...v1.3.0) (2026-11-03)
+
+
+### Features
+
+* add version meta tag to layout and tests ([ccc2800](https://github.com/tehuel/track/commit/ccc2800e6ae6f440e94759a99d0c145ba707ee6f))
+
+
+### Bug Fixes
+
+* update grid layout to support more columns on larger screens ([7de8739](https://github.com/tehuel/track/commit/7de8739b3218cc73b8f5b442378fa746121d9871))
+
 ## [1.2.0](https://github.com/tehuel/track/compare/v1.1.1...v1.2.0) (2026-11-03)
 
 
