@@ -2,7 +2,7 @@
 
 Lightweight, self-hosted personal tracker built with **Bun**, **Hono**, **SQLite (`bun:sqlite`)**, **HTMX**, and **Bootstrap 5**.
 
-Designed to be run in a local Docker Compose environment or homelab, with authentication delegated to your network perimeter (Tailscale, Cloudflare Tunnel Access, Authelia, or reverse proxy basic auth).
+Designed to be run as a container or self-contained binary in a homelab, with authentication delegated to your network perimeter (Tailscale, Cloudflare Tunnel Access, Authelia, or reverse proxy basic auth).
 
 ---
 
@@ -72,10 +72,11 @@ PORT=3000 DB_PATH=./tracker.db ./dist/track
 
 ### CI & Creating a GitHub Release
 
-Continuous Integration and Releases are managed in a single workflow (`.github/workflows/ci.yml`) split into two jobs:
+Continuous Integration and Releases are managed in a single workflow (`.github/workflows/ci.yml`) split into three jobs:
 
 - **`test` (`Typecheck & Test`)**: Runs automatically on **every** branch push, tag push, and Pull Request targeting `main` (`bun run typecheck` and `bun test`).
-- **`release` (`Build & Release Binaries`)**: Runs **only** after `test` succeeds and when triggered by a version tag (`v*`) or manual dispatch (`workflow_dispatch`).
+- **`build` (`Build Binaries`)**: Runs after `test` succeeds for version tags (`v*`) or manual dispatch (`workflow_dispatch`). It compiles the binaries, generates checksums, and uploads them as a workflow artifact.
+- **`publish` (`Publish Release & Image`)**: Runs after `build`, only for version tags. It downloads the build artifact, publishes the GitHub Release, and publishes a multi-architecture Docker image to GitHub Container Registry (`ghcr.io`).
 
 To publish a new release:
 
@@ -86,18 +87,26 @@ To publish a new release:
    ```
 2. **Automated pipeline**:
    - Runs the `test` job (`bun run typecheck` and `bun test`).
-   - Runs the `release` job to compile standalone binaries for Linux x64 (`track-linux-x64`) and Linux ARM64 (`track-linux-arm64`), generate `SHA256SUMS` checksums, and publish the GitHub Release with auto-generated release notes.
+   - Runs the `build` job to compile standalone binaries for Linux amd64 (`track-linux-amd64`) and Linux ARM64 (`track-linux-arm64`) and generate `SHA256SUMS` checksums.
+   - Runs the `publish` job to publish the GitHub Release with auto-generated release notes and `ghcr.io/tehuel/track` for both `linux/amd64` and `linux/arm64`.
 
 > You can also trigger a build without creating a release from the **Actions → CI & Release → Run workflow** button (`workflow_dispatch`) to download the compiled binaries as workflow artifacts.
 
 ---
 
-## Running with Docker Compose
+## Running with Docker
 
-To run `track` as a persistent containerized service:
+The published image is built from the same self-contained binaries attached to each GitHub Release:
 
 ```bash
-docker compose up -d
+docker run -d \
+  --name track \
+  --restart unless-stopped \
+  -p 3000:3000 \
+  -v "$PWD/data:/data" \
+  -e PORT=3000 \
+  -e DB_PATH=/data/tracker.db \
+  ghcr.io/tehuel/track:latest
 ```
 
 - Web UI available at: `http://localhost:3000`
@@ -105,12 +114,12 @@ docker compose up -d
 
 To view logs:
 ```bash
-docker compose logs -f
+docker logs -f track
 ```
 
 To stop:
 ```bash
-docker compose down
+docker stop track
 ```
 
 ---
