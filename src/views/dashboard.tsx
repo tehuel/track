@@ -41,28 +41,24 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                 <h2 class="h6 card-title mb-0 fw-semibold text-truncate">
                   <a
                     href={`/track/${tracker.id}`}
-                    class="stretched-link text-reset text-decoration-none"
+                    class="stretched-link text-reset text-decoration-none d-inline-flex align-items-center"
                     title={tracker.name}
-                    hx-indicator="#page-progress, closest .card"
+                    hx-indicator="#page-progress, find .spinner-border"
                   >
-                    {tracker.name}
+                    <span class="text-truncate">{tracker.name}</span>
+                    <span
+                      class="spinner-border spinner-border-sm text-body-secondary ms-2 flex-shrink-0 htmx-indicator"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                   </a>
                 </h2>
               </div>
               <span
-                class="text-body-secondary lh-1 flex-shrink-0 position-relative"
+                class="text-body-secondary lh-1 flex-shrink-0 position-relative z-2"
                 title={typeLabel}
               >
                 <Icon name={icon} class="fs-5" />
-                <span
-                  class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-body htmx-indicator pe-none"
-                  aria-hidden="true"
-                >
-                  <span
-                    class="spinner-border spinner-border-sm text-body-secondary"
-                    role="status"
-                  ></span>
-                </span>
               </span>
             </div>
 

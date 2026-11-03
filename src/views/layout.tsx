@@ -47,6 +47,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
       <body
         class="bg-body-secondary min-vh-100 d-flex flex-column"
         hx-boost="true"
+        hx-indicator="#page-progress"
       >
         {/* Top Page Loading Progress Bar (for boosted page navigation) */}
         <div
@@ -63,7 +64,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         {/* Navigation Bar */}
         <nav class="navbar navbar-expand bg-body border-0">
           <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="/" hx-indicator="#page-progress">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="/">
               <Icon name="activity" class="text-primary fs-4" />
               <span>track</span>
             </a>

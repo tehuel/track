@@ -27,7 +27,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('bi-hash')
     expect(html).toContain('<svg')
     expect(html).not.toContain('bootstrap-icons')
-    expect(html).toContain('hx-indicator="#page-progress, closest .card"')
+    expect(html).toContain('hx-indicator="#page-progress, find .spinner-border"')
     expect(html).toContain('htmx-indicator')
   })
 
@@ -222,6 +222,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('id="confirmModal"')
     expect(html).toContain('Confirmar eliminación')
     expect(html).toContain('id="theme-toggle"')
+    expect(html).toContain('hx-indicator="#page-progress"')
     expect(html).toContain('id="page-progress"')
     expect(html).toContain('htmx-indicator')
     expect(html).toContain('progress-bar-animated')
