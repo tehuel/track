@@ -1,102 +1,30 @@
 # track
 
-Lightweight, self-hosted personal tracker built with **Bun**, **Hono**, **SQLite (`bun:sqlite`)**, **HTMX**, and **Bootstrap 5**.
+Tracker personal simple, construido con Bun, Hono, SQLite, HTMX y Bootstrap.
 
-Designed to be run as a container or self-contained binary in a homelab, with authentication delegated to your network perimeter (Tailscale, Cloudflare Tunnel Access, Authelia, or reverse proxy basic auth).
-
----
-
-## Features
-
-- **Zero Auth / Single-Tenant Simplicity**: No users table, passwords, or permission tokens inside the app. Protected at the network perimeter.
-- **Hypermedia-Driven (HTMX)**:
-  - Instant live search and filtering.
-  - One-click habit check-ins and inline numeric/text logging with dynamic card updates.
-  - Chronological event history with fast event deletion.
-- **Responsive Bootstrap 5 UI**:
-  - Dark / light theme with automatic system preference detection.
-  - Clean card dashboard and dedicated single-track detail views.
-- **Fast Local SQLite**:
-  - Powered by Bun's native SQLite driver (`bun:sqlite`) with Write-Ahead Logging (WAL) enabled.
-  - Single database file mounted on a persistent Docker volume (`/data/tracker.db`).
+Diseñado para correr en un servidor personal o homelab.
 
 ---
 
-## Tech Stack
+## Inicio rápido
 
-- **Runtime**: [Bun](https://bun.sh/)
-- **Web Framework**: [Hono](https://hono.dev/) with Hono JSX
-- **Database**: Native SQLite (`bun:sqlite`)
-- **Frontend**: [HTMX](https://htmx.org/) v2 & [Bootstrap 5](https://getbootstrap.com/) v5.3
-- **Testing**: Bun Test (`bun test`)
+### Con binario
 
----
-
-## Quick Start (Local Development)
-
-### 1. Install Dependencies
-```bash
-bun install
-```
-
-### 2. Run the Development Server
-```bash
-bun dev
-```
-
-The application will start on `http://localhost:3000`. The SQLite database will be created automatically at `./tracker.db`.
-
-### 3. Run Tests & Typecheck
-```bash
-bun test
-bun run typecheck
-```
-
----
-
-## Self-Contained Binary & Releases
-
-`track` can be compiled into a single, self-contained executable (including the Bun runtime, application code, and embedded static assets) that runs without installing Bun or `node_modules` on the target host.
-
-### Build Locally
+Descargar el ejecutable para Linux desde [Releases](https://github.com/tehuel/track/releases) y ejecutar:
 
 ```bash
-bun run build
+./track
 ```
 
-This generates `./dist/track` for your current platform. Run it directly from any directory:
+La aplicación inicia en `http://localhost:3000` y crea la base de datos en `./tracker.db`.
+
+El puerto y la ubicación de la base de datos se pueden configurar mediante variables de entorno:
 
 ```bash
-PORT=3000 DB_PATH=./tracker.db ./dist/track
+PORT=8080 DB_PATH=/ruta/tracker.db ./track
 ```
 
-### CI & Creating a GitHub Release
-
-Continuous Integration and Releases are managed in a single workflow (`.github/workflows/ci.yml`) split into three jobs:
-
-- **`test` (`Typecheck & Test`)**: Runs automatically on **every** branch push, tag push, and Pull Request targeting `main` (`bun run typecheck` and `bun test`).
-- **`build` (`Build Binaries`)**: Runs after `test` succeeds for version tags (`v*`) or manual dispatch (`workflow_dispatch`). It compiles the binaries, generates checksums, and uploads them as a workflow artifact.
-- **`publish` (`Publish Release & Image`)**: Runs after `build`, only for version tags. It downloads the build artifact, publishes the GitHub Release, and publishes a multi-architecture Docker image to GitHub Container Registry (`ghcr.io`).
-
-To publish a new release:
-
-1. **Tag and push a new version**:
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
-2. **Automated pipeline**:
-   - Runs the `test` job (`bun run typecheck` and `bun test`).
-   - Runs the `build` job to compile standalone binaries for Linux amd64 (`track-linux-amd64`) and Linux ARM64 (`track-linux-arm64`) and generate `SHA256SUMS` checksums.
-   - Runs the `publish` job to publish the GitHub Release with auto-generated release notes and `ghcr.io/tehuel/track` for both `linux/amd64` and `linux/arm64`.
-
-> You can also trigger a build without creating a release from the **Actions → CI & Release → Run workflow** button (`workflow_dispatch`) to download the compiled binaries as workflow artifacts.
-
----
-
-## Running with Docker
-
-The published image is built from the same self-contained binaries attached to each GitHub Release:
+### Con Docker
 
 ```bash
 docker run -d \
@@ -104,33 +32,40 @@ docker run -d \
   --restart unless-stopped \
   -p 3000:3000 \
   -v "$PWD/data:/data" \
-  -e PORT=3000 \
-  -e DB_PATH=/data/tracker.db \
   ghcr.io/tehuel/track:latest
 ```
 
-- Web UI available at: `http://localhost:3000`
-- SQLite database stored on host at: `./data/tracker.db`
+O con Docker Compose:
 
-To view logs:
-```bash
-docker logs -f track
-```
-
-To stop:
-```bash
-docker stop track
+```yaml
+services:
+  track:
+    image: ghcr.io/tehuel/track:latest
+    container_name: track
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/data
 ```
 
 ---
 
-## Delegating Authentication (Perimeter Auth)
+## Desarrollo local
 
-Because `track` has zero internal user concepts, authentication should be handled at your perimeter or reverse proxy. Recommended options:
+Requiere [Bun](https://bun.sh/).
 
-1. **Tailscale (Simplest & Most Secure)**:
-   Keep the container bound to your host or private network, and access it exclusively over Tailscale from your personal devices.
-2. **Cloudflare Tunnel + Cloudflare Access**:
-   Route your domain to the container using `cloudflared`, and configure a Cloudflare Access policy (e.g. Google Login, GitHub Login, or One-Time PIN) in the Cloudflare Zero Trust dashboard.
-3. **Caddy / Nginx Reverse Proxy with Basic Auth**:
-   Put a reverse proxy in front of the container requiring HTTP Basic Auth or forward auth (e.g. Authelia, Authentik).
+```bash
+bun install    # Instalar dependencias
+bun dev        # Iniciar en modo desarrollo
+bun test       # Correr tests
+bun run build  # Compilar el binario
+```
+
+---
+
+## Nota sobre usuarios
+
+La aplicación no cuenta con registro de usuarios, contraseñas ni inicio de sesión. Está pensada para uso personal.
+
+Para exponer la aplicación a internet, se recomienda hacerlo a través de una red privada como **Tailscale**, o agregar autenticación previa mediante **Cloudflare Access** o un proxy inverso con contraseña.
