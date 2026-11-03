@@ -221,6 +221,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('toast-container')
     expect(html).toContain('id="confirmModal"')
     expect(html).toContain('Confirmar eliminación')
+    expect(html).toContain('id="confirmModalBtn"')
     expect(html).toContain('id="theme-toggle"')
     expect(html).toContain('hx-indicator="#page-progress"')
     expect(html).toContain('id="page-progress"')

@@ -8,7 +8,7 @@ import {
   THEME_JS_PATH,
 } from '../assets'
 import { Icon } from './icons'
-import { Modal, ModalFooter } from './modal'
+import { Modal, ModalFooter, SubmitButton } from './modal'
 
 interface LayoutProps {
   title?: string
@@ -93,9 +93,12 @@ export function Layout({ title = 'track', children }: LayoutProps) {
             <p id="confirmModalQuestion" class="mb-0 text-body"></p>
           </div>
           <ModalFooter>
-            <button type="button" class="btn btn-danger" id="confirmModalBtn">
-              Eliminar
-            </button>
+            <SubmitButton
+              type="button"
+              class="btn btn-danger d-flex align-items-center gap-1"
+              id="confirmModalBtn"
+              label="Eliminar"
+            />
           </ModalFooter>
         </Modal>
 

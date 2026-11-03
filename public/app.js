@@ -48,6 +48,8 @@
 
   document.addEventListener('hidden.bs.modal', (evt) => {
     evt.target.querySelector('form')?.reset();
+    const confirmBtn = evt.target.querySelector('#confirmModalBtn');
+    if (confirmBtn) toggleLoading(confirmBtn, false);
     delete evt.target.dataset.confirmPending;
     delete evt.target.dataset.pendingHide;
     delete evt.target.dataset.modalShown;
@@ -64,16 +66,19 @@
     delete modalEl.dataset.pendingHide;
     const confirmBtn = document.getElementById('confirmModalBtn');
     if (confirmBtn) {
+      toggleLoading(confirmBtn, false);
       // The dialog may still be fading in when its request returns and Bootstrap
       // ignores hide() during the show transition, so defer the close to
       // 'shown.bs.modal' if needed; the pending flag prevents duplicate requests.
       confirmBtn.onclick = () => {
         if (modalEl.dataset.confirmPending) return;
         modalEl.dataset.confirmPending = '1';
+        toggleLoading(confirmBtn, true);
         evt.detail.elt.addEventListener(
           'htmx:afterRequest',
           (e) => {
             delete modalEl.dataset.confirmPending;
+            toggleLoading(confirmBtn, false);
             if (e.detail.successful && window.bootstrap) {
               if (modalEl.dataset.modalShown) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
               else modalEl.dataset.pendingHide = '1';
