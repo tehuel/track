@@ -41,10 +41,16 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                 <h2 class="h6 card-title mb-0 fw-semibold text-truncate">
                   <a
                     href={`/track/${tracker.id}`}
-                    class="stretched-link text-reset text-decoration-none"
+                    class="stretched-link text-reset text-decoration-none d-inline-flex align-items-center"
                     title={tracker.name}
+                    hx-indicator="#page-progress, find .spinner-border"
                   >
-                    {tracker.name}
+                    <span class="text-truncate">{tracker.name}</span>
+                    <span
+                      class="spinner-border spinner-border-sm text-body-secondary ms-2 flex-shrink-0 htmx-indicator"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
                   </a>
                 </h2>
               </div>

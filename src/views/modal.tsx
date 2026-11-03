@@ -54,6 +54,7 @@ export function ModalFooter({ children }: { children: Child }) {
 
 interface SubmitButtonProps {
   label: string
+  id?: string
   type?: 'submit' | 'button'
   class?: string
   title?: string

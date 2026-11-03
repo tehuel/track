@@ -8,7 +8,7 @@ import {
   THEME_JS_PATH,
 } from '../assets'
 import { Icon } from './icons'
-import { Modal, ModalFooter } from './modal'
+import { Modal, ModalFooter, SubmitButton } from './modal'
 
 interface LayoutProps {
   title?: string
@@ -47,7 +47,20 @@ export function Layout({ title = 'track', children }: LayoutProps) {
       <body
         class="bg-body-secondary min-vh-100 d-flex flex-column"
         hx-boost="true"
+        hx-indicator="#page-progress"
       >
+        {/* Top Page Loading Progress Bar (for boosted page navigation) */}
+        <div
+          id="page-progress"
+          class="progress position-fixed top-0 start-0 w-100 rounded-0 htmx-indicator"
+          style="height: 3px; z-index: 2000;"
+          role="progressbar"
+          aria-label="Cargando página..."
+          aria-hidden="true"
+        >
+          <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+        </div>
+
         {/* Navigation Bar */}
         <nav class="navbar navbar-expand bg-body border-0">
           <div class="container">
@@ -80,9 +93,12 @@ export function Layout({ title = 'track', children }: LayoutProps) {
             <p id="confirmModalQuestion" class="mb-0 text-body"></p>
           </div>
           <ModalFooter>
-            <button type="button" class="btn btn-danger" id="confirmModalBtn">
-              Eliminar
-            </button>
+            <SubmitButton
+              type="button"
+              class="btn btn-danger d-flex align-items-center gap-1"
+              id="confirmModalBtn"
+              label="Eliminar"
+            />
           </ModalFooter>
         </Modal>
 
