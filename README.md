@@ -66,6 +66,27 @@ Bootstrap y HTMX se declaran como dependencias de desarrollo y Bun los embebe
 automáticamente al compilar; no es necesario descargar ni copiar assets
 manualmente.
 
+## Releases
+
+Cada merge a `main` que pase los tests crea automáticamente el siguiente
+release PR con los cambios de versión. Al mergear ese PR, `release-please`
+calcula la siguiente versión según Conventional Commits, actualiza
+`package.json` y `CHANGELOG.md`, crea el tag y la GitHub Release. El workflow
+publica además los binarios y las etiquetas correspondientes (`1.1.1`, `1.1`,
+`latest`) en GitHub Container Registry.
+
+Usá estos prefijos en los commits:
+
+```text
+fix: corregir cálculo       # PATCH
+feat: agregar funcionalidad # MINOR
+feat!: cambiar API          # MAJOR
+```
+
+También se puede indicar un cambio incompatible con `BREAKING CHANGE:` en el
+footer del commit. Los merges normales sólo preparan o actualizan el release
+PR; no publican una versión directamente.
+
 ---
 
 ## Nota sobre usuarios
