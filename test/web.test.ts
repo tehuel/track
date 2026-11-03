@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
 import { app } from '../src/index'
 import { db, createTracker, createEvent, getTrackerById, listEventsByTracker } from '../src/db'
+import { version } from '../package.json'
 
 describe('Web UI & HTMX endpoints', () => {
   beforeEach(() => {
@@ -228,6 +229,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('htmx-indicator')
     expect(html).toContain('progress-bar-animated')
     expect(html).toContain('src="/app.js?v=')
+    expect(html).toContain(`<meta name="version" content="${version}"/>`)
   })
 
   it('GET /app.js serves JavaScript UI helpers with version-less and versioned URLs', async () => {

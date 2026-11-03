@@ -7,6 +7,7 @@ import {
   HTMX_JS_PATH,
   THEME_JS_PATH,
 } from '../assets'
+import { version } from '../../package.json'
 import { Icon } from './icons'
 import { Modal, ModalFooter, SubmitButton } from './modal'
 
@@ -23,6 +24,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
       <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="version" content={version} />
         <title>{title}</title>
 
         {/* Runs before stylesheets to prevent FOUC / forced reflow. */}
