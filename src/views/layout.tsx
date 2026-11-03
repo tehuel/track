@@ -51,7 +51,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         {/* Top Page Loading Progress Bar (for boosted page navigation) */}
         <div
           id="page-progress"
-          class="progress position-fixed top-0 start-0 w-100 rounded-0 d-none"
+          class="progress position-fixed top-0 start-0 w-100 rounded-0 htmx-indicator"
           style="height: 3px; z-index: 2000;"
           role="progressbar"
           aria-label="Cargando página..."
@@ -63,7 +63,7 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         {/* Navigation Bar */}
         <nav class="navbar navbar-expand bg-body border-0">
           <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="/">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="/" hx-indicator="#page-progress">
               <Icon name="activity" class="text-primary fs-4" />
               <span>track</span>
             </a>
