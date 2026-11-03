@@ -3,7 +3,7 @@ import faviconIco from '../public/favicon.ico' with { type: 'file' }
 // @ts-expect-error Bun embedded file import
 import faviconSvg from '../public/favicon.svg' with { type: 'file' }
 import { app } from './web'
-import { serveAppJs, serveVendorAsset } from './assets'
+import { serveAppJs, serveThemeJs, serveVendorAsset } from './assets'
 
 // Health check endpoint
 app.get('/health', (c) => {
@@ -14,6 +14,7 @@ app.get('/health', (c) => {
 app.get('/favicon.ico', () => new Response(Bun.file(faviconIco)))
 app.get('/favicon.svg', () => new Response(Bun.file(faviconSvg)))
 app.get('/app.js', () => serveAppJs())
+app.get('/theme.js', () => serveThemeJs())
 app.get('/vendor/*', (c) => serveVendorAsset(c.req.path))
 
 const port = Number(process.env.PORT || 3000)

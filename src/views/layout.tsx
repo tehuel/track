@@ -1,6 +1,12 @@
 import type { Child } from 'hono/jsx'
 import { raw } from 'hono/html'
-import { APP_JS_PATH, BOOTSTRAP_CSS_PATH, BOOTSTRAP_JS_PATH, HTMX_JS_PATH } from '../assets'
+import {
+  APP_JS_PATH,
+  BOOTSTRAP_CSS_PATH,
+  BOOTSTRAP_JS_PATH,
+  HTMX_JS_PATH,
+  THEME_JS_PATH,
+} from '../assets'
 import { Icon } from './icons'
 import { Modal, ModalFooter } from './modal'
 
@@ -19,18 +25,8 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{title}</title>
 
-        {/* Bootstrap Theme Manager (runs immediately before stylesheets to prevent FOUC / forced reflow) */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            (() => {
-              const theme = localStorage.getItem('theme') ||
-                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-              document.documentElement.setAttribute('data-bs-theme', theme);
-            })();
-          `,
-          }}
-        />
+        {/* Runs before stylesheets to prevent FOUC / forced reflow. */}
+        <script src={THEME_JS_PATH}></script>
 
         {/* Favicons */}
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
