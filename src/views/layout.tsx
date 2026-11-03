@@ -1,6 +1,12 @@
 import type { Child } from 'hono/jsx'
 import { raw } from 'hono/html'
-import { APP_JS_PATH } from '../assets'
+import {
+  APP_JS_PATH,
+  BOOTSTRAP_CSS_PATH,
+  BOOTSTRAP_JS_PATH,
+  HTMX_JS_PATH,
+  THEME_JS_PATH,
+} from '../assets'
 import { Icon } from './icons'
 import { Modal, ModalFooter } from './modal'
 
@@ -19,22 +25,8 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{title}</title>
 
-        {/* Bootstrap Theme Manager (runs immediately before stylesheets to prevent FOUC / forced reflow) */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-            (() => {
-              const theme = localStorage.getItem('theme') ||
-                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-              document.documentElement.setAttribute('data-bs-theme', theme);
-            })();
-          `,
-          }}
-        />
-
-        {/* Preconnect to CDN */}
-        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="" />
-        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+        {/* Runs before stylesheets to prevent FOUC / forced reflow. */}
+        <script src={THEME_JS_PATH}></script>
 
         {/* Favicons */}
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -43,16 +35,19 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         {/* Bootstrap 5 CSS */}
         <link
           rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          href={BOOTSTRAP_CSS_PATH}
         />
 
         {/* HTMX, Bootstrap 5 & App UI JS (deferred to download in parallel and execute without blocking parser) */}
-        <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" defer></script>
+        <script src={HTMX_JS_PATH} defer></script>
+        <script src={BOOTSTRAP_JS_PATH} defer></script>
         <script src={APP_JS_PATH} defer></script>
       </head>
 
-      <body class="bg-body-secondary min-vh-100 d-flex flex-column">
+      <body
+        class="bg-body-secondary min-vh-100 d-flex flex-column"
+        hx-boost="true"
+      >
         {/* Navigation Bar */}
         <nav class="navbar navbar-expand bg-body border-0">
           <div class="container">
@@ -65,8 +60,8 @@ export function Layout({ title = 'track', children }: LayoutProps) {
               {/* Theme Toggle Button */}
               <button
                 type="button"
+                id="theme-toggle"
                 class="btn btn-sm border-0 text-body-secondary d-flex align-items-center justify-content-center"
-                onclick="window.toggleTheme()"
                 title="Cambiar tema"
                 aria-label="Cambiar tema"
               >

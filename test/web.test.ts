@@ -15,8 +15,11 @@ describe('Web UI & HTMX endpoints', () => {
     expect(res.status).toBe(200)
     const html = await res.text()
     expect(html).toContain('<!DOCTYPE html>')
+    expect(html).toContain('hx-boost="true"')
     expect(html).toContain('Tocar Guitarra')
-    expect(html).toContain('htmx.org')
+    expect(html).toContain('/vendor/htmx.min.js')
+    expect(html).toContain('src="/theme.js"')
+    expect(html).not.toContain('cdn.jsdelivr.net')
     expect(html).toContain('Crear track')
     expect(html).toContain('/track/guitar')
     expect(html).toContain('title="Hábito"')
@@ -24,6 +27,28 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('bi-hash')
     expect(html).toContain('<svg')
     expect(html).not.toContain('bootstrap-icons')
+  })
+
+  it('serves frontend vendor assets from declared packages', async () => {
+    const [css, bootstrap, htmx] = await Promise.all([
+      app.request('/vendor/bootstrap.min.css'),
+      app.request('/vendor/bootstrap.min.js'),
+      app.request('/vendor/htmx.min.js'),
+    ])
+
+    expect(css.status).toBe(200)
+    expect(css.headers.get('content-type')).toContain('text/css')
+    expect(bootstrap.status).toBe(200)
+    expect(bootstrap.headers.get('content-type')).toContain('application/javascript')
+    expect(htmx.status).toBe(200)
+    expect(htmx.headers.get('content-type')).toContain('application/javascript')
+  })
+
+  it('serves the theme initializer as a cacheable asset', async () => {
+    const res = await app.request('/theme.js')
+    expect(res.status).toBe(200)
+    expect(res.headers.get('content-type')).toContain('application/javascript')
+    expect(res.headers.get('cache-control')).toContain('immutable')
   })
 
   it('GET /?q=... with HX-Target trackers-grid returns filtered HTMX partial and sets HX-Push-Url', async () => {
@@ -194,6 +219,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('toast-container')
     expect(html).toContain('id="confirmModal"')
     expect(html).toContain('Confirmar eliminación')
+    expect(html).toContain('id="theme-toggle"')
     expect(html).toContain('src="/app.js?v=')
   })
 
@@ -210,7 +236,8 @@ describe('Web UI & HTMX endpoints', () => {
       expect(js).toContain("evt.key === 'Enter'")
       expect(js).toContain("evt.key === 'Escape'")
       expect(js).toContain('confirmPending')
-      expect(js).toContain('toggleTheme')
+      expect(js).toContain('#theme-toggle')
+      expect(js).not.toContain('window.toggleTheme')
     }
   })
 
