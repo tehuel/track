@@ -28,6 +28,21 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).not.toContain('bootstrap-icons')
   })
 
+  it('serves frontend vendor assets from declared packages', async () => {
+    const [css, bootstrap, htmx] = await Promise.all([
+      app.request('/vendor/bootstrap.min.css'),
+      app.request('/vendor/bootstrap.min.js'),
+      app.request('/vendor/htmx.min.js'),
+    ])
+
+    expect(css.status).toBe(200)
+    expect(css.headers.get('content-type')).toContain('text/css')
+    expect(bootstrap.status).toBe(200)
+    expect(bootstrap.headers.get('content-type')).toContain('application/javascript')
+    expect(htmx.status).toBe(200)
+    expect(htmx.headers.get('content-type')).toContain('application/javascript')
+  })
+
   it('GET /?q=... with HX-Target trackers-grid returns filtered HTMX partial and sets HX-Push-Url', async () => {
     createTracker({ id: 'run', name: 'Correr mañana', type: 'numeric' })
     createTracker({ id: 'meditate', name: 'Meditación', type: 'habit' })

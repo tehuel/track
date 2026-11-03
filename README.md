@@ -62,6 +62,10 @@ bun test       # Correr tests
 bun run build  # Compilar el binario
 ```
 
+Bootstrap y HTMX se declaran como dependencias de desarrollo y Bun los embebe
+automáticamente al compilar; no es necesario descargar ni copiar assets
+manualmente.
+
 ---
 
 ## Nota sobre usuarios

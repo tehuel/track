@@ -5,11 +5,11 @@
 // @ts-expect-error Bun embedded file import
 import appJsFile from '../public/app.js' with { type: 'file' }
 // @ts-expect-error Bun embedded file import
-import bootstrapCssFile from '../public/vendor/bootstrap.min.css' with { type: 'file' }
+import bootstrapCssFile from 'bootstrap/dist/css/bootstrap.min.css' with { type: 'file' }
 // @ts-expect-error Bun embedded file import
-import bootstrapJsFile from '../public/vendor/bootstrap.min.js' with { type: 'file' }
+import bootstrapJsFile from 'bootstrap/dist/js/bootstrap.min.js' with { type: 'file' }
 // @ts-expect-error Bun embedded file import
-import htmxJsFile from '../public/vendor/htmx.min.js' with { type: 'file' }
+import htmxJsFile from 'htmx.org/dist/htmx.min.js' with { type: 'file' }
 
 const appJsBytes = await Bun.file(appJsFile).arrayBuffer()
 const appJsVersion = Bun.hash(new Uint8Array(appJsBytes)).toString(16)
@@ -39,14 +39,15 @@ function serveAsset(file: string, contentType: string): Response {
   })
 }
 
-export function serveBootstrapCss(): Response {
-  return serveAsset(bootstrapCssFile, 'text/css; charset=utf-8')
-}
-
-export function serveBootstrapJs(): Response {
-  return serveAsset(bootstrapJsFile, 'application/javascript; charset=utf-8')
-}
-
-export function serveHtmxJs(): Response {
-  return serveAsset(htmxJsFile, 'application/javascript; charset=utf-8')
+export function serveVendorAsset(path: string): Response {
+  switch (path) {
+    case BOOTSTRAP_CSS_PATH:
+      return serveAsset(bootstrapCssFile, 'text/css; charset=utf-8')
+    case BOOTSTRAP_JS_PATH:
+      return serveAsset(bootstrapJsFile, 'application/javascript; charset=utf-8')
+    case HTMX_JS_PATH:
+      return serveAsset(htmxJsFile, 'application/javascript; charset=utf-8')
+    default:
+      return new Response('Not found', { status: 404 })
+  }
 }
