@@ -7,13 +7,20 @@
     document.documentElement.setAttribute('data-bs-theme', next);
   });
 
-  // Button loading feedback during HTMX requests (the element itself or a form's submit button)
+  // Loading feedback during HTMX requests (buttons, form submit, and boosted card links)
   const toggleLoading = (elt, loading) => {
     const btn = elt?.matches?.('button') ? elt : elt?.matches?.('form') && elt.querySelector('[type="submit"]');
     if (btn) {
       btn.disabled = loading;
       btn.querySelector('.spinner-border')?.classList.toggle('d-none', !loading);
       btn.querySelector('.bi')?.classList.toggle('d-none', loading);
+    }
+
+    const card = elt?.closest?.('a')?.closest?.('.card');
+    if (card) {
+      card.classList.toggle('opacity-75', loading);
+      card.querySelector('.tracker-card-spinner')?.classList.toggle('d-none', !loading);
+      card.querySelector('.tracker-card-icon')?.classList.toggle('d-none', loading);
     }
   };
 
@@ -117,9 +124,17 @@
   );
 
   // HTMX request lifecycle: spinner feedback, and close the hosting modal on success
-  document.addEventListener('htmx:beforeRequest', (evt) => toggleLoading(evt.detail.elt, true));
+  document.addEventListener('htmx:beforeRequest', (evt) => {
+    toggleLoading(evt.detail.elt, true);
+    if (evt.detail.boosted) {
+      document.getElementById('page-progress')?.classList.remove('d-none');
+    }
+  });
   document.addEventListener('htmx:afterRequest', (evt) => {
     toggleLoading(evt.detail.elt, false);
+    if (evt.detail.boosted) {
+      document.getElementById('page-progress')?.classList.add('d-none');
+    }
     const modalEl = evt.detail.successful && evt.detail.elt.closest?.('.modal');
     if (modalEl && window.bootstrap) bootstrap.Modal.getInstance(modalEl)?.hide();
   });

@@ -52,7 +52,12 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
                 class="text-body-secondary lh-1 flex-shrink-0 position-relative z-2"
                 title={typeLabel}
               >
-                <Icon name={icon} class="fs-5" />
+                <span
+                  class="spinner-border spinner-border-sm text-body-secondary d-none tracker-card-spinner"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                <Icon name={icon} class="fs-5 tracker-card-icon" />
               </span>
             </div>
 

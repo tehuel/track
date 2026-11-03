@@ -48,6 +48,18 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         class="bg-body-secondary min-vh-100 d-flex flex-column"
         hx-boost="true"
       >
+        {/* Top Page Loading Progress Bar (for boosted page navigation) */}
+        <div
+          id="page-progress"
+          class="progress position-fixed top-0 start-0 w-100 rounded-0 d-none"
+          style="height: 3px; z-index: 2000;"
+          role="progressbar"
+          aria-label="Cargando página..."
+          aria-hidden="true"
+        >
+          <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+        </div>
+
         {/* Navigation Bar */}
         <nav class="navbar navbar-expand bg-body border-0">
           <div class="container">
