@@ -1,19 +1,16 @@
-FROM oven/bun:alpine
+FROM debian:bookworm-slim
 WORKDIR /app
 
-# Install production dependencies
-COPY package.json bun.lock ./
-RUN bun install --production --frozen-lockfile
+ARG TARGETARCH
 
-# Copy application source and assets
-COPY src/ ./src/
-COPY public/ ./public/
-COPY tsconfig.json ./
+RUN groupadd --system track && useradd --system --gid track track
+COPY dist/track-linux-${TARGETARCH} /usr/local/bin/track
+RUN chmod 755 /usr/local/bin/track && mkdir /data && chown track:track /data
 
-# Default environment configuration
 ENV PORT=3000
 ENV DB_PATH=/data/tracker.db
 VOLUME ["/data"]
 
 EXPOSE 3000
-CMD ["bun", "src/index.ts"]
+USER track
+ENTRYPOINT ["/usr/local/bin/track"]

@@ -45,5 +45,5 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
   - `types.ts` — Centralized TypeScript interfaces.
 - `public/` — Static assets (favicons, icons, embedded at compile time).
 - `test/` — Bun test suite (`db.test.ts`, `web.test.ts`).
-- `.github/workflows/ci.yml` — Automated CI/CD pipeline (`test` job on all pushes/PRs, `release` job on `v*` tags).
-- `Dockerfile` & `docker-compose.yml` — Containerization and self-hosting configuration.
+- `.github/workflows/ci.yml` — Automated CI/CD pipeline (`test`, `build`, and `publish` jobs).
+- `Dockerfile` — Runtime image definition built from the published self-contained binaries.
