@@ -138,24 +138,28 @@ function EditTrackerModal({ tracker }: { tracker: Tracker }) {
 export function EventsSection({ tracker, events }: DetailProps) {
   return (
     <div class="mb-4" id="events-section">
-      <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-        <div class="d-flex align-items-baseline gap-2">
-          <h2 class="h5 mb-0 fw-semibold">Historial de entradas</h2>
-          <span class="text-body-secondary small">
-            {events.length === 1 ? '1 entrada' : `${events.length} entradas`}
-          </span>
+      <div class="row g-2 align-items-center justify-content-between mb-3">
+        <div class="col-12 col-sm-auto">
+          <div class="d-flex align-items-baseline gap-2">
+            <h2 class="h5 mb-0 fw-semibold">Historial de entradas</h2>
+            <span class="text-body-secondary small">
+              {events.length === 1 ? '1 entrada' : `${events.length} entradas`}
+            </span>
+          </div>
         </div>
 
-        {/* Open Modal for detailed log */}
-        <button
-          type="button"
-          class="btn btn-primary d-flex align-items-center gap-1"
-          data-bs-toggle="modal"
-          data-bs-target="#logModal"
-        >
-          <Icon name="plus-lg" />
-          <span>Registrar entrada</span>
-        </button>
+        <div class="col-auto ms-auto">
+          {/* Open Modal for detailed log */}
+          <button
+            type="button"
+            class="btn btn-primary d-flex align-items-center gap-1"
+            data-bs-toggle="modal"
+            data-bs-target="#logModal"
+          >
+            <Icon name="plus-lg" />
+            <span>Registrar entrada</span>
+          </button>
+        </div>
       </div>
 
       {events.length === 0 ? (
