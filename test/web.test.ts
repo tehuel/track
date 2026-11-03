@@ -219,6 +219,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('toast-container')
     expect(html).toContain('id="confirmModal"')
     expect(html).toContain('Confirmar eliminación')
+    expect(html).toContain('id="theme-toggle"')
     expect(html).toContain('src="/app.js?v=')
   })
 
@@ -235,7 +236,8 @@ describe('Web UI & HTMX endpoints', () => {
       expect(js).toContain("evt.key === 'Enter'")
       expect(js).toContain("evt.key === 'Escape'")
       expect(js).toContain('confirmPending')
-      expect(js).toContain('toggleTheme')
+      expect(js).toContain('#theme-toggle')
+      expect(js).not.toContain('window.toggleTheme')
     }
   })
 

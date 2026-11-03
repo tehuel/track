@@ -60,8 +60,8 @@ export function Layout({ title = 'track', children }: LayoutProps) {
               {/* Theme Toggle Button */}
               <button
                 type="button"
+                id="theme-toggle"
                 class="btn btn-sm border-0 text-body-secondary d-flex align-items-center justify-content-center"
-                onclick="window.toggleTheme()"
                 title="Cambiar tema"
                 aria-label="Cambiar tema"
               >

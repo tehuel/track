@@ -1,10 +1,11 @@
 (() => {
-  // Theme toggle helper
-  window.toggleTheme = () => {
+  // Theme toggle
+  document.addEventListener('click', (evt) => {
+    if (!evt.target?.closest?.('#theme-toggle')) return;
     const next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
     localStorage.setItem('theme', next);
     document.documentElement.setAttribute('data-bs-theme', next);
-  };
+  });
 
   // Button loading feedback during HTMX requests (the element itself or a form's submit button)
   const toggleLoading = (elt, loading) => {
