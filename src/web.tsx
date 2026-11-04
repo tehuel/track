@@ -62,7 +62,9 @@ function parseEventForm(track: Track, body: FormBody) {
   const value = Number.isFinite(parsedValue) ? parsedValue : null
   const note = field(body, 'note')
   const rawTimestamp = field(body, 'timestamp')
-  const date = rawTimestamp ? new Date(rawTimestamp) : new Date()
+  const date = rawTimestamp
+    ? new Date(rawTimestamp.endsWith('Z') ? rawTimestamp : `${rawTimestamp}Z`)
+    : new Date()
   const timestamp = Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString()
 
   if (track.type === 'numeric' && value === null) return null
