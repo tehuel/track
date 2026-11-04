@@ -245,6 +245,25 @@ interface BucketRow {
   total: number
 }
 
+function queryBucketTotals(
+  track: Track,
+  keyLen: 7 | 10,
+  startKey: string
+): Map<string, number> {
+  const rows = db
+    .query<BucketRow, [number, string, string, number, string, number]>(
+      `SELECT
+         substr(timestamp, 1, ?) AS key,
+         COALESCE(SUM(CASE WHEN ? = 'numeric' THEN COALESCE(value, 0) ELSE 1 END), 0) AS total
+       FROM track_events
+       WHERE track_id = ? AND substr(timestamp, 1, ?) >= ?
+       GROUP BY substr(timestamp, 1, ?)`
+    )
+    .all(keyLen, track.type, track.id, keyLen, startKey, keyLen)
+
+  return new Map(rows.map((r) => [r.key, Number(r.total)]))
+}
+
 /**
  * Returns a continuous time series of accumulated values (`SUM(value)` for
  * numeric tracks, `COUNT(*)` for habit/text tracks) for the requested view.
@@ -263,72 +282,46 @@ export function getTrackSeries(
   if (view === '12m' && mode !== 'grid') {
     const endYear = now.getUTCFullYear()
     const endMonth = now.getUTCMonth()
-    const startDate = new Date(Date.UTC(endYear, endMonth - 11, 1))
-    const startKey = startDate.toISOString().slice(0, 7)
+    const startKey = new Date(Date.UTC(endYear, endMonth - 11, 1))
+      .toISOString()
+      .slice(0, 7)
+    const totals = queryBucketTotals(track, 7, startKey)
 
-    const rows = db
-      .query<BucketRow, [string, string, string]>(
-        `SELECT
-           substr(timestamp, 1, 7) AS key,
-           COALESCE(SUM(CASE WHEN ? = 'numeric' THEN COALESCE(value, 0) ELSE 1 END), 0) AS total
-         FROM track_events
-         WHERE track_id = ? AND substr(timestamp, 1, 7) >= ?
-         GROUP BY substr(timestamp, 1, 7)`
-      )
-      .all(track.type, track.id, startKey)
-
-    const totals = new Map(rows.map((r) => [r.key, Number(r.total)]))
-    const points: ChartPoint[] = []
-
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(Date.UTC(endYear, endMonth - i, 1))
+    return Array.from({ length: 12 }, (_, idx) => {
+      const d = new Date(Date.UTC(endYear, endMonth - (11 - idx), 1))
       const y = d.getUTCFullYear()
       const m = d.getUTCMonth()
       const key = `${y}-${String(m + 1).padStart(2, '0')}`
       const shortLabel = MONTHS_SHORT[m] ?? ''
-      points.push({
+      return {
         key,
         label: `${shortLabel} ${y}`,
         shortLabel,
         value: totals.get(key) ?? 0,
-      })
-    }
-
-    return points
+      }
+    })
   }
 
   const days = view === '12m' ? 364 : view === '30d' ? 30 : 7
   const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
   const startUtc = todayUtc - (days - 1) * 86_400_000
-  const startKey = new Date(startUtc).toISOString().slice(0, 10)
+  const totals = queryBucketTotals(
+    track,
+    10,
+    new Date(startUtc).toISOString().slice(0, 10)
+  )
 
-  const rows = db
-    .query<BucketRow, [string, string, string]>(
-      `SELECT
-         substr(timestamp, 1, 10) AS key,
-         COALESCE(SUM(CASE WHEN ? = 'numeric' THEN COALESCE(value, 0) ELSE 1 END), 0) AS total
-       FROM track_events
-       WHERE track_id = ? AND substr(timestamp, 1, 10) >= ?
-       GROUP BY substr(timestamp, 1, 10)`
-    )
-    .all(track.type, track.id, startKey)
-
-  const totals = new Map(rows.map((r) => [r.key, Number(r.total)]))
-  const points: ChartPoint[] = []
-
-  for (let i = 0; i < days; i++) {
+  return Array.from({ length: days }, (_, i) => {
     const d = new Date(startUtc + i * 86_400_000)
     const key = d.toISOString().slice(0, 10)
     const dayNum = d.getUTCDate()
     const weekday = WEEKDAYS_SHORT[d.getUTCDay()] ?? ''
     const month = MONTHS_SHORT[d.getUTCMonth()]?.toLowerCase() ?? ''
-    points.push({
+    return {
       key,
       label: `${weekday} ${dayNum} ${month}`,
       shortLabel: days === 7 ? weekday : String(dayNum),
       value: totals.get(key) ?? 0,
-    })
-  }
-
-  return points
+    }
+  })
 }

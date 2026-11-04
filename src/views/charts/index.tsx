@@ -1,17 +1,62 @@
 import {
   CHART_PERIODS,
   getTrackChartMode,
+  type ChartMode,
   type ChartPeriod,
   type ChartPoint,
   type Track,
   type TrackEvent,
 } from '../../types'
-import { DetailBarsChart, MiniBarsChart } from './bars'
-import { DetailGridChart, MiniGridChart } from './grid'
-import { DetailLineChart, MiniLineChart } from './line'
+import { BarsChart } from './bars'
+import { GridChart } from './grid'
+import { LineChart } from './line'
 import { formatChartValue, getTrackColor } from './utils'
 
 export { formatChartValue }
+
+function renderModeChart(
+  mode: ChartMode,
+  props: {
+    track: Track
+    points: ChartPoint[]
+    period?: ChartPeriod
+    mini?: boolean
+  }
+) {
+  const color = getTrackColor(props.track)
+  const period = props.period ?? '7d'
+  const mini = Boolean(props.mini)
+
+  if (mode === 'grid') {
+    return (
+      <GridChart
+        track={props.track}
+        period={period}
+        points={props.points}
+        color={color}
+        mini={mini}
+      />
+    )
+  }
+  if (mode === 'bars') {
+    return (
+      <BarsChart
+        points={props.points}
+        color={color}
+        mini={mini}
+        ariaLabel={mini ? 'Últimos 7 días' : `Gráfico de barras (${period})`}
+      />
+    )
+  }
+  return (
+    <LineChart
+      points={props.points}
+      color={color}
+      mini={mini}
+      ariaLabel={mini ? 'Últimos 7 días' : `Gráfico de línea (${period})`}
+    />
+  )
+}
 
 interface DashboardMiniChartProps {
   track: Track
@@ -25,15 +70,11 @@ export function DashboardMiniChart({
   latestEvent,
 }: DashboardMiniChartProps) {
   const mode = getTrackChartMode(track, 'dashboard')
-  const color = getTrackColor(track)
-  const maxVal = Math.max(1, ...points.map((p) => p.value))
 
   return (
     <div class="d-flex align-items-center justify-content-between gap-2 mt-3 position-relative z-2">
       <div class="d-flex align-items-center flex-shrink-0" data-chart-mode={mode}>
-        {mode === 'grid' && <MiniGridChart points={points} color={color} maxVal={maxVal} />}
-        {mode === 'bars' && <MiniBarsChart points={points} color={color} />}
-        {mode === 'line' && <MiniLineChart points={points} color={color} />}
+        {renderModeChart(mode, { track, points, mini: true })}
       </div>
 
       <div class="text-body-secondary small text-truncate">
@@ -61,8 +102,6 @@ export function TrackChartSection({
   oob = false,
 }: TrackChartSectionProps) {
   const mode = getTrackChartMode(track, period)
-  const color = getTrackColor(track)
-  const maxVal = Math.max(1, ...points.map((p) => p.value))
   const minWidth =
     period === '12m' && mode === 'grid'
       ? '34rem'
@@ -88,29 +127,7 @@ export function TrackChartSection({
           class="d-flex flex-column justify-content-center h-100 w-100"
           style={{ minWidth }}
         >
-          {mode === 'grid' && (
-            <DetailGridChart
-              track={track}
-              period={period}
-              points={points}
-              color={color}
-              maxVal={maxVal}
-            />
-          )}
-          {mode === 'bars' && (
-            <DetailBarsChart
-              period={period}
-              points={points}
-              color={color}
-            />
-          )}
-          {mode === 'line' && (
-            <DetailLineChart
-              period={period}
-              points={points}
-              color={color}
-            />
-          )}
+          {renderModeChart(mode, { track, period, points })}
         </div>
       </div>
 

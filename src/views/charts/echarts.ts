@@ -1,6 +1,6 @@
 import * as echarts from 'echarts/core'
 import { BarChart, LineChart, type BarSeriesOption, type LineSeriesOption } from 'echarts/charts'
-import { GridComponent, type GridComponentOption } from 'echarts/components'
+import { GridComponent } from 'echarts/components'
 import { SVGRenderer } from 'echarts/renderers'
 import { raw } from 'hono/html'
 import type { ChartPoint } from '../../types'
@@ -8,27 +8,30 @@ import { formatChartValue } from './utils'
 
 echarts.use([BarChart, LineChart, GridComponent, SVGRenderer])
 
-export type EChartsSSRConfs = echarts.ComposeOption<
-  BarSeriesOption | LineSeriesOption | GridComponentOption
->
-
-interface RenderEChartsProps {
-  width: number
-  height: number
-  option: EChartsSSRConfs
+export interface CartesianChartProps {
   points: ChartPoint[]
+  color: string
   ariaLabel: string
-  responsive?: boolean
+  mini?: boolean
 }
 
-export function renderEChartsSvg({
-  width,
-  height,
-  option,
+interface RenderCartesianOptions extends CartesianChartProps {
+  boundaryGap?: boolean
+  scaleY?: boolean
+  series: BarSeriesOption | LineSeriesOption
+}
+
+export function renderCartesianChart({
   points,
   ariaLabel,
-  responsive = false,
-}: RenderEChartsProps) {
+  mini = false,
+  boundaryGap = true,
+  scaleY = false,
+  series,
+}: RenderCartesianOptions) {
+  const width = mini ? 68 : 560
+  const height = mini ? 20 : 130
+
   const chart = echarts.init(null, null, {
     renderer: 'svg',
     ssr: true,
@@ -38,33 +41,51 @@ export function renderEChartsSvg({
 
   chart.setOption({
     animation: false,
-    ...option,
+    grid: mini
+      ? { left: 2, right: 2, top: 2, bottom: 2 }
+      : { left: 18, right: 18, top: 12, bottom: 22 },
+    xAxis: {
+      type: 'category',
+      show: !mini,
+      boundaryGap,
+      data: points.map((p) => (mini ? p.key : p.shortLabel)),
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: {
+        color: 'currentColor',
+        opacity: 0.6,
+        fontSize: 11,
+        interval: points.length > 12 ? 4 : 0,
+      },
+    },
+    yAxis: {
+      type: 'value',
+      show: false,
+      ...(scaleY ? { scale: true } : { min: 0 }),
+    },
+    series: [series],
   })
 
   let svg = chart.renderToSVGString()
   chart.dispose()
 
-  // Inject native <title> tooltips on each rendered series item using ECharts SSR metadata
   svg = svg.replace(
     /<path\b([^>]*?\becmeta_data_index="(\d+)"[^>]*?)><\/path>/g,
     (match, attrs: string, idxStr: string) => {
       const p = points[Number(idxStr)]
-      if (!p) return match
-      return `<path${attrs}><title>${p.label}: ${formatChartValue(p.value)}</title></path>`
+      return p
+        ? `<path${attrs}><title>${p.label}: ${formatChartValue(p.value)}</title></path>`
+        : match
     }
   )
 
-  if (responsive) {
-    svg = svg.replace(
-      /^<svg width="\d+" height="\d+"/,
-      `<svg class="w-100 h-100" role="img" aria-label="${ariaLabel}"`
-    )
-  } else {
-    svg = svg.replace(
-      /^<svg /,
-      `<svg role="img" aria-label="${ariaLabel}" `
-    )
-  }
+  const rootAttrs = mini
+    ? `<svg role="img" aria-label="${ariaLabel}" `
+    : `<svg class="w-100 h-100" role="img" aria-label="${ariaLabel}"`
 
-  return raw(svg)
+  return raw(
+    mini
+      ? svg.replace(/^<svg /, rootAttrs)
+      : svg.replace(/^<svg width="\d+" height="\d+"/, rootAttrs)
+  )
 }
