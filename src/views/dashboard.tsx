@@ -1,25 +1,25 @@
 import {
-  TRACKER_TYPES,
-  getTrackerIcon,
-  getTrackerTypeLabel,
-  type Tracker,
+  TRACK_TYPES,
+  getTrackIcon,
+  getTrackTypeLabel,
+  type Track,
 } from '../types'
 import { Layout } from './layout'
 import { Icon } from './icons'
 import { ColorPicker, FormModal, SubmitButton } from './modal'
 
 interface DashboardProps {
-  trackers: Tracker[]
+  trackers: Track[]
   query?: string
 }
 
 interface TrackerCardProps {
-  tracker: Tracker
+  tracker: Track
 }
 
 export function TrackerCard({ tracker }: TrackerCardProps) {
-  const icon = getTrackerIcon(tracker.type)
-  const typeLabel = getTrackerTypeLabel(tracker.type)
+  const icon = getTrackIcon(tracker.type)
+  const typeLabel = getTrackTypeLabel(tracker.type)
 
   return (
     <div class="col" id={`tracker-card-${tracker.id}`}>
@@ -140,7 +140,7 @@ function NewTrackerModal() {
       <div class="mb-3">
         <label class="form-label fw-medium d-block">Tipo</label>
         <div class="btn-group w-100" role="group" aria-label="Tipo">
-          {TRACKER_TYPES.map((t, idx) => (
+          {TRACK_TYPES.map((t, idx) => (
             <>
               <input
                 type="radio"

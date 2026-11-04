@@ -1,6 +1,6 @@
 import type { Child } from 'hono/jsx'
 import { Icon } from './icons'
-import { TRACKER_COLORS } from '../types'
+import { TRACK_COLORS } from '../types'
 
 interface ModalProps {
   id: string
@@ -137,7 +137,7 @@ export function ColorPicker({ selectedColor = null, idPrefix = 'tracker-color' }
         >
           <Icon name="slash-circle" />
         </label>
-        {TRACKER_COLORS.map((c) => (
+        {TRACK_COLORS.map((c) => (
           <>
             <input
               type="radio"

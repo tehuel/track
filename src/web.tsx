@@ -10,7 +10,7 @@ import {
   createEvent,
   deleteEvent,
 } from './db'
-import { parseTrackerColor, parseTrackerType, type Tracker } from './types'
+import { parseTrackColor, parseTrackType, type Track } from './types'
 import { DashboardPage, TrackersGrid, TrackerCard } from './views/dashboard'
 import { DetailPage, EventsSection } from './views/detail'
 
@@ -40,7 +40,7 @@ function toast(c: Context, message: string) {
   c.header('HX-Trigger', JSON.stringify({ showToast: message }))
 }
 
-function renderEventsSection(c: Context, tracker: Tracker) {
+function renderEventsSection(c: Context, tracker: Track) {
   const events = listEventsByTracker(tracker.id, EVENTS_LIMIT)
   return c.html(<EventsSection tracker={tracker} events={events} />)
 }
@@ -50,12 +50,12 @@ function parseTrackerForm(body: FormBody) {
   return {
     name: field(body, 'name'),
     description: field(body, 'description'),
-    color: parseTrackerColor(body['color']),
+    color: parseTrackColor(body['color']),
   }
 }
 
 /** Parses and validates an event for the given tracker type. Returns `null` if invalid. */
-function parseEventForm(tracker: Tracker, body: FormBody) {
+function parseEventForm(tracker: Track, body: FormBody) {
   const rawValue = field(body, 'value')
   const parsedValue = rawValue === null ? NaN : Number(rawValue)
   const value = Number.isFinite(parsedValue) ? parsedValue : null
@@ -102,7 +102,7 @@ app.post('/track', async (c) => {
   createTracker({
     id: generateUniqueSlug(name),
     name,
-    type: parseTrackerType(body['type']),
+    type: parseTrackType(body['type']),
     ...rest,
   })
   return navigate(c, '/')

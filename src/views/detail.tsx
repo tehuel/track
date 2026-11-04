@@ -1,16 +1,16 @@
 import {
-  getTrackerIcon,
-  getTrackerTypeLabel,
-  type Tracker,
-  type TrackerEvent,
+  getTrackIcon,
+  getTrackTypeLabel,
+  type Track,
+  type TrackEvent,
 } from '../types'
 import { Layout } from './layout'
 import { Icon } from './icons'
 import { ColorPicker, FormModal } from './modal'
 
 interface DetailProps {
-  tracker: Tracker
-  events: TrackerEvent[]
+  tracker: Track
+  events: TrackEvent[]
 }
 
 function formatDate(iso: string): string {
@@ -27,7 +27,7 @@ function formatDate(iso: string): string {
   }
 }
 
-function LogEntryModal({ tracker }: { tracker: Tracker }) {
+function LogEntryModal({ tracker }: { tracker: Track }) {
   const isText = tracker.type === 'text'
 
   return (
@@ -87,7 +87,7 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
   )
 }
 
-function EditTrackerModal({ tracker }: { tracker: Tracker }) {
+function EditTrackerModal({ tracker }: { tracker: Track }) {
   return (
     <FormModal
       id="editModal"
@@ -202,8 +202,8 @@ export function EventsSection({ tracker, events }: DetailProps) {
 }
 
 export function DetailPage({ tracker, events }: DetailProps) {
-  const icon = getTrackerIcon(tracker.type)
-  const typeLabel = getTrackerTypeLabel(tracker.type)
+  const icon = getTrackIcon(tracker.type)
+  const typeLabel = getTrackTypeLabel(tracker.type)
 
   return (
     <Layout title={`${tracker.name} - track`}>

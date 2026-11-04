@@ -1,5 +1,5 @@
 import { Database } from 'bun:sqlite'
-import type { Tracker, TrackerEvent } from './types'
+import type { Track, TrackEvent } from './types'
 
 const dbPath =
   process.env.NODE_ENV === 'test' ? ':memory:' : process.env.DB_PATH || 'tracker.db'
@@ -42,17 +42,17 @@ function slugify(text: string): string {
 
 // --- Tracker Queries ---
 
-export function listTrackers(): Tracker[] {
+export function listTrackers(): Track[] {
   return db
-    .query<Tracker, []>(
+    .query<Track, []>(
       'SELECT id, name, type, description, color, created_at FROM trackers ORDER BY created_at ASC'
     )
     .all()
 }
 
-export function getTrackerById(id: string): Tracker | null {
+export function getTrackerById(id: string): Track | null {
   return db
-    .query<Tracker, [string]>(
+    .query<Track, [string]>(
       'SELECT id, name, type, description, color, created_at FROM trackers WHERE id = ?'
     )
     .get(id)
@@ -66,7 +66,7 @@ export function generateUniqueSlug(name: string): string {
   return `${baseSlug}-${crypto.randomUUID().slice(0, 4)}`
 }
 
-export function createTracker(tracker: Tracker): void {
+export function createTracker(tracker: Track): void {
   db.query<never, [string, string, string, string | null, string | null]>(
     'INSERT INTO trackers (id, name, type, description, color) VALUES (?, ?, ?, ?, ?)'
   ).run(
@@ -93,15 +93,15 @@ export function deleteTracker(id: string): void {
 
 // --- Event Queries ---
 
-export function listEventsByTracker(trackerId: string, limit: number = 50): TrackerEvent[] {
+export function listEventsByTracker(trackerId: string, limit: number = 50): TrackEvent[] {
   return db
-    .query<TrackerEvent, [string, number]>(
+    .query<TrackEvent, [string, number]>(
       'SELECT id, tracker_id, value, note, timestamp FROM tracker_events WHERE tracker_id = ? ORDER BY timestamp DESC LIMIT ?'
     )
     .all(trackerId, limit)
 }
 
-export function createEvent(event: TrackerEvent): void {
+export function createEvent(event: TrackEvent): void {
   db.query<never, [string, string, number | null, string | null, string]>(
     'INSERT INTO tracker_events (id, tracker_id, value, note, timestamp) VALUES (?, ?, ?, ?, ?)'
   ).run(
