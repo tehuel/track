@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.5.0](https://github.com/tehuel/track/compare/v1.4.0...v1.5.0) (2026-11-04)
+
+
+### Features
+
+* **charts:** add horizontal scroll on small screens and auto-scroll to latest ([9b9fd3f](https://github.com/tehuel/track/commit/9b9fd3f4680b04b18c91d721454f47f2dc0722fc))
+* **db:** add chart visualization modes and series aggregation queries ([1cc83f0](https://github.com/tehuel/track/commit/1cc83f0c880e50d7e75369244b1489a45d3ef00c))
+* **db:** make WAL journal mode opt-in via DB_WAL environment variable ([91b4b46](https://github.com/tehuel/track/commit/91b4b46d9e06237bb418f3647d46161a1af2199a))
+* **ui:** integrate configurable charts into dashboard, detail page, and edit modal ([e68c458](https://github.com/tehuel/track/commit/e68c458c906a2c9518eeec8c735ad8aa247ba040))
+* **views:** add universal SSR chart components for grid, bars, and line modes ([52628d1](https://github.com/tehuel/track/commit/52628d16261eda72a63b1dfd55549ba958d75021))
+
+
+### Bug Fixes
+
+* **charts:** omit zero dots on missing days in line mode and connect active points ([3a07609](https://github.com/tehuel/track/commit/3a076090ce1e73a29cd1af0e6c52111438415045))
+* **charts:** use flex-fill on mini grid items so 7-day blocks render at full width ([928ec78](https://github.com/tehuel/track/commit/928ec78d96a5fbbb75ee673588f9850f5a789c05))
+
+
+### Performance Improvements
+
+* **db:** filter by timestamp directly in getEventTotals to utilize index ([5326d95](https://github.com/tehuel/track/commit/5326d9578fcbcfa65121da5f1c1d6a7a4682359e))
+
 ## [1.4.0](https://github.com/tehuel/track/compare/v1.3.0...v1.4.0) (2026-11-04)
 
 
