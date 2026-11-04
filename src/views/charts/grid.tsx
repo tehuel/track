@@ -21,24 +21,19 @@ export function GridChart({
   if (mini) {
     return (
       <div
-        class="w-100 d-flex align-items-center"
+        class="w-100 d-flex align-items-center gap-1"
         role="img"
         aria-label="Últimos 7 días"
-        style={{
-          height: '2rem',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-          gap: '0.25rem',
-        }}
+        style={{ height: '2rem' }}
       >
         {points.map((p) => {
           const active = p.value > 0
           return (
             <span
-              class="rounded-pill d-block"
+              class="rounded-2 flex-fill"
               title={`${p.label}: ${formatChartValue(p.value)}`}
               style={{
-                height: '0.5rem',
+                height: '0.75rem',
                 backgroundColor: active ? color : 'currentColor',
                 opacity: active ? getIntensityOpacity(p.value, maxVal) : '0.15',
               }}
