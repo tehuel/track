@@ -542,6 +542,8 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html7d).toContain('data-chart-mode="grid"')
     expect(html7d).toContain('hx-get="/track/workout?period=30d"')
     expect(html7d).toContain('hx-get="/track/workout?period=12m"')
+    expect(html7d).toContain('aria-label="Dashboard: Grilla"')
+    expect(html7d).toContain('aria-label="12 meses: Línea"')
 
     const res30d = await app.request('/track/workout?period=30d', {
       headers: { 'HX-Request': 'true', 'HX-Target': 'chart-section' },

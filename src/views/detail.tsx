@@ -3,7 +3,6 @@ import {
   getTrackChartMode,
   getTrackIcon,
   getTrackTypeLabel,
-  type ChartMode,
   type ChartPeriod,
   type ChartPoint,
   type Track,
@@ -81,39 +80,16 @@ function LogEntryModal({ track }: { track: Track }) {
   )
 }
 
-function ChartModeSelector({
-  name,
-  label,
-  selected,
-}: {
-  name: string
+const CHART_VIEW_ROWS: {
+  name: 'chart_dashboard' | 'chart_7d' | 'chart_30d' | 'chart_12m'
+  view: 'dashboard' | ChartPeriod
   label: string
-  selected: ChartMode
-}) {
-  return (
-    <div class="col-6">
-      <label class="form-label small text-body-secondary mb-1 d-block">{label}</label>
-      <div class="btn-group btn-group-sm w-100" role="group" aria-label={label}>
-        {CHART_MODES.map((m) => (
-          <>
-            <input
-              type="radio"
-              class="btn-check"
-              name={name}
-              id={`edit-${name}-${m.value}`}
-              value={m.value}
-              autocomplete="off"
-              checked={selected === m.value}
-            />
-            <label class="btn btn-outline-secondary" for={`edit-${name}-${m.value}`}>
-              {m.label}
-            </label>
-          </>
-        ))}
-      </div>
-    </div>
-  )
-}
+}[] = [
+  { name: 'chart_dashboard', view: 'dashboard', label: 'Dashboard' },
+  { name: 'chart_7d', view: '7d', label: '7 días' },
+  { name: 'chart_30d', view: '30d', label: '30 días' },
+  { name: 'chart_12m', view: '12m', label: '12 meses' },
+]
 
 function EditTrackModal({ track }: { track: Track }) {
   return (
@@ -146,28 +122,51 @@ function EditTrackModal({ track }: { track: Track }) {
 
       <div class="mb-3">
         <label class="form-label fw-medium d-block mb-1">Visualización</label>
-        <div class="row g-2">
-          <ChartModeSelector
-            name="chart_dashboard"
-            label="Dashboard"
-            selected={getTrackChartMode(track, 'dashboard')}
-          />
-          <ChartModeSelector
-            name="chart_7d"
-            label="7 días"
-            selected={getTrackChartMode(track, '7d')}
-          />
-          <ChartModeSelector
-            name="chart_30d"
-            label="30 días"
-            selected={getTrackChartMode(track, '30d')}
-          />
-          <ChartModeSelector
-            name="chart_12m"
-            label="12 meses"
-            selected={getTrackChartMode(track, '12m')}
-          />
-        </div>
+        <table class="table table-sm table-borderless align-middle mb-0 text-center">
+          <thead>
+            <tr class="small text-body-secondary">
+              <th scope="col" class="text-start fw-normal ps-0">
+                Vista
+              </th>
+              {CHART_MODES.map((m) => (
+                <th scope="col" class="fw-normal">
+                  {m.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {CHART_VIEW_ROWS.map((row) => {
+              const selected = getTrackChartMode(track, row.view)
+              return (
+                <tr>
+                  <th
+                    scope="row"
+                    class="text-start small text-body-secondary fw-normal ps-0"
+                  >
+                    {row.label}
+                  </th>
+                  {CHART_MODES.map((m) => {
+                    const inputId = `edit-${row.name}-${m.value}`
+                    return (
+                      <td>
+                        <input
+                          type="radio"
+                          class="form-check-input m-0"
+                          name={row.name}
+                          id={inputId}
+                          value={m.value}
+                          checked={selected === m.value}
+                          aria-label={`${row.label}: ${m.label}`}
+                        />
+                      </td>
+                    )
+                  })}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
 
       <div class="mb-2">
