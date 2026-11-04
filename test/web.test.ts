@@ -612,4 +612,38 @@ describe('Web UI & HTMX endpoints', () => {
     expect(logHtml).toContain('hx-swap-oob="true"')
     expect(logHtml).toContain('data-period="30d"')
   })
+
+  it('line chart omits circle dots on days without entries and connects active days directly', async () => {
+    createTrack({
+      id: 'weight-line',
+      name: 'Peso',
+      type: 'numeric',
+      chart_7d: 'line',
+    })
+
+    const now = new Date()
+    const twoDaysAgo = new Date(now.getTime() - 2 * 86_400_000)
+
+    createEvent({
+      id: 'w1',
+      track_id: 'weight-line',
+      value: 75,
+      timestamp: twoDaysAgo.toISOString(),
+    })
+    createEvent({
+      id: 'w2',
+      track_id: 'weight-line',
+      value: 74,
+      timestamp: now.toISOString(),
+    })
+
+    const res = await app.request('/track/weight-line', {
+      headers: { 'HX-Request': 'true', 'HX-Target': 'chart-section' },
+    })
+    expect(res.status).toBe(200)
+    const html = await res.text()
+    const circles = html.match(/<circle /g) ?? []
+    expect(circles.length).toBe(2)
+    expect(html).not.toContain(': 0</title>')
+  })
 })

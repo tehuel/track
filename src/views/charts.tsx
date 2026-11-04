@@ -104,9 +104,10 @@ export function DashboardMiniChart({
             const y = padY + plotH - (p.value / maxVal) * plotH
             return { x, y, p }
           })
-          const poly = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ')
-          const firstX = coords[0]?.x.toFixed(1) ?? '0'
-          const lastX = coords[coords.length - 1]?.x.toFixed(1) ?? '0'
+          const activeCoords = coords.filter((c) => c.p.value > 0)
+          const poly = activeCoords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ')
+          const firstX = activeCoords[0]?.x.toFixed(1) ?? '0'
+          const lastX = activeCoords[activeCoords.length - 1]?.x.toFixed(1) ?? '0'
           const baseLineY = (padY + plotH).toFixed(1)
           const area = `${firstX},${baseLineY} ${poly} ${lastX},${baseLineY}`
 
@@ -118,16 +119,28 @@ export function DashboardMiniChart({
               role="img"
               aria-label="Últimos 7 días"
             >
-              <polygon points={area} fill={color} fill-opacity="0.15" />
-              <polyline
-                fill="none"
-                stroke={color}
-                stroke-width="1.75"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                points={poly}
-              />
-              {coords.map((c) => (
+              {activeCoords.length >= 2 ? (
+                <>
+                  <polygon points={area} fill={color} fill-opacity="0.15" />
+                  <polyline
+                    fill="none"
+                    stroke={color}
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    points={poly}
+                  />
+                </>
+              ) : (
+                <polyline
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-opacity="0.18"
+                  stroke-width="1.5"
+                  points={`${padX},${baseLineY} ${W - padX},${baseLineY}`}
+                />
+              )}
+              {activeCoords.map((c) => (
                 <circle cx={c.x.toFixed(1)} cy={c.y.toFixed(1)} r="2" fill={color}>
                   <title>{`${c.p.label}: ${formatChartValue(c.p.value)}`}</title>
                 </circle>
@@ -354,9 +367,10 @@ export function TrackChartSection({
             const y = padY + plotH - (p.value / maxVal) * plotH
             return { x, y, p, i }
           })
-          const poly = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ')
-          const firstX = coords[0]?.x.toFixed(1) ?? '0'
-          const lastX = coords[coords.length - 1]?.x.toFixed(1) ?? '0'
+          const activeCoords = coords.filter((c) => c.p.value > 0)
+          const poly = activeCoords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ')
+          const firstX = activeCoords[0]?.x.toFixed(1) ?? '0'
+          const lastX = activeCoords[activeCoords.length - 1]?.x.toFixed(1) ?? '0'
           const baseY = (padY + plotH).toFixed(1)
           const area = `${firstX},${baseY} ${poly} ${lastX},${baseY}`
 
@@ -367,28 +381,42 @@ export function TrackChartSection({
               role="img"
               aria-label={`Gráfico de línea (${period})`}
             >
-              <polygon points={area} fill={color} fill-opacity="0.12" />
-              <polyline
-                fill="none"
-                stroke={color}
-                stroke-width="2.25"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                points={poly}
-              />
+              {activeCoords.length >= 2 ? (
+                <>
+                  <polygon points={area} fill={color} fill-opacity="0.12" />
+                  <polyline
+                    fill="none"
+                    stroke={color}
+                    stroke-width="2.25"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    points={poly}
+                  />
+                </>
+              ) : (
+                <polyline
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-opacity="0.18"
+                  stroke-width="1.5"
+                  points={`${padX},${baseY} ${W - padX},${baseY}`}
+                />
+              )}
               {coords.map((c) => {
                 const showLabel =
                   points.length <= 12 || c.i % 5 === 0 || c.i === points.length - 1
                 return (
                   <>
-                    <circle
-                      cx={c.x.toFixed(1)}
-                      cy={c.y.toFixed(1)}
-                      r="3.2"
-                      fill={color}
-                    >
-                      <title>{`${c.p.label}: ${formatChartValue(c.p.value)}`}</title>
-                    </circle>
+                    {c.p.value > 0 && (
+                      <circle
+                        cx={c.x.toFixed(1)}
+                        cy={c.y.toFixed(1)}
+                        r="3.2"
+                        fill={color}
+                      >
+                        <title>{`${c.p.label}: ${formatChartValue(c.p.value)}`}</title>
+                      </circle>
+                    )}
                     {showLabel && (
                       <text
                         x={c.x.toFixed(1)}
