@@ -427,13 +427,14 @@ describe('Web UI & HTMX endpoints', () => {
     expect(listEventsByTrack('diary')).toHaveLength(0)
   })
 
-  it('GET / renders export button in dashboard toolbar with hx-boost="false"', async () => {
+  it('GET / renders export link in footer with hx-boost="false"', async () => {
     const res = await app.request('/')
     expect(res.status).toBe(200)
     const html = await res.text()
     expect(html).toContain('href="/export"')
     expect(html).toContain('hx-boost="false"')
     expect(html).toContain('Exportar')
+    expect(html).toContain('<footer')
   })
 
   it('GET /export downloads full data as JSON with appropriate headers and structure', async () => {

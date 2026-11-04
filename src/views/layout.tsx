@@ -89,6 +89,17 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         {/* Main Content Area */}
         <main class="container py-4 flex-grow-1">{children}</main>
 
+        {/* Footer */}
+        <footer class="container py-3 text-end">
+          <a
+            href="/export"
+            class="text-body-tertiary small text-decoration-none"
+            hx-boost="false"
+          >
+            Exportar
+          </a>
+        </footer>
+
         {/* Global Confirmation Modal */}
         <Modal id="confirmModal" title="Confirmar eliminación">
           <div class="modal-body p-4">
