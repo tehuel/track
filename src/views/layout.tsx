@@ -90,10 +90,11 @@ export function Layout({ title = 'track', children }: LayoutProps) {
         <main class="container py-4 flex-grow-1">{children}</main>
 
         {/* Footer */}
-        <footer class="container py-3 text-end">
+        <footer class="container py-3 d-flex justify-content-between align-items-center text-body-tertiary small">
+          <span>v{version}</span>
           <a
             href="/export"
-            class="text-body-tertiary small text-decoration-none"
+            class="text-body-tertiary text-decoration-none"
             hx-boost="false"
           >
             Exportar
