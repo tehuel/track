@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.0](https://github.com/tehuel/track/compare/v1.3.0...v1.4.0) (2026-11-04)
+
+
+### Features
+
+* add option to export data in JSON ([adc0c47](https://github.com/tehuel/track/commit/adc0c479a63b34080ee636e0d1090abe36c92c38))
+* **ui:** add app version to footer ([ee422d8](https://github.com/tehuel/track/commit/ee422d8dd65b34a6df4565cd1e62f5d78b93490f))
+
+
+### Bug Fixes
+
+* persist timestamps in UTC on server and format in local timezone on client ([e770bf4](https://github.com/tehuel/track/commit/e770bf44b576374d41ec45327a70871098762b04))
+* Timezone handling ([a558ba6](https://github.com/tehuel/track/commit/a558ba65e49eb51927fa29ceb7991cb1f7a44ecd))
+
 ## [1.3.0](https://github.com/tehuel/track/compare/v1.2.0...v1.3.0) (2026-11-03)
 
 
