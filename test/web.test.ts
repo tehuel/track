@@ -537,6 +537,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(res7d.status).toBe(200)
     const html7d = await res7d.text()
     expect(html7d).toContain('id="chart-section"')
+    expect(html7d).toContain('overflow-x-auto')
     expect(html7d).toContain('data-period="7d"')
     expect(html7d).toContain('data-chart-mode="grid"')
     expect(html7d).toContain('hx-get="/track/workout?period=30d"')

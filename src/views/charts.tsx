@@ -164,6 +164,14 @@ export function TrackChartSection({
   const mode = getTrackChartMode(track, period)
   const color = getColor(track)
   const maxVal = Math.max(1, ...points.map((p) => p.value))
+  const minWidth =
+    period === '12m' && mode === 'grid'
+      ? '34rem'
+      : period === '30d'
+        ? '30rem'
+        : period === '12m'
+          ? '28rem'
+          : '18rem'
 
   return (
     <div
@@ -174,9 +182,13 @@ export function TrackChartSection({
       hx-swap-oob={oob ? 'true' : undefined}
     >
       <div
-        class="d-flex flex-column justify-content-center"
+        class="overflow-x-auto overflow-y-hidden"
         style={{ height: '8.75rem' }}
       >
+        <div
+          class="d-flex flex-column justify-content-center h-100 w-100"
+          style={{ minWidth }}
+        >
         {mode === 'grid' && period === '7d' && (
           <div class="d-flex justify-content-between gap-1 text-center w-100">
             {points.map((p) => {
@@ -395,6 +407,7 @@ export function TrackChartSection({
             </svg>
           )
         })()}
+        </div>
       </div>
 
       {/* Simple row of period links below the chart */}

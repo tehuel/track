@@ -36,6 +36,9 @@
         minute: '2-digit',
       });
     });
+    evt.detail.elt.querySelectorAll?.('#chart-section .overflow-x-auto').forEach((el) => {
+      el.scrollLeft = el.scrollWidth;
+    });
   });
 
   // Modal lifecycle: focus + default datetime on open, reset form on close
