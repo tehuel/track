@@ -13,20 +13,6 @@ interface DetailProps {
   events: TrackEvent[]
 }
 
-function formatDate(iso: string): string {
-  try {
-    const d = new Date(iso)
-    return d.toLocaleString('es-AR', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  } catch {
-    return iso
-  }
-}
-
 function LogEntryModal({ track }: { track: Track }) {
   const isText = track.type === 'text'
 
@@ -174,7 +160,7 @@ export function EventsSection({ track, events }: DetailProps) {
           {events.map((event) => (
             <div class="list-group-item border-0 p-3 d-flex justify-content-between align-items-center gap-3">
               <div class="d-flex align-items-center gap-3 flex-grow-1 min-w-0 flex-wrap">
-                <span class="text-body-secondary small">{formatDate(event.timestamp)}</span>
+                <time datetime={event.timestamp} class="text-body-secondary small"></time>
                 {event.value !== null && event.value !== undefined && (
                   <span class="font-monospace fw-semibold">{event.value}</span>
                 )}
