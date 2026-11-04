@@ -6,7 +6,11 @@ const dbPath =
 
 // `strict: true` allows binding named parameters (`$name`) from plain object keys (`{ name }`).
 export const db = new Database(dbPath, { strict: true })
-db.exec('PRAGMA journal_mode = WAL;')
+
+// WAL is opt-in (`DB_WAL=true`) because it creates `-wal`/`-shm` side files next to the DB.
+// The journal mode persists in the file, so set it explicitly to revert databases that used WAL.
+const useWal = ['1', 'true'].includes(process.env.DB_WAL?.trim().toLowerCase() ?? '')
+db.exec(`PRAGMA journal_mode = ${useWal ? 'WAL' : 'DELETE'};`)
 db.exec('PRAGMA foreign_keys = ON;')
 
 const CHART_COLUMNS = ['chart_dashboard', 'chart_7d', 'chart_30d', 'chart_12m'] as const

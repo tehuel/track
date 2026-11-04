@@ -24,6 +24,12 @@ El puerto y la ubicación de la base de datos se pueden configurar mediante vari
 PORT=8080 DB_PATH=/ruta/track.db ./track
 ```
 
+| Variable | Predeterminado | Descripción |
+|---|---|---|
+| `PORT` | `3000` | Puerto HTTP. |
+| `DB_PATH` | `track.db` | Ruta del archivo SQLite. |
+| `DB_WAL` | `false` | Activa el modo WAL de SQLite (`true`/`1`). Mejora la concurrencia, pero crea los archivos `track.db-wal` y `track.db-shm` junto a la base. |
+
 ### Con Docker
 
 ```bash

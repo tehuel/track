@@ -14,7 +14,7 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 - **HTTP / Routing Layer (`src/web.tsx`)**: Hono router handling request parameters, form parsing, and HTTP/HTMX responses.
   - Server-rendered HTML pages and HTMX partial routes.
 - **Data Access Layer (`src/db.ts`)**: Pure TypeScript functions executing native SQLite prepared queries (`db.query(...)`).
-  - Connection singleton with Write-Ahead Logging (WAL) and foreign keys enabled.
+  - Connection singleton with foreign keys enabled. Write-Ahead Logging (WAL) is opt-in via `DB_WAL=true` (default `DELETE` journal mode, no `-wal`/`-shm` side files).
   - Uses `:memory:` SQLite automatically when `NODE_ENV === 'test'`.
   - Only SQL lives here; aggregation queries return raw totals (`getEventTotals`).
 - **Chart Series (`src/series.ts`)**: Builds continuous, labeled `ChartPoint[]` time series (UTC date ranges, Spanish labels) from `db.ts` totals.
