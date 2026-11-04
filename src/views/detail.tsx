@@ -219,11 +219,11 @@ export function ChartSection({
       hx-swap-oob={oob ? 'true' : undefined}
     >
       <div
-        class="overflow-x-auto overflow-y-hidden d-flex align-items-center"
-        style={{ minHeight: '9.25rem' }}
+        class="overflow-x-auto overflow-y-hidden"
+        style={{ height: '9rem' }}
       >
         <div
-          class="w-100"
+          class="d-flex flex-column justify-content-center h-100 w-100"
           style={{ minWidth }}
         >
           <Chart mode={mode} track={track} period={period} points={points} />

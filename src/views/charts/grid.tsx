@@ -21,10 +21,11 @@ export function GridChart({
   if (mini) {
     return (
       <div
-        class="w-100"
+        class="w-100 d-flex align-items-center"
         role="img"
         aria-label="Últimos 7 días"
         style={{
+          height: '2rem',
           display: 'grid',
           gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
           gap: '0.25rem',
@@ -85,10 +86,11 @@ export function GridChart({
   if (period === '30d') {
     return (
       <div
-        class="w-100"
+        class="w-100 h-100"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(10, minmax(0, 1fr))',
+          gridTemplateRows: 'repeat(3, minmax(0, 1fr))',
           gap: '0.375rem',
         }}
       >
@@ -99,7 +101,6 @@ export function GridChart({
               class="rounded-2 d-flex align-items-center justify-content-center small font-monospace"
               title={`${p.label}: ${formatChartValue(p.value)}`}
               style={{
-                height: '2.25rem',
                 backgroundColor: active ? color : 'transparent',
                 color: active ? '#fff' : 'var(--bs-secondary-color)',
                 border: `1px solid ${active ? color : 'var(--bs-border-color)'}`,
@@ -117,7 +118,8 @@ export function GridChart({
   return (
     <svg
       viewBox="0 0 569.5 74.5"
-      class="w-100 d-block"
+      preserveAspectRatio="none"
+      class="w-100 h-100 d-block"
       role="img"
       aria-label="Actividad anual"
     >

@@ -18,14 +18,10 @@ import {
   parseTrackColor,
   parseTrackType,
   type ChartPeriod,
+  type ChartPoint,
   type Track,
 } from './types'
-import {
-  DashboardPage,
-  TracksGrid,
-  TrackCard,
-  type TrackSummary,
-} from './views/dashboard'
+import { DashboardPage, TracksGrid, TrackCard } from './views/dashboard'
 import { DetailPage, EventsSection, ChartSection } from './views/detail'
 
 export const app = new Hono()
@@ -54,19 +50,12 @@ function toast(c: Context, message: string) {
   c.header('HX-Trigger', JSON.stringify({ showToast: message }))
 }
 
-function buildTrackSummary(track: Track): TrackSummary {
-  return {
-    points: getTrackSeries(track, 'dashboard'),
-    latestEvent: listEventsByTrack(track.id, 1)[0] ?? null,
-  }
-}
-
-function buildSummaries(tracks: Track[]): Record<string, TrackSummary> {
-  const summaries: Record<string, TrackSummary> = {}
+function buildDashboardSeries(tracks: Track[]): Record<string, ChartPoint[]> {
+  const series: Record<string, ChartPoint[]> = {}
   for (const t of tracks) {
-    summaries[t.id] = buildTrackSummary(t)
+    series[t.id] = getTrackSeries(t, 'dashboard')
   }
-  return summaries
+  return series
 }
 
 function getRequestedPeriod(c: Context): ChartPeriod {
@@ -143,16 +132,16 @@ app.get('/', (c) => {
       )
     : all
 
-  const summaries = buildSummaries(filtered)
+  const series = buildDashboardSeries(filtered)
 
   // If HTMX requested just the grid partial, return TracksGrid with clean URL push
   if (c.req.header('HX-Target') === 'tracks-grid') {
     c.header('HX-Push-Url', q ? `/?q=${encodeURIComponent(rawQ.trim())}` : '/')
-    return c.html(<TracksGrid tracks={filtered} summaries={summaries} />)
+    return c.html(<TracksGrid tracks={filtered} series={series} />)
   }
 
   return c.html(
-    <DashboardPage tracks={filtered} summaries={summaries} query={rawQ.trim()} />
+    <DashboardPage tracks={filtered} series={series} query={rawQ.trim()} />
   )
 })
 
@@ -239,7 +228,9 @@ app.post('/track/:id', async (c) => {
 
   switch (c.req.header('HX-Target')) {
     case `track-card-${id}`:
-      return c.html(<TrackCard track={track} summary={buildTrackSummary(track)} />)
+      return c.html(
+        <TrackCard track={track} points={getTrackSeries(track, 'dashboard')} />
+      )
     case 'events-section':
       return renderEventsSection(c, track)
     default:
