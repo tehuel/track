@@ -206,7 +206,7 @@ export function getEventTotals(
     .query<{ key: string; total: number }, { keyLen: number; trackId: string; sinceKey: string }>(
       `SELECT substr(timestamp, 1, $keyLen) AS key, ${aggregate} AS total
        FROM track_events
-       WHERE track_id = $trackId AND key >= $sinceKey
+       WHERE track_id = $trackId AND timestamp >= $sinceKey
        GROUP BY key`
     )
     .all({ keyLen: BUCKET_KEY_LENGTH[bucket], trackId: track.id, sinceKey })
