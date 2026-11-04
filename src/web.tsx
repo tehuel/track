@@ -9,6 +9,7 @@ import {
   listEventsByTrack,
   createEvent,
   deleteEvent,
+  getAllDataForExport,
 } from './db'
 import { parseTrackColor, parseTrackType, type Track } from './types'
 import { DashboardPage, TracksGrid, TrackCard } from './views/dashboard'
@@ -91,6 +92,18 @@ app.get('/', (c) => {
   }
 
   return c.html(<DashboardPage tracks={filtered} query={rawQ.trim()} />)
+})
+
+// GET /export - Export all tracks and events to JSON
+app.get('/export', (c) => {
+  const data = getAllDataForExport()
+  const json = JSON.stringify(data, null, 2)
+  const dateStr = new Date().toISOString().slice(0, 10)
+  const filename = `track-export-${dateStr}.json`
+
+  c.header('Content-Type', 'application/json; charset=utf-8')
+  c.header('Content-Disposition', `attachment; filename="${filename}"`)
+  return c.body(json)
 })
 
 // POST /track - Create new track

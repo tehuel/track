@@ -252,7 +252,16 @@ export function DashboardPage({ tracks, query = '' }: DashboardProps) {
             </div>
           </div>
 
-          <div class="col-auto ms-auto">
+          <div class="col-auto ms-auto d-flex align-items-center gap-2">
+            <a
+              href="/export"
+              class="btn btn-outline-secondary d-flex align-items-center gap-2"
+              title="Exportar datos a JSON"
+              hx-boost="false"
+            >
+              <Icon name="download" />
+              <span>Exportar</span>
+            </a>
             <button
               type="button"
               class="btn btn-primary d-flex align-items-center gap-2"
