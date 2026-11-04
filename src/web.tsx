@@ -1,12 +1,12 @@
 import { Hono, type Context } from 'hono'
 import {
-  listTrackers,
-  getTrackerById,
-  createTracker,
-  updateTracker,
-  deleteTracker,
+  listTracks,
+  getTrackById,
+  createTrack,
+  updateTrack,
+  deleteTrack,
   generateUniqueSlug,
-  listEventsByTracker,
+  listEventsByTrack,
   createEvent,
   deleteEvent,
 } from './db'
@@ -41,7 +41,7 @@ function toast(c: Context, message: string) {
 }
 
 function renderEventsSection(c: Context, tracker: Track) {
-  const events = listEventsByTracker(tracker.id, EVENTS_LIMIT)
+  const events = listEventsByTrack(tracker.id, EVENTS_LIMIT)
   return c.html(<EventsSection tracker={tracker} events={events} />)
 }
 
@@ -75,7 +75,7 @@ function parseEventForm(tracker: Track, body: FormBody) {
 app.get('/', (c) => {
   const rawQ = c.req.query('q') || ''
   const q = rawQ.toLowerCase().trim()
-  const all = listTrackers()
+  const all = listTracks()
   const filtered = q
     ? all.filter(
         (t) =>
@@ -99,7 +99,7 @@ app.post('/track', async (c) => {
   const { name, ...rest } = parseTrackerForm(body)
   if (!name) return c.text('El nombre es obligatorio', 400)
 
-  createTracker({
+  createTrack({
     id: generateUniqueSlug(name),
     name,
     type: parseTrackType(body['type']),
@@ -111,35 +111,35 @@ app.post('/track', async (c) => {
 // POST /track/:id/edit - Update track details
 app.post('/track/:id/edit', async (c) => {
   const id = c.req.param('id')
-  if (!getTrackerById(id)) return navigate(c, '/')
+  if (!getTrackById(id)) return navigate(c, '/')
 
   const { name, ...rest } = parseTrackerForm(await c.req.parseBody())
   if (!name) return c.text('El nombre es obligatorio', 400)
 
-  updateTracker(id, { name, ...rest })
+  updateTrack(id, { name, ...rest })
   return navigate(c, `/track/${id}`)
 })
 
 // GET /track/:id - Single track detail
 app.get('/track/:id', (c) => {
   const id = c.req.param('id')
-  const tracker = getTrackerById(id)
+  const tracker = getTrackById(id)
   if (!tracker) return c.redirect('/')
 
-  const events = listEventsByTracker(id, EVENTS_LIMIT)
+  const events = listEventsByTrack(id, EVENTS_LIMIT)
   return c.html(<DetailPage tracker={tracker} events={events} />)
 })
 
 // POST /track/:id - Log event (quick log from dashboard card or modal from detail)
 app.post('/track/:id', async (c) => {
   const id = c.req.param('id')
-  const tracker = getTrackerById(id)
+  const tracker = getTrackById(id)
   if (!tracker) return navigate(c, '/')
 
   const input = parseEventForm(tracker, await c.req.parseBody())
   if (!input) return c.text('Entrada inválida', 400)
 
-  createEvent({ id: crypto.randomUUID(), tracker_id: id, ...input })
+  createEvent({ id: crypto.randomUUID(), track_id: id, ...input })
   toast(c, `Entrada registrada en ${tracker.name}`)
 
   switch (c.req.header('HX-Target')) {
@@ -154,7 +154,7 @@ app.post('/track/:id', async (c) => {
 
 // DELETE /track/:id - Delete track
 app.delete('/track/:id', (c) => {
-  deleteTracker(c.req.param('id'))
+  deleteTrack(c.req.param('id'))
   return navigate(c, '/')
 })
 
@@ -164,7 +164,7 @@ app.delete('/track/:id/:eventId', (c) => {
   deleteEvent(trackerId, c.req.param('eventId'))
 
   if (c.req.header('HX-Target') === 'events-section') {
-    const tracker = getTrackerById(trackerId)
+    const tracker = getTrackById(trackerId)
     if (tracker) {
       toast(c, 'Entrada eliminada')
       return renderEventsSection(c, tracker)

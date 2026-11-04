@@ -46,7 +46,7 @@ export interface Track {
 
 export interface TrackEvent {
   id: string
-  tracker_id: string
+  track_id: string
   value?: number | null
   note?: string | null
   timestamp: string
