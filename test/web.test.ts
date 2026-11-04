@@ -433,4 +433,64 @@ describe('Web UI & HTMX endpoints', () => {
     expect(listEventsByTrack('pages')).toHaveLength(0)
     expect(listEventsByTrack('diary')).toHaveLength(0)
   })
+
+  it('GET / renders export link and version in footer with hx-boost="false"', async () => {
+    const res = await app.request('/')
+    expect(res.status).toBe(200)
+    const html = await res.text()
+    expect(html).toContain('href="/export"')
+    expect(html).toContain('hx-boost="false"')
+    expect(html).toContain('Exportar')
+    expect(html).toContain('<footer')
+    expect(html).toContain('v1.3.0')
+  })
+
+  it('GET /export downloads full data as JSON with appropriate headers and structure', async () => {
+    createTrack({
+      id: 'books',
+      name: 'Books, "Reading" & Notes',
+      type: 'numeric',
+      description: 'Books read\nper month',
+      color: '#0d6efd',
+    })
+    createTrack({
+      id: 'meditation',
+      name: 'Meditation',
+      type: 'habit',
+    })
+
+    createEvent({
+      id: 'evt-1',
+      track_id: 'books',
+      value: 3,
+      note: 'Finished "Dune", part 1',
+      timestamp: '2026-11-03T12:00:00.000Z',
+    })
+
+    const res = await app.request('/export')
+    expect(res.status).toBe(200)
+    expect(res.headers.get('Content-Type')).toBe('application/json; charset=utf-8')
+    const disposition = res.headers.get('Content-Disposition') || ''
+    expect(disposition).toContain('attachment; filename="track-export-')
+    expect(disposition).toContain('.json"')
+
+    const data = await res.json()
+    expect(Array.isArray(data)).toBe(true)
+    expect(data.length).toBe(2)
+
+    const booksTrack = data.find((t: any) => t.id === 'books')
+    expect(booksTrack).toBeDefined()
+    expect(booksTrack.name).toBe('Books, "Reading" & Notes')
+    expect(booksTrack.description).toBe('Books read\nper month')
+    expect(booksTrack.color).toBe('#0d6efd')
+    expect(booksTrack.events.length).toBe(1)
+    expect(booksTrack.events[0].id).toBe('evt-1')
+    expect(booksTrack.events[0].value).toBe(3)
+    expect(booksTrack.events[0].note).toBe('Finished "Dune", part 1')
+
+    const meditationTrack = data.find((t: any) => t.id === 'meditation')
+    expect(meditationTrack).toBeDefined()
+    expect(meditationTrack.name).toBe('Meditation')
+    expect(meditationTrack.events).toEqual([])
+  })
 })

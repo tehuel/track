@@ -10,6 +10,7 @@ import {
   createEvent,
   listEventsByTrack,
   deleteEvent,
+  getAllDataForExport,
 } from '../src/db'
 
 describe('Database layer (bun:sqlite)', () => {
@@ -111,5 +112,53 @@ describe('Database layer (bun:sqlite)', () => {
 
     deleteEvent('weight', 'weight-1')
     expect(listEventsByTrack('weight').length).toBe(0)
+  })
+
+  it('exports all tracks and events in a nested structure including tracks with no events', () => {
+    createTrack({
+      id: 'running',
+      name: 'Running',
+      type: 'numeric',
+      description: 'Morning run',
+      color: '#198754',
+    })
+    createTrack({
+      id: 'no-events',
+      name: 'Empty Track',
+      type: 'habit',
+    })
+
+    createEvent({
+      id: 'run-1',
+      track_id: 'running',
+      value: 5.2,
+      note: '5k park run',
+      timestamp: '2026-11-01T10:00:00Z',
+    })
+    createEvent({
+      id: 'run-2',
+      track_id: 'running',
+      value: 10.0,
+      note: '10k weekend',
+      timestamp: '2026-11-02T10:00:00Z',
+    })
+
+    const tracks = getAllDataForExport()
+    expect(tracks.length).toBe(2)
+
+    const running = tracks.find((t) => t.id === 'running')
+    expect(running).toBeDefined()
+    expect(running?.name).toBe('Running')
+    expect(running?.color).toBe('#198754')
+    expect(running?.events.length).toBe(2)
+    expect(running?.events[0]?.id).toBe('run-2')
+    expect(running?.events[0]?.value).toBe(10.0)
+    expect(running?.events[1]?.id).toBe('run-1')
+    expect(running?.events[1]?.value).toBe(5.2)
+
+    const empty = tracks.find((t) => t.id === 'no-events')
+    expect(empty).toBeDefined()
+    expect(empty?.name).toBe('Empty Track')
+    expect(empty?.events).toEqual([])
   })
 })

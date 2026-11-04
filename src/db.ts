@@ -118,3 +118,33 @@ export function deleteEvent(trackId: string, eventId: string): void {
     'DELETE FROM track_events WHERE id = ? AND track_id = ?'
   ).run(eventId, trackId)
 }
+
+// --- Export Queries ---
+
+export interface TrackWithEvents extends Track {
+  events: TrackEvent[]
+}
+
+export function getAllDataForExport(): TrackWithEvents[] {
+  const tracks = listTracks()
+  const allEvents = db
+    .query<TrackEvent, []>(
+      'SELECT id, track_id, value, note, timestamp FROM track_events ORDER BY timestamp DESC'
+    )
+    .all()
+
+  const eventsByTrack = new Map<string, TrackEvent[]>()
+  for (const event of allEvents) {
+    const list = eventsByTrack.get(event.track_id)
+    if (list) {
+      list.push(event)
+    } else {
+      eventsByTrack.set(event.track_id, [event])
+    }
+  }
+
+  return tracks.map((track) => ({
+    ...track,
+    events: eventsByTrack.get(track.id) ?? [],
+  }))
+}
