@@ -14,8 +14,10 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 - **HTTP / Routing Layer (`src/web.tsx`)**: Hono router handling request parameters, form parsing, and HTTP/HTMX responses.
   - Server-rendered HTML pages and HTMX partial routes.
 - **Data Access Layer (`src/db.ts`)**: Pure TypeScript functions executing native SQLite prepared queries (`db.query(...)`).
-  - Connection singleton with Write-Ahead Logging (WAL) and foreign keys enabled.
+  - Connection singleton with foreign keys enabled. Write-Ahead Logging (WAL) is opt-in via `DB_WAL=true` (default `DELETE` journal mode, no `-wal`/`-shm` side files).
   - Uses `:memory:` SQLite automatically when `NODE_ENV === 'test'`.
+  - Only SQL lives here; aggregation queries return raw totals (`getEventTotals`).
+- **Chart Series (`src/series.ts`)**: Builds continuous, labeled `ChartPoint[]` time series (UTC date ranges, Spanish labels) from `db.ts` totals.
 - **Views (`src/views/`)**: Server-rendered Hono JSX components (`layout.tsx`, `dashboard.tsx`, `detail.tsx`).
 - **Entrypoint (`src/index.ts`)**: Initializes Hono server, health endpoints, static asset handlers, and exports default Bun server configuration.
 
@@ -30,6 +32,7 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 ### 4. Testing & Verification Philosophy
 - **Automated Tests**: Unit and integration tests written for Bun Test (`bun test`) located in `test/`.
   - Database queries tested against `:memory:` SQLite instances (`test/db.test.ts`).
+  - Chart series tested end-to-end and via pure builders (`test/series.test.ts`).
   - Web UI & HTMX partials tested via `app.request()` (`test/web.test.ts`).
 - **Strict Typing**: Full TypeScript coverage verified with `bun run typecheck` (`tsc --noEmit`).
 
@@ -40,10 +43,11 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 - `src/` — Server codebase:
   - `index.ts` — Main server entrypoint.
   - `db.ts` — Native SQLite connection, slug generation, and typed database queries.
+  - `series.ts` — Chart time series construction (date ranges, labels, empty buckets).
   - `web.tsx` — Web page and HTMX route handlers.
   - `views/` — Hono JSX view templates.
   - `types.ts` — Centralized TypeScript interfaces.
 - `public/` — Static assets (favicons, icons, embedded at compile time).
-- `test/` — Bun test suite (`db.test.ts`, `web.test.ts`).
+- `test/` — Bun test suite (`db.test.ts`, `series.test.ts`, `web.test.ts`).
 - `.github/workflows/ci.yml` — Automated CI/CD pipeline (`test`, `build`, and `publish` jobs).
 - `Dockerfile` — Runtime image definition built from the published self-contained binaries.

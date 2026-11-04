@@ -10,8 +10,8 @@ import {
   createEvent,
   deleteEvent,
   getAllDataForExport,
-  getTrackSeries,
 } from './db'
+import { getTrackSeries } from './series'
 import {
   parseChartMode,
   parseChartPeriod,

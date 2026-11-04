@@ -11,7 +11,7 @@ import {
   listEventsByTrack,
   deleteEvent,
   getAllDataForExport,
-  getTrackSeries,
+  getEventTotals,
 } from '../src/db'
 
 describe('Database layer (bun:sqlite)', () => {
@@ -204,69 +204,25 @@ describe('Database layer (bun:sqlite)', () => {
     expect(preserved?.chart_12m).toBe('grid')
   })
 
-  it('aggregates daily and monthly series for habit, numeric (SUM), and text tracks', () => {
-    createTrack({
-      id: 'steps',
-      name: 'Pasos',
-      type: 'numeric',
-      chart_12m: 'bars',
-    })
-    createTrack({
-      id: 'meditate',
-      name: 'Meditar',
-      type: 'habit',
-      chart_12m: 'grid',
-    })
+  it('accumulates event totals per day and month (SUM for numeric, COUNT otherwise)', () => {
+    createTrack({ id: 'water', name: 'Agua', type: 'numeric' })
+    createTrack({ id: 'run', name: 'Correr', type: 'habit' })
+    const water = getTrackById('water')!
+    const run = getTrackById('run')!
 
-    const refNow = new Date('2026-11-04T15:00:00Z')
-    createEvent({
-      id: 's1',
-      track_id: 'steps',
-      value: 3000,
-      timestamp: '2026-11-04T09:00:00Z',
-    })
-    createEvent({
-      id: 's2',
-      track_id: 'steps',
-      value: 4500,
-      timestamp: '2026-11-04T14:00:00Z',
-    })
-    createEvent({
-      id: 's3',
-      track_id: 'steps',
-      value: 5000,
-      timestamp: '2026-10-15T10:00:00Z',
-    })
+    createEvent({ id: 'w1', track_id: 'water', value: 2, timestamp: '2026-11-04T09:00:00Z' })
+    createEvent({ id: 'w2', track_id: 'water', value: 3, timestamp: '2026-11-04T18:00:00Z' })
+    createEvent({ id: 'w3', track_id: 'water', value: null, timestamp: '2026-11-03T10:00:00Z' })
+    createEvent({ id: 'w4', track_id: 'water', value: 7, timestamp: '2026-10-01T10:00:00Z' })
+    createEvent({ id: 'r1', track_id: 'run', timestamp: '2026-11-04T07:00:00Z' })
+    createEvent({ id: 'r2', track_id: 'run', timestamp: '2026-11-04T19:00:00Z' })
 
-    const series7d = getTrackSeries(getTrackById('steps')!, '7d', refNow)
-    expect(series7d).toHaveLength(7)
-    expect(series7d[6]?.key).toBe('2026-11-04')
-    expect(series7d[6]?.value).toBe(7500)
-    expect(series7d[5]?.value).toBe(0)
+    const daily = getEventTotals(water, 'day', '2026-11-03')
+    expect(Object.fromEntries(daily)).toEqual({ '2026-11-03': 0, '2026-11-04': 5 })
 
-    const series30d = getTrackSeries(getTrackById('steps')!, '30d', refNow)
-    expect(series30d).toHaveLength(30)
+    const monthly = getEventTotals(water, 'month', '2026-10')
+    expect(Object.fromEntries(monthly)).toEqual({ '2026-10': 7, '2026-11': 5 })
 
-    const series12mBars = getTrackSeries(getTrackById('steps')!, '12m', refNow)
-    expect(series12mBars).toHaveLength(12)
-    expect(series12mBars[11]?.key).toBe('2026-11')
-    expect(series12mBars[11]?.value).toBe(7500)
-    expect(series12mBars[10]?.key).toBe('2026-10')
-    expect(series12mBars[10]?.value).toBe(5000)
-
-    createEvent({
-      id: 'm1',
-      track_id: 'meditate',
-      timestamp: '2026-11-04T08:00:00Z',
-    })
-    createEvent({
-      id: 'm2',
-      track_id: 'meditate',
-      timestamp: '2026-11-04T20:00:00Z',
-    })
-    const series12mGrid = getTrackSeries(getTrackById('meditate')!, '12m', refNow)
-    expect(series12mGrid).toHaveLength(364)
-    expect(series12mGrid[363]?.key).toBe('2026-11-04')
-    expect(series12mGrid[363]?.value).toBe(2)
+    expect(getEventTotals(run, 'day', '2026-11-01').get('2026-11-04')).toBe(2)
   })
 })
