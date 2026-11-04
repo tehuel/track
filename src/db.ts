@@ -12,9 +12,13 @@ import {
 const dbPath =
   process.env.NODE_ENV === 'test' ? ':memory:' : process.env.DB_PATH || 'track.db'
 
-export const db = new Database(dbPath)
+// `strict: true` allows binding named parameters (`$name`) from plain object keys (`{ name }`).
+export const db = new Database(dbPath, { strict: true })
 db.exec('PRAGMA journal_mode = WAL;')
 db.exec('PRAGMA foreign_keys = ON;')
+
+const CHART_COLUMNS = ['chart_dashboard', 'chart_7d', 'chart_30d', 'chart_12m'] as const
+
 db.exec(`
   CREATE TABLE IF NOT EXISTS tracks (
     id TEXT PRIMARY KEY,
@@ -22,10 +26,7 @@ db.exec(`
     type TEXT NOT NULL DEFAULT 'habit',
     description TEXT,
     color TEXT,
-    chart_dashboard TEXT NOT NULL DEFAULT 'grid',
-    chart_7d TEXT NOT NULL DEFAULT 'grid',
-    chart_30d TEXT NOT NULL DEFAULT 'grid',
-    chart_12m TEXT NOT NULL DEFAULT 'grid',
+    ${CHART_COLUMNS.map((col) => `${col} TEXT NOT NULL DEFAULT 'grid',`).join('\n    ')}
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
@@ -48,7 +49,7 @@ const existingCols = new Set(
     .all()
     .map((c) => c.name)
 )
-for (const col of ['chart_dashboard', 'chart_7d', 'chart_30d', 'chart_12m']) {
+for (const col of CHART_COLUMNS) {
   if (!existingCols.has(col)) {
     db.exec(`ALTER TABLE tracks ADD COLUMN ${col} TEXT NOT NULL DEFAULT 'grid'`)
   }
@@ -68,10 +69,7 @@ function slugify(text: string): string {
 // --- Track Queries ---
 
 const TRACK_SELECT = `
-  SELECT
-    id, name, type, description, color,
-    chart_dashboard, chart_7d, chart_30d, chart_12m,
-    created_at
+  SELECT id, name, type, description, color, ${CHART_COLUMNS.join(', ')}, created_at
   FROM tracks
 `
 
@@ -85,33 +83,25 @@ export function getTrackById(id: string): Track | null {
 
 export function generateUniqueSlug(name: string): string {
   const baseSlug = slugify(name)
-  if (!getTrackById(baseSlug)) {
-    return baseSlug
-  }
-  return `${baseSlug}-${crypto.randomUUID().slice(0, 4)}`
+  return getTrackById(baseSlug) ? `${baseSlug}-${crypto.randomUUID().slice(0, 4)}` : baseSlug
 }
 
 export function createTrack(track: Track): void {
   const fallback = defaultChartMode(track.type)
-  db.query<
-    never,
-    [string, string, string, string | null, string | null, string, string, string, string]
-  >(
-    `INSERT INTO tracks (
-      id, name, type, description, color,
-      chart_dashboard, chart_7d, chart_30d, chart_12m
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(
-    track.id,
-    track.name,
-    track.type,
-    track.description ?? null,
-    track.color ?? null,
-    track.chart_dashboard ?? fallback,
-    track.chart_7d ?? fallback,
-    track.chart_30d ?? fallback,
-    track.chart_12m ?? fallback
-  )
+  db.query(
+    `INSERT INTO tracks (id, name, type, description, color, ${CHART_COLUMNS.join(', ')})
+     VALUES ($id, $name, $type, $description, $color, ${CHART_COLUMNS.map((c) => `$${c}`).join(', ')})`
+  ).run({
+    id: track.id,
+    name: track.name,
+    type: track.type,
+    description: track.description ?? null,
+    color: track.color ?? null,
+    chart_dashboard: track.chart_dashboard ?? fallback,
+    chart_7d: track.chart_7d ?? fallback,
+    chart_30d: track.chart_30d ?? fallback,
+    chart_12m: track.chart_12m ?? fallback,
+  })
 }
 
 export function updateTrack(
@@ -126,70 +116,57 @@ export function updateTrack(
     chart_12m?: ChartMode
   }
 ): void {
-  db.query<
-    never,
-    [
-      string,
-      string | null,
-      string | null,
-      string | null,
-      string | null,
-      string | null,
-      string | null,
-      string,
-    ]
-  >(
+  // Chart modes are optional: omitted values keep the current column value.
+  db.query(
     `UPDATE tracks
-     SET name = ?,
-         description = ?,
-         color = ?,
-         chart_dashboard = COALESCE(?, chart_dashboard),
-         chart_7d = COALESCE(?, chart_7d),
-         chart_30d = COALESCE(?, chart_30d),
-         chart_12m = COALESCE(?, chart_12m)
-     WHERE id = ?`
-  ).run(
-    data.name,
-    data.description ?? null,
-    data.color ?? null,
-    data.chart_dashboard ?? null,
-    data.chart_7d ?? null,
-    data.chart_30d ?? null,
-    data.chart_12m ?? null,
-    id
-  )
+     SET name = $name,
+         description = $description,
+         color = $color,
+         ${CHART_COLUMNS.map((c) => `${c} = COALESCE($${c}, ${c})`).join(',\n         ')}
+     WHERE id = $id`
+  ).run({
+    id,
+    name: data.name,
+    description: data.description ?? null,
+    color: data.color ?? null,
+    chart_dashboard: data.chart_dashboard ?? null,
+    chart_7d: data.chart_7d ?? null,
+    chart_30d: data.chart_30d ?? null,
+    chart_12m: data.chart_12m ?? null,
+  })
 }
 
 export function deleteTrack(id: string): void {
-  db.query<never, [string]>('DELETE FROM tracks WHERE id = ?').run(id)
+  db.query('DELETE FROM tracks WHERE id = ?').run(id)
 }
 
 // --- Event Queries ---
 
+const EVENT_SELECT = 'SELECT id, track_id, value, note, timestamp FROM track_events'
+
 export function listEventsByTrack(trackId: string, limit: number = 50): TrackEvent[] {
   return db
     .query<TrackEvent, [string, number]>(
-      'SELECT id, track_id, value, note, timestamp FROM track_events WHERE track_id = ? ORDER BY timestamp DESC LIMIT ?'
+      `${EVENT_SELECT} WHERE track_id = ? ORDER BY timestamp DESC LIMIT ?`
     )
     .all(trackId, limit)
 }
 
 export function createEvent(event: TrackEvent): void {
-  db.query<never, [string, string, number | null, string | null, string]>(
-    'INSERT INTO track_events (id, track_id, value, note, timestamp) VALUES (?, ?, ?, ?, ?)'
-  ).run(
-    event.id,
-    event.track_id,
-    event.value ?? null,
-    event.note ?? null,
-    event.timestamp
-  )
+  db.query(
+    `INSERT INTO track_events (id, track_id, value, note, timestamp)
+     VALUES ($id, $track_id, $value, $note, $timestamp)`
+  ).run({
+    id: event.id,
+    track_id: event.track_id,
+    value: event.value ?? null,
+    note: event.note ?? null,
+    timestamp: event.timestamp,
+  })
 }
 
 export function deleteEvent(trackId: string, eventId: string): void {
-  db.query<never, [string, string]>(
-    'DELETE FROM track_events WHERE id = ? AND track_id = ?'
-  ).run(eventId, trackId)
+  db.query('DELETE FROM track_events WHERE id = ? AND track_id = ?').run(eventId, trackId)
 }
 
 // --- Export Queries ---
@@ -199,24 +176,12 @@ export interface TrackWithEvents extends Track {
 }
 
 export function getAllDataForExport(): TrackWithEvents[] {
-  const tracks = listTracks()
   const allEvents = db
-    .query<TrackEvent, []>(
-      'SELECT id, track_id, value, note, timestamp FROM track_events ORDER BY timestamp DESC'
-    )
+    .query<TrackEvent, []>(`${EVENT_SELECT} ORDER BY timestamp DESC`)
     .all()
+  const eventsByTrack = Map.groupBy(allEvents, (event) => event.track_id)
 
-  const eventsByTrack = new Map<string, TrackEvent[]>()
-  for (const event of allEvents) {
-    const list = eventsByTrack.get(event.track_id)
-    if (list) {
-      list.push(event)
-    } else {
-      eventsByTrack.set(event.track_id, [event])
-    }
-  }
-
-  return tracks.map((track) => ({
+  return listTracks().map((track) => ({
     ...track,
     events: eventsByTrack.get(track.id) ?? [],
   }))
@@ -224,42 +189,30 @@ export function getAllDataForExport(): TrackWithEvents[] {
 
 // --- Chart Series Aggregation Queries ---
 
+const DAY_MS = 86_400_000
 const WEEKDAYS_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-const MONTHS_SHORT = [
-  'Ene',
-  'Feb',
-  'Mar',
-  'Abr',
-  'May',
-  'Jun',
-  'Jul',
-  'Ago',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dic',
-]
+// prettier-ignore
+const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 
-interface BucketRow {
-  key: string
-  total: number
-}
-
+/**
+ * Sums event values per time bucket, where a bucket is the first `keyLen`
+ * characters of the ISO timestamp (`YYYY-MM` for months, `YYYY-MM-DD` for days).
+ * Numeric tracks sum `value`; habit/text tracks count events.
+ */
 function queryBucketTotals(
   track: Track,
   keyLen: 7 | 10,
   startKey: string
 ): Map<string, number> {
+  const aggregate = track.type === 'numeric' ? 'SUM(COALESCE(value, 0))' : 'COUNT(*)'
   const rows = db
-    .query<BucketRow, [number, string, string, number, string, number]>(
-      `SELECT
-         substr(timestamp, 1, ?) AS key,
-         COALESCE(SUM(CASE WHEN ? = 'numeric' THEN COALESCE(value, 0) ELSE 1 END), 0) AS total
+    .query<{ key: string; total: number }, { keyLen: number; trackId: string; startKey: string }>(
+      `SELECT substr(timestamp, 1, $keyLen) AS key, ${aggregate} AS total
        FROM track_events
-       WHERE track_id = ? AND substr(timestamp, 1, ?) >= ?
-       GROUP BY substr(timestamp, 1, ?)`
+       WHERE track_id = $trackId AND key >= $startKey
+       GROUP BY key`
     )
-    .all(keyLen, track.type, track.id, keyLen, startKey, keyLen)
+    .all({ keyLen, trackId: track.id, startKey })
 
   return new Map(rows.map((r) => [r.key, Number(r.total)]))
 }
@@ -280,22 +233,17 @@ export function getTrackSeries(
   const mode = getTrackChartMode(track, view)
 
   if (view === '12m' && mode !== 'grid') {
-    const endYear = now.getUTCFullYear()
-    const endMonth = now.getUTCMonth()
-    const startKey = new Date(Date.UTC(endYear, endMonth - 11, 1))
-      .toISOString()
-      .slice(0, 7)
-    const totals = queryBucketTotals(track, 7, startKey)
+    const monthAt = (offset: number) =>
+      new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1))
+    const totals = queryBucketTotals(track, 7, monthAt(-11).toISOString().slice(0, 7))
 
-    return Array.from({ length: 12 }, (_, idx) => {
-      const d = new Date(Date.UTC(endYear, endMonth - (11 - idx), 1))
-      const y = d.getUTCFullYear()
-      const m = d.getUTCMonth()
-      const key = `${y}-${String(m + 1).padStart(2, '0')}`
-      const shortLabel = MONTHS_SHORT[m] ?? ''
+    return Array.from({ length: 12 }, (_, i) => {
+      const d = monthAt(i - 11)
+      const key = d.toISOString().slice(0, 7)
+      const shortLabel = MONTHS_SHORT[d.getUTCMonth()] ?? ''
       return {
         key,
-        label: `${shortLabel} ${y}`,
+        label: `${shortLabel} ${d.getUTCFullYear()}`,
         shortLabel,
         value: totals.get(key) ?? 0,
       }
@@ -304,15 +252,11 @@ export function getTrackSeries(
 
   const days = view === '12m' ? 364 : view === '30d' ? 30 : 7
   const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  const startUtc = todayUtc - (days - 1) * 86_400_000
-  const totals = queryBucketTotals(
-    track,
-    10,
-    new Date(startUtc).toISOString().slice(0, 10)
-  )
+  const startUtc = todayUtc - (days - 1) * DAY_MS
+  const totals = queryBucketTotals(track, 10, new Date(startUtc).toISOString().slice(0, 10))
 
   return Array.from({ length: days }, (_, i) => {
-    const d = new Date(startUtc + i * 86_400_000)
+    const d = new Date(startUtc + i * DAY_MS)
     const key = d.toISOString().slice(0, 10)
     const dayNum = d.getUTCDate()
     const weekday = WEEKDAYS_SHORT[d.getUTCDay()] ?? ''
