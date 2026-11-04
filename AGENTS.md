@@ -1,6 +1,6 @@
-# Tracker — Agent Guidelines
+# Track — Agent Guidelines
 
-Self-hosted, lightweight personal tracker application built with **Bun**, **Hono**, **SQLite (`bun:sqlite`)**, **HTMX**, and **Bootstrap 5**.
+Self-hosted, lightweight personal tracking application built with **Bun**, **Hono**, **SQLite (`bun:sqlite`)**, **HTMX**, and **Bootstrap 5**.
 
 For developer setup, Docker commands, and API documentation, see [README.md](README.md).
 
@@ -22,9 +22,9 @@ For developer setup, Docker commands, and API documentation, see [README.md](REA
 ### 3. Hypermedia & Frontend Architecture (HTMX + Bootstrap 5)
 - **Zero Client Bundlers**: No Vite, Webpack, or heavy node-based SPA build pipelines.
 - **HTMX Dynamic Swaps**:
-  - Habit check-in and inline value logging swap the individual card in-place (`hx-target="#tracker-card-:id"`).
+  - Habit check-in and inline value logging swap the individual card in-place (`hx-target="#track-card-:id"`).
   - Search filter performs debounced live partial replacement (`hx-trigger="keyup changed delay:200ms"`).
-  - Event and tracker deletion refresh views cleanly via `hx-delete` + `HX-Location`.
+  - Event and track deletion refresh views cleanly via `hx-delete` + `HX-Location`.
 - **Zero Custom CSS**: Styled exclusively with vanilla Bootstrap 5 and Bootstrap Icons.
 
 ### 4. Testing & Verification Philosophy

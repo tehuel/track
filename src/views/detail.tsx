@@ -1,16 +1,16 @@
 import {
-  getTrackerIcon,
-  getTrackerTypeLabel,
-  type Tracker,
-  type TrackerEvent,
+  getTrackIcon,
+  getTrackTypeLabel,
+  type Track,
+  type TrackEvent,
 } from '../types'
 import { Layout } from './layout'
 import { Icon } from './icons'
 import { ColorPicker, FormModal } from './modal'
 
 interface DetailProps {
-  tracker: Tracker
-  events: TrackerEvent[]
+  track: Track
+  events: TrackEvent[]
 }
 
 function formatDate(iso: string): string {
@@ -27,18 +27,18 @@ function formatDate(iso: string): string {
   }
 }
 
-function LogEntryModal({ tracker }: { tracker: Tracker }) {
-  const isText = tracker.type === 'text'
+function LogEntryModal({ track }: { track: Track }) {
+  const isText = track.type === 'text'
 
   return (
     <FormModal
       id="logModal"
       title="Registrar entrada"
-      action={`/track/${tracker.id}`}
+      action={`/track/${track.id}`}
       target="#events-section"
       submitLabel="Registrar entrada"
     >
-      {tracker.type === 'numeric' && (
+      {track.type === 'numeric' && (
         <div class="mb-3">
           <label for="logModal-value" class="form-label fw-medium">
             <span>Valor</span>
@@ -87,55 +87,55 @@ function LogEntryModal({ tracker }: { tracker: Tracker }) {
   )
 }
 
-function EditTrackerModal({ tracker }: { tracker: Tracker }) {
+function EditTrackModal({ track }: { track: Track }) {
   return (
     <FormModal
       id="editModal"
       title="Editar track"
-      action={`/track/${tracker.id}/edit`}
+      action={`/track/${track.id}/edit`}
       submitLabel="Guardar cambios"
     >
       <div class="mb-3">
-        <label for="edit-tracker-name" class="form-label fw-medium">
+        <label for="edit-track-name" class="form-label fw-medium">
           <span>Nombre</span>
           <span class="text-danger ms-1">*</span>
         </label>
         <input
           type="text"
           class="form-control"
-          id="edit-tracker-name"
+          id="edit-track-name"
           name="name"
-          value={tracker.name}
+          value={track.name}
           required
           autofocus
         />
       </div>
 
       <ColorPicker
-        selectedColor={tracker.color}
-        idPrefix="edit-tracker-color"
+        selectedColor={track.color}
+        idPrefix="edit-track-color"
       />
 
       <div class="mb-2">
-        <label for="edit-tracker-description" class="form-label fw-medium">
+        <label for="edit-track-description" class="form-label fw-medium">
           Descripción
         </label>
         <textarea
           class="form-control"
-          id="edit-tracker-description"
+          id="edit-track-description"
           name="description"
           placeholder="Descripción..."
           rows={2}
           maxlength={500}
         >
-          {tracker.description ?? ''}
+          {track.description ?? ''}
         </textarea>
       </div>
     </FormModal>
   )
 }
 
-export function EventsSection({ tracker, events }: DetailProps) {
+export function EventsSection({ track, events }: DetailProps) {
   return (
     <div class="mb-4" id="events-section">
       <div class="row g-2 align-items-center justify-content-between mb-3">
@@ -184,7 +184,7 @@ export function EventsSection({ tracker, events }: DetailProps) {
               <button
                 type="button"
                 class="btn btn-link link-danger p-1 text-decoration-none lh-1 flex-shrink-0"
-                hx-delete={`/track/${tracker.id}/${event.id}`}
+                hx-delete={`/track/${track.id}/${event.id}`}
                 hx-target="#events-section"
                 hx-swap="outerHTML"
                 hx-confirm="¿Eliminar entrada?"
@@ -201,31 +201,31 @@ export function EventsSection({ tracker, events }: DetailProps) {
   )
 }
 
-export function DetailPage({ tracker, events }: DetailProps) {
-  const icon = getTrackerIcon(tracker.type)
-  const typeLabel = getTrackerTypeLabel(tracker.type)
+export function DetailPage({ track, events }: DetailProps) {
+  const icon = getTrackIcon(track.type)
+  const typeLabel = getTrackTypeLabel(track.type)
 
   return (
-    <Layout title={`${tracker.name} - track`}>
+    <Layout title={`${track.name} - track`}>
       <div>
-        {/* Tracker Header */}
+        {/* Track Header */}
         <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
           <div>
             <div class="d-flex align-items-center gap-2">
-              {tracker.color && (
+              {track.color && (
                 <span
                   class="rounded-circle flex-shrink-0 d-inline-block"
                   style={{
                     width: '0.875rem',
                     height: '0.875rem',
-                    backgroundColor: tracker.color,
+                    backgroundColor: track.color,
                   }}
                 ></span>
               )}
-              <h1 class="h3 mb-0 fw-semibold">{tracker.name}</h1>
+              <h1 class="h3 mb-0 fw-semibold">{track.name}</h1>
             </div>
-            {tracker.description && (
-              <p class="text-body-secondary mt-1 mb-0">{tracker.description}</p>
+            {track.description && (
+              <p class="text-body-secondary mt-1 mb-0">{track.description}</p>
             )}
           </div>
 
@@ -234,7 +234,7 @@ export function DetailPage({ tracker, events }: DetailProps) {
               <Icon name={icon} class="fs-5" />
             </span>
 
-            {/* Edit Tracker */}
+            {/* Edit Track */}
             <button
               type="button"
               class="btn btn-outline-secondary"
@@ -246,11 +246,11 @@ export function DetailPage({ tracker, events }: DetailProps) {
               <Icon name="pencil" />
             </button>
 
-            {/* Delete Tracker */}
+            {/* Delete Track */}
             <button
               type="button"
               class="btn btn-outline-danger"
-              hx-delete={`/track/${tracker.id}`}
+              hx-delete={`/track/${track.id}`}
               hx-confirm="¿Eliminar track?"
               title="Eliminar track"
               aria-label="Eliminar track"
@@ -261,13 +261,13 @@ export function DetailPage({ tracker, events }: DetailProps) {
         </div>
 
         {/* History Feed Section */}
-        <EventsSection tracker={tracker} events={events} />
+        <EventsSection track={track} events={events} />
 
         {/* Log Entry Modal */}
-        <LogEntryModal tracker={tracker} />
+        <LogEntryModal track={track} />
 
-        {/* Edit Tracker Modal */}
-        <EditTrackerModal tracker={tracker} />
+        {/* Edit Track Modal */}
+        <EditTrackModal track={track} />
       </div>
     </Layout>
   )

@@ -1,6 +1,6 @@
 # track
 
-Tracker personal simple, construido con Bun, Hono, SQLite, HTMX y Bootstrap.
+Aplicación de seguimiento personal simple, construida con Bun, Hono, SQLite, HTMX y Bootstrap.
 
 Diseñado para correr en un servidor personal o homelab.
 
@@ -16,12 +16,12 @@ Descargar el ejecutable para Linux desde [Releases](https://github.com/tehuel/tr
 ./track
 ```
 
-La aplicación inicia en `http://localhost:3000` y crea la base de datos en `./tracker.db`.
+La aplicación inicia en `http://localhost:3000` y crea la base de datos en `./track.db`.
 
 El puerto y la ubicación de la base de datos se pueden configurar mediante variables de entorno:
 
 ```bash
-PORT=8080 DB_PATH=/ruta/tracker.db ./track
+PORT=8080 DB_PATH=/ruta/track.db ./track
 ```
 
 ### Con Docker

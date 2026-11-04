@@ -8,7 +8,7 @@ COPY dist/track-linux-${TARGETARCH} /usr/local/bin/track
 RUN chmod 755 /usr/local/bin/track && mkdir /data && chown track:track /data
 
 ENV PORT=3000
-ENV DB_PATH=/data/tracker.db
+ENV DB_PATH=/data/track.db
 VOLUME ["/data"]
 
 EXPOSE 3000

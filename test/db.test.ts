@@ -1,24 +1,24 @@
 import { describe, expect, it, beforeEach } from 'bun:test'
 import {
   db,
-  createTracker,
-  updateTracker,
-  getTrackerById,
-  listTrackers,
-  deleteTracker,
+  createTrack,
+  updateTrack,
+  getTrackById,
+  listTracks,
+  deleteTrack,
   generateUniqueSlug,
   createEvent,
-  listEventsByTracker,
+  listEventsByTrack,
   deleteEvent,
 } from '../src/db'
 
 describe('Database layer (bun:sqlite)', () => {
   beforeEach(() => {
-    db.exec('DELETE FROM trackers')
+    db.exec('DELETE FROM tracks')
   })
 
-  it('creates and lists trackers with optional color', () => {
-    createTracker({
+  it('creates and lists tracks with optional color', () => {
+    createTrack({
       id: 'water-log',
       name: 'Drink Water',
       type: 'habit',
@@ -26,13 +26,13 @@ describe('Database layer (bun:sqlite)', () => {
       color: '#0dcaf0',
     })
 
-    createTracker({
+    createTrack({
       id: 'stretching',
       name: 'Stretching',
       type: 'habit',
     })
 
-    const list = listTrackers()
+    const list = listTracks()
     expect(list.length).toBe(2)
     expect(list[0]?.id).toBe('water-log')
     expect(list[0]?.name).toBe('Drink Water')
@@ -43,73 +43,73 @@ describe('Database layer (bun:sqlite)', () => {
     expect(list[1]?.color).toBeNull()
   })
 
-  it('updates tracker name, description, and color', () => {
-    createTracker({ id: 'sleep', name: 'Sleep', type: 'numeric' })
-    expect(getTrackerById('sleep')?.color).toBeNull()
+  it('updates track name, description, and color', () => {
+    createTrack({ id: 'sleep', name: 'Sleep', type: 'numeric' })
+    expect(getTrackById('sleep')?.color).toBeNull()
 
-    updateTracker('sleep', {
+    updateTrack('sleep', {
       name: 'Sleep Hours',
       description: 'Nightly rest',
       color: '#6f42c1',
     })
 
-    const updated = getTrackerById('sleep')
+    const updated = getTrackById('sleep')
     expect(updated?.name).toBe('Sleep Hours')
     expect(updated?.description).toBe('Nightly rest')
     expect(updated?.color).toBe('#6f42c1')
   })
 
-  it('finds tracker by ID', () => {
-    createTracker({ id: 'pushups', name: 'Pushups', type: 'numeric' })
+  it('finds track by ID', () => {
+    createTrack({ id: 'pushups', name: 'Pushups', type: 'numeric' })
 
-    expect(getTrackerById('non-existent')).toBeNull()
+    expect(getTrackById('non-existent')).toBeNull()
 
-    const found = getTrackerById('pushups')
+    const found = getTrackById('pushups')
     expect(found).not.toBeNull()
     expect(found?.name).toBe('Pushups')
   })
 
   it('generates unique slugs when collisions occur', () => {
-    createTracker({ id: 'workout', name: 'Workout', type: 'habit' })
+    createTrack({ id: 'workout', name: 'Workout', type: 'habit' })
 
     const uniqueSlug = generateUniqueSlug('Workout')
     expect(uniqueSlug.startsWith('workout-')).toBe(true)
     expect(uniqueSlug).not.toBe('workout')
   })
 
-  it('deletes tracker and cascades deletion to associated events', () => {
-    createTracker({ id: 'reading', name: 'Reading', type: 'habit' })
+  it('deletes track and cascades deletion to associated events', () => {
+    createTrack({ id: 'reading', name: 'Reading', type: 'habit' })
     createEvent({
       id: 'event-1',
-      tracker_id: 'reading',
+      track_id: 'reading',
       timestamp: new Date().toISOString(),
     })
 
-    expect(listEventsByTracker('reading').length).toBe(1)
+    expect(listEventsByTrack('reading').length).toBe(1)
 
-    deleteTracker('reading')
-    expect(getTrackerById('reading')).toBeNull()
-    expect(listEventsByTracker('reading').length).toBe(0)
+    deleteTrack('reading')
+    expect(getTrackById('reading')).toBeNull()
+    expect(listEventsByTrack('reading').length).toBe(0)
   })
 
-  it('creates, lists, and deletes tracker events', () => {
-    createTracker({ id: 'weight', name: 'Weight', type: 'numeric' })
+  it('creates, lists, and deletes track events', () => {
+    createTrack({ id: 'weight', name: 'Weight', type: 'numeric' })
 
     createEvent({
       id: 'weight-1',
-      tracker_id: 'weight',
+      track_id: 'weight',
       value: 75.5,
       note: 'Morning weigh-in',
       timestamp: '2026-10-31T08:00:00Z',
     })
 
-    const events = listEventsByTracker('weight')
+    const events = listEventsByTrack('weight')
     expect(events.length).toBe(1)
     expect(events[0]?.id).toBe('weight-1')
     expect(events[0]?.value).toBe(75.5)
     expect(events[0]?.note).toBe('Morning weigh-in')
 
     deleteEvent('weight', 'weight-1')
-    expect(listEventsByTracker('weight').length).toBe(0)
+    expect(listEventsByTrack('weight').length).toBe(0)
   })
 })
