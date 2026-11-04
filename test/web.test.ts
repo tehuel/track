@@ -520,7 +520,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('data-chart-mode="grid"')
     expect(html).toContain('data-chart-mode="bars"')
     expect(html).toContain('data-chart-mode="line"')
-    expect(html).toContain('<polyline')
+    expect(html).toContain('<path')
   })
 
   it('GET /track/:id renders chart section and swaps #chart-section partial via HTMX for ?period=30d and ?period=12m', async () => {
@@ -564,7 +564,7 @@ describe('Web UI & HTMX endpoints', () => {
     const html12m = await res12m.text()
     expect(html12m).toContain('data-period="12m"')
     expect(html12m).toContain('data-chart-mode="line"')
-    expect(html12m).toContain('<polyline')
+    expect(html12m).toContain('aria-label="Gráfico de línea (12m)"')
   })
 
   it('POST /track/:id/edit updates independent chart visualization modes from edit modal', async () => {
@@ -642,8 +642,10 @@ describe('Web UI & HTMX endpoints', () => {
     })
     expect(res.status).toBe(200)
     const html = await res.text()
-    const circles = html.match(/<circle /g) ?? []
-    expect(circles.length).toBe(2)
+    const points = html.match(/ecmeta_ssr_type="chart"/g) ?? []
+    expect(points.length).toBe(2)
+    expect(html).toContain(': 75</title>')
+    expect(html).toContain(': 74</title>')
     expect(html).not.toContain(': 0</title>')
   })
 })

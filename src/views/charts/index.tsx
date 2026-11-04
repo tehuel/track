@@ -32,8 +32,8 @@ export function DashboardMiniChart({
     <div class="d-flex align-items-center justify-content-between gap-2 mt-3 position-relative z-2">
       <div class="d-flex align-items-center flex-shrink-0" data-chart-mode={mode}>
         {mode === 'grid' && <MiniGridChart points={points} color={color} maxVal={maxVal} />}
-        {mode === 'bars' && <MiniBarsChart points={points} color={color} maxVal={maxVal} />}
-        {mode === 'line' && <MiniLineChart points={points} color={color} maxVal={maxVal} />}
+        {mode === 'bars' && <MiniBarsChart points={points} color={color} />}
+        {mode === 'line' && <MiniLineChart points={points} color={color} />}
       </div>
 
       <div class="text-body-secondary small text-truncate">
@@ -102,7 +102,6 @@ export function TrackChartSection({
               period={period}
               points={points}
               color={color}
-              maxVal={maxVal}
             />
           )}
           {mode === 'line' && (
@@ -110,7 +109,6 @@ export function TrackChartSection({
               period={period}
               points={points}
               color={color}
-              maxVal={maxVal}
             />
           )}
         </div>
