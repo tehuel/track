@@ -21,7 +21,7 @@ interface RenderCartesianOptions extends CartesianChartProps {
   series: BarSeriesOption | LineSeriesOption
 }
 
-export function renderCartesianSvg({
+export function renderCartesianChart({
   points,
   ariaLabel,
   mini = false,
@@ -29,9 +29,9 @@ export function renderCartesianSvg({
   scaleY = false,
   series,
 }: RenderCartesianOptions) {
-  const width = mini ? 320 : 960
-  const height = mini ? 32 : 116
-  const padX = mini ? 2 : boundaryGap ? 2 : 8
+  const width = mini ? 380 : 1260
+  const height = mini ? 32 : 144
+  const padX = mini ? 4 : boundaryGap ? 6 : 20
 
   const chart = echarts.init(null, null, {
     renderer: 'svg',
@@ -42,12 +42,22 @@ export function renderCartesianSvg({
 
   chart.setOption({
     animation: false,
-    grid: { left: padX, right: padX, top: 4, bottom: 4 },
+    grid: mini
+      ? { left: padX, right: padX, top: 3, bottom: 3 }
+      : { left: padX, right: padX, top: 10, bottom: 22 },
     xAxis: {
       type: 'category',
-      show: false,
+      show: !mini,
       boundaryGap,
-      data: points.map((p) => p.key),
+      data: points.map((p) => (mini ? p.key : p.shortLabel)),
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: {
+        color: 'currentColor',
+        opacity: 0.6,
+        fontSize: 12,
+        interval: points.length > 12 ? 4 : 0,
+      },
     },
     yAxis: {
       type: 'value',
@@ -73,7 +83,7 @@ export function renderCartesianSvg({
   return raw(
     svg.replace(
       /^<svg width="\d+" height="\d+"/,
-      `<svg class="w-100 h-100 d-block" preserveAspectRatio="none" role="img" aria-label="${ariaLabel}"`
+      `<svg class="w-100 h-100 d-block" role="img" aria-label="${ariaLabel}"`
     )
   )
 }
