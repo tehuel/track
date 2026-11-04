@@ -10,10 +10,24 @@ import {
   createEvent,
   deleteEvent,
   getAllDataForExport,
+  getTrackSeries,
 } from './db'
-import { parseTrackColor, parseTrackType, type Track } from './types'
-import { DashboardPage, TracksGrid, TrackCard } from './views/dashboard'
+import {
+  parseChartMode,
+  parseChartPeriod,
+  parseTrackColor,
+  parseTrackType,
+  type ChartPeriod,
+  type Track,
+} from './types'
+import {
+  DashboardPage,
+  TracksGrid,
+  TrackCard,
+  type TrackSummary,
+} from './views/dashboard'
 import { DetailPage, EventsSection } from './views/detail'
+import { TrackChartSection } from './views/charts'
 
 export const app = new Hono()
 
@@ -41,9 +55,46 @@ function toast(c: Context, message: string) {
   c.header('HX-Trigger', JSON.stringify({ showToast: message }))
 }
 
+function buildTrackSummary(track: Track): TrackSummary {
+  return {
+    points: getTrackSeries(track, 'dashboard'),
+    latestEvent: listEventsByTrack(track.id, 1)[0] ?? null,
+  }
+}
+
+function buildSummaries(tracks: Track[]): Record<string, TrackSummary> {
+  const summaries: Record<string, TrackSummary> = {}
+  for (const t of tracks) {
+    summaries[t.id] = buildTrackSummary(t)
+  }
+  return summaries
+}
+
+function getRequestedPeriod(c: Context): ChartPeriod {
+  const queryPeriod = c.req.query('period')
+  if (queryPeriod) return parseChartPeriod(queryPeriod)
+  const currentUrl = c.req.header('HX-Current-URL')
+  if (currentUrl) {
+    try {
+      const url = new URL(currentUrl, 'http://localhost')
+      return parseChartPeriod(url.searchParams.get('period'))
+    } catch {
+      // ignore malformed URL
+    }
+  }
+  return '7d'
+}
+
 function renderEventsSection(c: Context, track: Track) {
   const events = listEventsByTrack(track.id, EVENTS_LIMIT)
-  return c.html(<EventsSection track={track} events={events} />)
+  const period = getRequestedPeriod(c)
+  const chartPoints = getTrackSeries(track, period)
+  return c.html(
+    <>
+      <EventsSection track={track} events={events} />
+      <TrackChartSection track={track} period={period} points={chartPoints} oob={true} />
+    </>
+  )
 }
 
 /** Shared parsing for the create and edit track forms. */
@@ -52,6 +103,12 @@ function parseTrackForm(body: FormBody) {
     name: field(body, 'name'),
     description: field(body, 'description'),
     color: parseTrackColor(body['color']),
+    ...(body['chart_dashboard']
+      ? { chart_dashboard: parseChartMode(body['chart_dashboard']) }
+      : {}),
+    ...(body['chart_7d'] ? { chart_7d: parseChartMode(body['chart_7d']) } : {}),
+    ...(body['chart_30d'] ? { chart_30d: parseChartMode(body['chart_30d']) } : {}),
+    ...(body['chart_12m'] ? { chart_12m: parseChartMode(body['chart_12m']) } : {}),
   }
 }
 
@@ -87,13 +144,17 @@ app.get('/', (c) => {
       )
     : all
 
+  const summaries = buildSummaries(filtered)
+
   // If HTMX requested just the grid partial, return TracksGrid with clean URL push
   if (c.req.header('HX-Target') === 'tracks-grid') {
     c.header('HX-Push-Url', q ? `/?q=${encodeURIComponent(rawQ.trim())}` : '/')
-    return c.html(<TracksGrid tracks={filtered} />)
+    return c.html(<TracksGrid tracks={filtered} summaries={summaries} />)
   }
 
-  return c.html(<DashboardPage tracks={filtered} query={rawQ.trim()} />)
+  return c.html(
+    <DashboardPage tracks={filtered} summaries={summaries} query={rawQ.trim()} />
+  )
 })
 
 // GET /export - Export all tracks and events to JSON
@@ -135,14 +196,34 @@ app.post('/track/:id/edit', async (c) => {
   return navigate(c, `/track/${id}`)
 })
 
-// GET /track/:id - Single track detail
+// GET /track/:id - Single track detail (and HTMX chart partial swap for ?period=...)
 app.get('/track/:id', (c) => {
   const id = c.req.param('id')
   const track = getTrackById(id)
   if (!track) return c.redirect('/')
 
+  const period = parseChartPeriod(c.req.query('period'))
+  const chartPoints = getTrackSeries(track, period)
+
+  if (c.req.header('HX-Target') === 'chart-section') {
+    c.header(
+      'HX-Push-Url',
+      period === '7d' ? `/track/${id}` : `/track/${id}?period=${period}`
+    )
+    return c.html(
+      <TrackChartSection track={track} period={period} points={chartPoints} />
+    )
+  }
+
   const events = listEventsByTrack(id, EVENTS_LIMIT)
-  return c.html(<DetailPage track={track} events={events} />)
+  return c.html(
+    <DetailPage
+      track={track}
+      events={events}
+      period={period}
+      chartPoints={chartPoints}
+    />
+  )
 })
 
 // POST /track/:id - Log event (quick log from dashboard card or modal from detail)
@@ -159,7 +240,7 @@ app.post('/track/:id', async (c) => {
 
   switch (c.req.header('HX-Target')) {
     case `track-card-${id}`:
-      return c.html(<TrackCard track={track} />)
+      return c.html(<TrackCard track={track} summary={buildTrackSummary(track)} />)
     case 'events-section':
       return renderEventsSection(c, track)
     default:

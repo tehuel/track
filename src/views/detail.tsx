@@ -1,16 +1,24 @@
 import {
+  CHART_MODES,
+  getTrackChartMode,
   getTrackIcon,
   getTrackTypeLabel,
+  type ChartMode,
+  type ChartPeriod,
+  type ChartPoint,
   type Track,
   type TrackEvent,
 } from '../types'
 import { Layout } from './layout'
 import { Icon } from './icons'
 import { ColorPicker, FormModal } from './modal'
+import { TrackChartSection } from './charts'
 
 interface DetailProps {
   track: Track
   events: TrackEvent[]
+  period?: ChartPeriod
+  chartPoints?: ChartPoint[]
 }
 
 function LogEntryModal({ track }: { track: Track }) {
@@ -73,6 +81,40 @@ function LogEntryModal({ track }: { track: Track }) {
   )
 }
 
+function ChartModeSelector({
+  name,
+  label,
+  selected,
+}: {
+  name: string
+  label: string
+  selected: ChartMode
+}) {
+  return (
+    <div class="col-6">
+      <label class="form-label small text-body-secondary mb-1 d-block">{label}</label>
+      <div class="btn-group btn-group-sm w-100" role="group" aria-label={label}>
+        {CHART_MODES.map((m) => (
+          <>
+            <input
+              type="radio"
+              class="btn-check"
+              name={name}
+              id={`edit-${name}-${m.value}`}
+              value={m.value}
+              autocomplete="off"
+              checked={selected === m.value}
+            />
+            <label class="btn btn-outline-secondary" for={`edit-${name}-${m.value}`}>
+              {m.label}
+            </label>
+          </>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function EditTrackModal({ track }: { track: Track }) {
   return (
     <FormModal
@@ -101,6 +143,32 @@ function EditTrackModal({ track }: { track: Track }) {
         selectedColor={track.color}
         idPrefix="edit-track-color"
       />
+
+      <div class="mb-3">
+        <label class="form-label fw-medium d-block mb-1">Visualización</label>
+        <div class="row g-2">
+          <ChartModeSelector
+            name="chart_dashboard"
+            label="Dashboard"
+            selected={getTrackChartMode(track, 'dashboard')}
+          />
+          <ChartModeSelector
+            name="chart_7d"
+            label="7 días"
+            selected={getTrackChartMode(track, '7d')}
+          />
+          <ChartModeSelector
+            name="chart_30d"
+            label="30 días"
+            selected={getTrackChartMode(track, '30d')}
+          />
+          <ChartModeSelector
+            name="chart_12m"
+            label="12 meses"
+            selected={getTrackChartMode(track, '12m')}
+          />
+        </div>
+      </div>
 
       <div class="mb-2">
         <label for="edit-track-description" class="form-label fw-medium">
@@ -187,7 +255,12 @@ export function EventsSection({ track, events }: DetailProps) {
   )
 }
 
-export function DetailPage({ track, events }: DetailProps) {
+export function DetailPage({
+  track,
+  events,
+  period = '7d',
+  chartPoints = [],
+}: DetailProps) {
   const icon = getTrackIcon(track.type)
   const typeLabel = getTrackTypeLabel(track.type)
 
@@ -245,6 +318,9 @@ export function DetailPage({ track, events }: DetailProps) {
             </button>
           </div>
         </div>
+
+        {/* Visualization Section */}
+        <TrackChartSection track={track} period={period} points={chartPoints} />
 
         {/* History Feed Section */}
         <EventsSection track={track} events={events} />

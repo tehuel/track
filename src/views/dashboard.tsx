@@ -2,22 +2,32 @@ import {
   TRACK_TYPES,
   getTrackIcon,
   getTrackTypeLabel,
+  type ChartPoint,
   type Track,
+  type TrackEvent,
 } from '../types'
 import { Layout } from './layout'
 import { Icon } from './icons'
 import { ColorPicker, FormModal, SubmitButton } from './modal'
+import { DashboardMiniChart } from './charts'
+
+export interface TrackSummary {
+  points: ChartPoint[]
+  latestEvent: TrackEvent | null
+}
 
 interface DashboardProps {
   tracks: Track[]
+  summaries?: Record<string, TrackSummary>
   query?: string
 }
 
 interface TrackCardProps {
   track: Track
+  summary?: TrackSummary
 }
 
-export function TrackCard({ track }: TrackCardProps) {
+export function TrackCard({ track, summary }: TrackCardProps) {
   const icon = getTrackIcon(track.type)
   const typeLabel = getTrackTypeLabel(track.type)
 
@@ -66,6 +76,14 @@ export function TrackCard({ track }: TrackCardProps) {
               <p class="card-text text-body-secondary small mb-0 mt-1 text-truncate">
                 {track.description}
               </p>
+            )}
+
+            {summary && (
+              <DashboardMiniChart
+                track={track}
+                points={summary.points}
+                latestEvent={summary.latestEvent}
+              />
             )}
           </div>
 
@@ -182,7 +200,7 @@ function NewTrackModal() {
   )
 }
 
-export function TracksGrid({ tracks }: DashboardProps) {
+export function TracksGrid({ tracks, summaries }: DashboardProps) {
   if (tracks.length === 0) {
     return (
       <div id="tracks-grid" class="card text-center p-5 border-0 bg-body rounded-3">
@@ -207,14 +225,14 @@ export function TracksGrid({ tracks }: DashboardProps) {
     <div id="tracks-grid">
       <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
         {tracks.map((track) => (
-          <TrackCard track={track} />
+          <TrackCard track={track} summary={summaries?.[track.id]} />
         ))}
       </div>
     </div>
   )
 }
 
-export function DashboardPage({ tracks, query = '' }: DashboardProps) {
+export function DashboardPage({ tracks, summaries, query = '' }: DashboardProps) {
   return (
     <Layout>
       <div>
@@ -266,7 +284,7 @@ export function DashboardPage({ tracks, query = '' }: DashboardProps) {
         </div>
 
         {/* Tracks Grid */}
-        <TracksGrid tracks={tracks} />
+        <TracksGrid tracks={tracks} summaries={summaries} />
 
         {/* Create Modal */}
         <NewTrackModal />
