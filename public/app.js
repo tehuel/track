@@ -26,6 +26,18 @@
     bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 }).show();
   });
 
+  // Render UTC <time datetime="..."> elements in the user's local timezone
+  document.addEventListener('htmx:load', (evt) => {
+    evt.detail.elt.querySelectorAll?.('time[datetime]').forEach((el) => {
+      el.textContent = new Date(el.dateTime).toLocaleString('es-AR', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    });
+  });
+
   // Modal lifecycle: focus + default datetime on open, reset form on close
   document.addEventListener('show.bs.modal', (evt) => {
     const timeInput = evt.target.querySelector('input[type="datetime-local"]');
@@ -35,6 +47,12 @@
         .toISOString()
         .slice(0, 16);
     }
+  });
+
+  // Convert local datetime-local input value to UTC ISO string before sending to server
+  document.addEventListener('htmx:configRequest', (evt) => {
+    const time = evt.detail.parameters.timestamp;
+    if (time) evt.detail.parameters.timestamp = new Date(time).toISOString();
   });
 
   document.addEventListener('shown.bs.modal', (evt) => {

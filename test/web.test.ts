@@ -246,6 +246,8 @@ describe('Web UI & HTMX endpoints', () => {
       expect(js).toContain("evt.key === 'Escape'")
       expect(js).toContain('confirmPending')
       expect(js).toContain('#theme-toggle')
+      expect(js).toContain('htmx:load')
+      expect(js).toContain('htmx:configRequest')
       expect(js).not.toContain('window.toggleTheme')
     }
   })
@@ -291,6 +293,10 @@ describe('Web UI & HTMX endpoints', () => {
 
     expect(res.status).toBe(302)
     expect(res.headers.get('location')).toBe('/track/weight')
+
+    const events = listEventsByTrack('weight')
+    expect(events).toHaveLength(1)
+    expect(events[0]?.timestamp).toBe('2026-10-31T08:00:00.000Z')
   })
 
   it('GET /track/:id displays detail view with history and log modal', async () => {
@@ -307,6 +313,7 @@ describe('Web UI & HTMX endpoints', () => {
     const html = await res.text()
     expect(html).toContain('Lectura')
     expect(html).toContain('Terminado capítulo 3')
+    expect(html).toContain('<time datetime="2026-10-31T10:00:00Z"')
     expect(html).toContain('Historial de entradas')
     expect(html).toContain('id="logModal"')
     expect(html).toContain('title="Hábito"')
