@@ -493,4 +493,159 @@ describe('Web UI & HTMX endpoints', () => {
     expect(meditationTrack.name).toBe('Meditation')
     expect(meditationTrack.events).toEqual([])
   })
+
+  it('renders 7-day mini-charts on dashboard cards according to chart_dashboard mode', async () => {
+    createTrack({
+      id: 'h-grid',
+      name: 'Hábito Grilla',
+      type: 'habit',
+      chart_dashboard: 'grid',
+    })
+    createTrack({
+      id: 'n-bars',
+      name: 'Numérico Barras',
+      type: 'numeric',
+      chart_dashboard: 'bars',
+    })
+    createTrack({
+      id: 't-line',
+      name: 'Texto Línea',
+      type: 'text',
+      chart_dashboard: 'line',
+    })
+
+    const res = await app.request('/')
+    expect(res.status).toBe(200)
+    const html = await res.text()
+    expect(html).toContain('data-chart-mode="grid"')
+    expect(html).toContain('data-chart-mode="bars"')
+    expect(html).toContain('data-chart-mode="line"')
+    expect(html).toContain('<path')
+  })
+
+  it('GET /track/:id renders chart section and swaps #chart-section partial via HTMX for ?period=30d and ?period=12m', async () => {
+    createTrack({
+      id: 'workout',
+      name: 'Entrenamiento',
+      type: 'habit',
+      chart_7d: 'grid',
+      chart_30d: 'bars',
+      chart_12m: 'line',
+    })
+
+    const res7d = await app.request('/track/workout')
+    expect(res7d.status).toBe(200)
+    const html7d = await res7d.text()
+    expect(html7d).toContain('id="chart-section"')
+    expect(html7d).toContain('overflow-x-auto')
+    expect(html7d).toContain('data-period="7d"')
+    expect(html7d).toContain('data-chart-mode="grid"')
+    expect(html7d).toContain('hx-get="/track/workout?period=30d"')
+    expect(html7d).toContain('hx-get="/track/workout?period=12m"')
+    expect(html7d).toContain('aria-label="Dashboard: Grilla"')
+    expect(html7d).toContain('aria-label="12 meses: Línea"')
+
+    const res30d = await app.request('/track/workout?period=30d', {
+      headers: { 'HX-Request': 'true', 'HX-Target': 'chart-section' },
+    })
+    expect(res30d.status).toBe(200)
+    expect(res30d.headers.get('HX-Push-Url')).toBe('/track/workout?period=30d')
+    const html30d = await res30d.text()
+    expect(html30d).toContain('id="chart-section"')
+    expect(html30d).toContain('data-period="30d"')
+    expect(html30d).toContain('data-chart-mode="bars"')
+    expect(html30d).not.toContain('<nav')
+
+    const res12m = await app.request('/track/workout?period=12m', {
+      headers: { 'HX-Request': 'true', 'HX-Target': 'chart-section' },
+    })
+    expect(res12m.status).toBe(200)
+    expect(res12m.headers.get('HX-Push-Url')).toBe('/track/workout?period=12m')
+    const html12m = await res12m.text()
+    expect(html12m).toContain('data-period="12m"')
+    expect(html12m).toContain('data-chart-mode="line"')
+    expect(html12m).toContain('aria-label="Gráfico de línea (12m)"')
+  })
+
+  it('POST /track/:id/edit updates independent chart visualization modes from edit modal', async () => {
+    createTrack({ id: 'water', name: 'Agua', type: 'numeric' })
+
+    const formData = new FormData()
+    formData.append('name', 'Agua Diaria')
+    formData.append('chart_dashboard', 'line')
+    formData.append('chart_7d', 'grid')
+    formData.append('chart_30d', 'bars')
+    formData.append('chart_12m', 'grid')
+
+    const res = await app.request('/track/water/edit', {
+      method: 'POST',
+      headers: { 'HX-Request': 'true' },
+      body: formData,
+    })
+    expect(res.status).toBe(200)
+
+    const updated = getTrackById('water')
+    expect(updated?.chart_dashboard).toBe('line')
+    expect(updated?.chart_7d).toBe('grid')
+    expect(updated?.chart_30d).toBe('bars')
+    expect(updated?.chart_12m).toBe('grid')
+  })
+
+  it('updates #chart-section out-of-band when logging or deleting events on detail page', async () => {
+    createTrack({ id: 'coffee', name: 'Café', type: 'numeric' })
+
+    const formData = new FormData()
+    formData.append('value', '2')
+    const logRes = await app.request('/track/coffee', {
+      method: 'POST',
+      headers: {
+        'HX-Target': 'events-section',
+        'HX-Current-URL': 'http://localhost/track/coffee?period=30d',
+      },
+      body: formData,
+    })
+
+    expect(logRes.status).toBe(200)
+    const logHtml = await logRes.text()
+    expect(logHtml).toContain('id="events-section"')
+    expect(logHtml).toContain('id="chart-section"')
+    expect(logHtml).toContain('hx-swap-oob="true"')
+    expect(logHtml).toContain('data-period="30d"')
+  })
+
+  it('line chart omits circle dots on days without entries and connects active days directly', async () => {
+    createTrack({
+      id: 'weight-line',
+      name: 'Peso',
+      type: 'numeric',
+      chart_7d: 'line',
+    })
+
+    const now = new Date()
+    const twoDaysAgo = new Date(now.getTime() - 2 * 86_400_000)
+
+    createEvent({
+      id: 'w1',
+      track_id: 'weight-line',
+      value: 75,
+      timestamp: twoDaysAgo.toISOString(),
+    })
+    createEvent({
+      id: 'w2',
+      track_id: 'weight-line',
+      value: 74,
+      timestamp: now.toISOString(),
+    })
+
+    const res = await app.request('/track/weight-line', {
+      headers: { 'HX-Request': 'true', 'HX-Target': 'chart-section' },
+    })
+    expect(res.status).toBe(200)
+    const html = await res.text()
+    const points = html.match(/ecmeta_ssr_type="chart"/g) ?? []
+    expect(points.length).toBe(2)
+    expect(html).toContain(': 75</title>')
+    expect(html).toContain(': 74</title>')
+    expect(html).not.toContain(': 0</title>')
+  })
 })

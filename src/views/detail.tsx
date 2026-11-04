@@ -1,16 +1,24 @@
 import {
+  CHART_MODES,
+  CHART_PERIODS,
+  getTrackChartMode,
   getTrackIcon,
   getTrackTypeLabel,
+  type ChartPeriod,
+  type ChartPoint,
   type Track,
   type TrackEvent,
 } from '../types'
 import { Layout } from './layout'
 import { Icon } from './icons'
 import { ColorPicker, FormModal } from './modal'
+import { Chart } from './charts'
 
 interface DetailProps {
   track: Track
   events: TrackEvent[]
+  period?: ChartPeriod
+  chartPoints?: ChartPoint[]
 }
 
 function LogEntryModal({ track }: { track: Track }) {
@@ -73,6 +81,17 @@ function LogEntryModal({ track }: { track: Track }) {
   )
 }
 
+const CHART_VIEW_ROWS: {
+  name: 'chart_dashboard' | 'chart_7d' | 'chart_30d' | 'chart_12m'
+  view: 'dashboard' | ChartPeriod
+  label: string
+}[] = [
+  { name: 'chart_dashboard', view: 'dashboard', label: 'Dashboard' },
+  { name: 'chart_7d', view: '7d', label: '7 días' },
+  { name: 'chart_30d', view: '30d', label: '30 días' },
+  { name: 'chart_12m', view: '12m', label: '12 meses' },
+]
+
 function EditTrackModal({ track }: { track: Track }) {
   return (
     <FormModal
@@ -102,6 +121,55 @@ function EditTrackModal({ track }: { track: Track }) {
         idPrefix="edit-track-color"
       />
 
+      <div class="mb-3">
+        <label class="form-label fw-medium d-block mb-1">Visualización</label>
+        <table class="table table-sm table-borderless align-middle mb-0 text-center">
+          <thead>
+            <tr class="small text-body-secondary">
+              <th scope="col" class="text-start fw-normal ps-0">
+                Vista
+              </th>
+              {CHART_MODES.map((m) => (
+                <th scope="col" class="fw-normal">
+                  {m.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {CHART_VIEW_ROWS.map((row) => {
+              const selected = getTrackChartMode(track, row.view)
+              return (
+                <tr>
+                  <th
+                    scope="row"
+                    class="text-start small text-body-secondary fw-normal ps-0"
+                  >
+                    {row.label}
+                  </th>
+                  {CHART_MODES.map((m) => {
+                    const inputId = `edit-${row.name}-${m.value}`
+                    return (
+                      <td>
+                        <input
+                          type="radio"
+                          class="form-check-input m-0"
+                          name={row.name}
+                          id={inputId}
+                          value={m.value}
+                          checked={selected === m.value}
+                          aria-label={`${row.label}: ${m.label}`}
+                        />
+                      </td>
+                    )
+                  })}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
       <div class="mb-2">
         <label for="edit-track-description" class="form-label fw-medium">
           Descripción
@@ -118,6 +186,73 @@ function EditTrackModal({ track }: { track: Track }) {
         </textarea>
       </div>
     </FormModal>
+  )
+}
+
+export function ChartSection({
+  track,
+  period = '7d',
+  points,
+  oob = false,
+}: {
+  track: Track
+  period?: ChartPeriod
+  points: ChartPoint[]
+  oob?: boolean
+}) {
+  const mode = getTrackChartMode(track, period)
+  const minWidth =
+    period === '12m' && mode === 'grid'
+      ? '34rem'
+      : period === '30d'
+        ? '30rem'
+        : period === '12m'
+          ? '28rem'
+          : '18rem'
+
+  return (
+    <div
+      class="card border-0 bg-body rounded-3 p-3 mb-4"
+      id="chart-section"
+      data-period={period}
+      data-chart-mode={mode}
+      hx-swap-oob={oob ? 'true' : undefined}
+    >
+      <div
+        class="overflow-x-auto overflow-y-hidden"
+        style={{ height: '9rem' }}
+      >
+        <div
+          class="d-flex flex-column justify-content-center h-100 w-100"
+          style={{ minWidth }}
+        >
+          <Chart mode={mode} track={track} period={period} points={points} />
+        </div>
+      </div>
+
+      {/* Simple row of period links below the chart */}
+      <div class="d-flex justify-content-center align-items-center gap-3 mt-2 pt-1 small">
+        {CHART_PERIODS.map((p) => {
+          const active = p.value === period
+          return (
+            <a
+              href={`/track/${track.id}?period=${p.value}`}
+              hx-get={`/track/${track.id}?period=${p.value}`}
+              hx-target="#chart-section"
+              hx-swap="outerHTML"
+              class={
+                active
+                  ? 'fw-semibold text-body text-decoration-none'
+                  : 'text-body-secondary text-decoration-none'
+              }
+              aria-current={active ? 'true' : undefined}
+            >
+              {p.label}
+            </a>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -187,7 +322,12 @@ export function EventsSection({ track, events }: DetailProps) {
   )
 }
 
-export function DetailPage({ track, events }: DetailProps) {
+export function DetailPage({
+  track,
+  events,
+  period = '7d',
+  chartPoints = [],
+}: DetailProps) {
   const icon = getTrackIcon(track.type)
   const typeLabel = getTrackTypeLabel(track.type)
 
@@ -245,6 +385,9 @@ export function DetailPage({ track, events }: DetailProps) {
             </button>
           </div>
         </div>
+
+        {/* Visualization Section */}
+        <ChartSection track={track} period={period} points={chartPoints} />
 
         {/* History Feed Section */}
         <EventsSection track={track} events={events} />
