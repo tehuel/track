@@ -173,76 +173,81 @@ export function TrackChartSection({
       data-chart-mode={mode}
       hx-swap-oob={oob ? 'true' : undefined}
     >
-      {mode === 'grid' && period === '7d' && (
-        <div class="d-flex justify-content-between gap-1 text-center py-1">
-          {points.map((p) => {
-            const active = p.value > 0
-            return (
-              <div
-                class="d-flex flex-column align-items-center gap-1 flex-fill"
-                title={`${p.label}: ${formatChartValue(p.value)}`}
-              >
-                <span class="text-body-secondary small">{p.shortLabel}</span>
-                <span
-                  class="rounded-circle d-inline-flex align-items-center justify-content-center small fw-semibold font-monospace"
+      <div
+        class="d-flex flex-column justify-content-center"
+        style={{ height: '8.75rem' }}
+      >
+        {mode === 'grid' && period === '7d' && (
+          <div class="d-flex justify-content-between gap-1 text-center w-100">
+            {points.map((p) => {
+              const active = p.value > 0
+              return (
+                <div
+                  class="d-flex flex-column align-items-center gap-2 flex-fill"
+                  title={`${p.label}: ${formatChartValue(p.value)}`}
+                >
+                  <span class="text-body-secondary small">{p.shortLabel}</span>
+                  <span
+                    class="rounded-circle d-inline-flex align-items-center justify-content-center small fw-semibold font-monospace"
+                    style={{
+                      width: '2.5rem',
+                      height: '2.5rem',
+                      backgroundColor: active ? color : 'transparent',
+                      color: active ? '#fff' : 'var(--bs-secondary-color)',
+                      border: active
+                        ? `1.5px solid ${color}`
+                        : '1.5px solid var(--bs-border-color)',
+                      opacity: active ? getIntensityOpacity(p.value, maxVal) : '0.65',
+                    }}
+                  >
+                    {active
+                      ? track.type === 'habit' && p.value === 1
+                        ? '✓'
+                        : formatChartValue(p.value)
+                      : '·'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {mode === 'grid' && period === '30d' && (
+          <div
+            class="w-100"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(10, minmax(0, 1fr))',
+              gap: '0.375rem',
+            }}
+          >
+            {points.map((p) => {
+              const active = p.value > 0
+              const opacity = active ? getIntensityOpacity(p.value, maxVal) : '0.45'
+              return (
+                <div
+                  class="rounded-2 d-flex align-items-center justify-content-center small font-monospace"
+                  title={`${p.label}: ${formatChartValue(p.value)}`}
                   style={{
-                    width: '2.125rem',
-                    height: '2.125rem',
+                    height: '2.25rem',
                     backgroundColor: active ? color : 'transparent',
                     color: active ? '#fff' : 'var(--bs-secondary-color)',
-                    border: active ? `1.5px solid ${color}` : '1.5px solid var(--bs-border-color)',
-                    opacity: active ? getIntensityOpacity(p.value, maxVal) : '0.65',
+                    border: active ? `1px solid ${color}` : '1px solid var(--bs-border-color)',
+                    opacity,
                   }}
                 >
-                  {active
-                    ? track.type === 'habit' && p.value === 1
-                      ? '✓'
-                      : formatChartValue(p.value)
-                    : '·'}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      )}
+                  {p.shortLabel}
+                </div>
+              )
+            })}
+          </div>
+        )}
 
-      {mode === 'grid' && period === '30d' && (
-        <div
-          class="py-1"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(10, minmax(0, 1fr))',
-            gap: '0.375rem',
-          }}
-        >
-          {points.map((p) => {
-            const active = p.value > 0
-            const opacity = active ? getIntensityOpacity(p.value, maxVal) : '0.45'
-            return (
-              <div
-                class="rounded-2 d-flex align-items-center justify-content-center small font-monospace"
-                title={`${p.label}: ${formatChartValue(p.value)}`}
-                style={{
-                  height: '2rem',
-                  backgroundColor: active ? color : 'transparent',
-                  color: active ? '#fff' : 'var(--bs-secondary-color)',
-                  border: active ? `1px solid ${color}` : '1px solid var(--bs-border-color)',
-                  opacity,
-                }}
-              >
-                {p.shortLabel}
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {mode === 'grid' && period === '12m' && (
-        <div class="py-1">
+        {mode === 'grid' && period === '12m' && (
           <svg
             viewBox="0 0 572 77"
             class="w-100"
-            style={{ maxHeight: '96px' }}
+            style={{ height: '100%', maxHeight: '7.5rem' }}
             role="img"
             aria-label="Actividad anual"
           >
@@ -266,25 +271,22 @@ export function TrackChartSection({
               )
             })}
           </svg>
-        </div>
-      )}
+        )}
 
-      {mode === 'bars' && (() => {
-        const W = 560
-        const H = 110
-        const padX = 16
-        const padY = 10
-        const plotW = W - padX * 2
-        const plotH = H - padY
-        const step = plotW / Math.max(1, points.length)
-        const barW = Math.min(28, Math.max(6, step * 0.65))
+        {mode === 'bars' && (() => {
+          const W = 560
+          const H = 110
+          const padX = 16
+          const padY = 10
+          const plotW = W - padX * 2
+          const plotH = H - padY
+          const step = plotW / Math.max(1, points.length)
+          const barW = Math.min(28, Math.max(6, step * 0.65))
 
-        return (
-          <div class="py-1">
+          return (
             <svg
               viewBox={`0 0 ${W} ${H + 20}`}
-              class="w-100"
-              style={{ maxHeight: '140px' }}
+              class="w-100 h-100"
               role="img"
               aria-label={`Gráfico de barras (${period})`}
             >
@@ -325,34 +327,31 @@ export function TrackChartSection({
                 )
               })}
             </svg>
-          </div>
-        )
-      })()}
+          )
+        })()}
 
-      {mode === 'line' && (() => {
-        const W = 560
-        const H = 110
-        const padX = 20
-        const padY = 12
-        const plotW = W - padX * 2
-        const plotH = H - padY * 2
-        const coords = points.map((p, i) => {
-          const x = padX + (i / Math.max(1, points.length - 1)) * plotW
-          const y = padY + plotH - (p.value / maxVal) * plotH
-          return { x, y, p, i }
-        })
-        const poly = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ')
-        const firstX = coords[0]?.x.toFixed(1) ?? '0'
-        const lastX = coords[coords.length - 1]?.x.toFixed(1) ?? '0'
-        const baseY = (padY + plotH).toFixed(1)
-        const area = `${firstX},${baseY} ${poly} ${lastX},${baseY}`
+        {mode === 'line' && (() => {
+          const W = 560
+          const H = 110
+          const padX = 20
+          const padY = 12
+          const plotW = W - padX * 2
+          const plotH = H - padY * 2
+          const coords = points.map((p, i) => {
+            const x = padX + (i / Math.max(1, points.length - 1)) * plotW
+            const y = padY + plotH - (p.value / maxVal) * plotH
+            return { x, y, p, i }
+          })
+          const poly = coords.map((c) => `${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ')
+          const firstX = coords[0]?.x.toFixed(1) ?? '0'
+          const lastX = coords[coords.length - 1]?.x.toFixed(1) ?? '0'
+          const baseY = (padY + plotH).toFixed(1)
+          const area = `${firstX},${baseY} ${poly} ${lastX},${baseY}`
 
-        return (
-          <div class="py-1">
+          return (
             <svg
               viewBox={`0 0 ${W} ${H + 20}`}
-              class="w-100"
-              style={{ maxHeight: '140px' }}
+              class="w-100 h-100"
               role="img"
               aria-label={`Gráfico de línea (${period})`}
             >
@@ -394,9 +393,9 @@ export function TrackChartSection({
                 )
               })}
             </svg>
-          </div>
-        )
-      })()}
+          )
+        })()}
+      </div>
 
       {/* Simple row of period links below the chart */}
       <div class="d-flex justify-content-center align-items-center gap-3 mt-2 pt-1 small">
