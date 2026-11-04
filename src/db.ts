@@ -1,13 +1,5 @@
 import { Database } from 'bun:sqlite'
-import {
-  defaultChartMode,
-  getTrackChartMode,
-  type ChartMode,
-  type ChartPeriod,
-  type ChartPoint,
-  type Track,
-  type TrackEvent,
-} from './types'
+import { defaultChartMode, type ChartMode, type Track, type TrackEvent } from './types'
 
 const dbPath =
   process.env.NODE_ENV === 'test' ? ':memory:' : process.env.DB_PATH || 'track.db'
@@ -187,85 +179,33 @@ export function getAllDataForExport(): TrackWithEvents[] {
   }))
 }
 
-// --- Chart Series Aggregation Queries ---
+// --- Aggregation Queries ---
 
-const DAY_MS = 86_400_000
-const WEEKDAYS_SHORT = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-// prettier-ignore
-const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+export type TotalsBucket = 'day' | 'month'
+
+/** Length of the ISO timestamp prefix used as bucket key (`YYYY-MM-DD` / `YYYY-MM`). */
+const BUCKET_KEY_LENGTH: Record<TotalsBucket, number> = { day: 10, month: 7 }
 
 /**
- * Sums event values per time bucket, where a bucket is the first `keyLen`
- * characters of the ISO timestamp (`YYYY-MM` for months, `YYYY-MM-DD` for days).
+ * Accumulates a track's events per time bucket, keyed by ISO date (`YYYY-MM-DD`)
+ * or month (`YYYY-MM`), starting at `sinceKey` (inclusive).
  * Numeric tracks sum `value`; habit/text tracks count events.
+ * Buckets without events are omitted.
  */
-function queryBucketTotals(
+export function getEventTotals(
   track: Track,
-  keyLen: 7 | 10,
-  startKey: string
+  bucket: TotalsBucket,
+  sinceKey: string
 ): Map<string, number> {
   const aggregate = track.type === 'numeric' ? 'SUM(COALESCE(value, 0))' : 'COUNT(*)'
   const rows = db
-    .query<{ key: string; total: number }, { keyLen: number; trackId: string; startKey: string }>(
+    .query<{ key: string; total: number }, { keyLen: number; trackId: string; sinceKey: string }>(
       `SELECT substr(timestamp, 1, $keyLen) AS key, ${aggregate} AS total
        FROM track_events
-       WHERE track_id = $trackId AND key >= $startKey
+       WHERE track_id = $trackId AND key >= $sinceKey
        GROUP BY key`
     )
-    .all({ keyLen, trackId: track.id, startKey })
+    .all({ keyLen: BUCKET_KEY_LENGTH[bucket], trackId: track.id, sinceKey })
 
   return new Map(rows.map((r) => [r.key, Number(r.total)]))
-}
-
-/**
- * Returns a continuous time series of accumulated values (`SUM(value)` for
- * numeric tracks, `COUNT(*)` for habit/text tracks) for the requested view.
- *
- * - `dashboard` / `7d`: 7 daily points
- * - `30d`: 30 daily points
- * - `12m`: 364 daily points (52×7 heatmap) when mode is `grid`, or 12 monthly points when mode is `bars`/`line`
- */
-export function getTrackSeries(
-  track: Track,
-  view: 'dashboard' | ChartPeriod,
-  now: Date = new Date()
-): ChartPoint[] {
-  const mode = getTrackChartMode(track, view)
-
-  if (view === '12m' && mode !== 'grid') {
-    const monthAt = (offset: number) =>
-      new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1))
-    const totals = queryBucketTotals(track, 7, monthAt(-11).toISOString().slice(0, 7))
-
-    return Array.from({ length: 12 }, (_, i) => {
-      const d = monthAt(i - 11)
-      const key = d.toISOString().slice(0, 7)
-      const shortLabel = MONTHS_SHORT[d.getUTCMonth()] ?? ''
-      return {
-        key,
-        label: `${shortLabel} ${d.getUTCFullYear()}`,
-        shortLabel,
-        value: totals.get(key) ?? 0,
-      }
-    })
-  }
-
-  const days = view === '12m' ? 364 : view === '30d' ? 30 : 7
-  const todayUtc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  const startUtc = todayUtc - (days - 1) * DAY_MS
-  const totals = queryBucketTotals(track, 10, new Date(startUtc).toISOString().slice(0, 10))
-
-  return Array.from({ length: days }, (_, i) => {
-    const d = new Date(startUtc + i * DAY_MS)
-    const key = d.toISOString().slice(0, 10)
-    const dayNum = d.getUTCDate()
-    const weekday = WEEKDAYS_SHORT[d.getUTCDay()] ?? ''
-    const month = MONTHS_SHORT[d.getUTCMonth()]?.toLowerCase() ?? ''
-    return {
-      key,
-      label: `${weekday} ${dayNum} ${month}`,
-      shortLabel: days === 7 ? weekday : String(dayNum),
-      value: totals.get(key) ?? 0,
-    }
-  })
 }
