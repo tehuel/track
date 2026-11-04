@@ -26,8 +26,7 @@ import {
   TrackCard,
   type TrackSummary,
 } from './views/dashboard'
-import { DetailPage, EventsSection } from './views/detail'
-import { TrackChartSection } from './views/charts'
+import { DetailPage, EventsSection, ChartSection } from './views/detail'
 
 export const app = new Hono()
 
@@ -92,7 +91,7 @@ function renderEventsSection(c: Context, track: Track) {
   return c.html(
     <>
       <EventsSection track={track} events={events} />
-      <TrackChartSection track={track} period={period} points={chartPoints} oob={true} />
+      <ChartSection track={track} period={period} points={chartPoints} oob={true} />
     </>
   )
 }
@@ -211,7 +210,7 @@ app.get('/track/:id', (c) => {
       period === '7d' ? `/track/${id}` : `/track/${id}?period=${period}`
     )
     return c.html(
-      <TrackChartSection track={track} period={period} points={chartPoints} />
+      <ChartSection track={track} period={period} points={chartPoints} />
     )
   }
 

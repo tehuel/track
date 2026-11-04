@@ -1,5 +1,6 @@
 import {
   TRACK_TYPES,
+  getTrackChartMode,
   getTrackIcon,
   getTrackTypeLabel,
   type ChartPoint,
@@ -9,7 +10,7 @@ import {
 import { Layout } from './layout'
 import { Icon } from './icons'
 import { ColorPicker, FormModal, SubmitButton } from './modal'
-import { DashboardMiniChart } from './charts'
+import { Chart } from './charts'
 
 export interface TrackSummary {
   points: ChartPoint[]
@@ -78,13 +79,23 @@ export function TrackCard({ track, summary }: TrackCardProps) {
               </p>
             )}
 
-            {summary && (
-              <DashboardMiniChart
-                track={track}
-                points={summary.points}
-                latestEvent={summary.latestEvent}
-              />
-            )}
+            {summary && (() => {
+              const mode = getTrackChartMode(track, 'dashboard')
+              return (
+                <div class="d-flex align-items-center justify-content-between gap-2 mt-3 position-relative z-2">
+                  <div class="d-flex align-items-center flex-shrink-0" data-chart-mode={mode}>
+                    <Chart mode={mode} track={track} points={summary.points} mini />
+                  </div>
+                  <div class="text-body-secondary small text-truncate">
+                    {summary.latestEvent ? (
+                      <time datetime={summary.latestEvent.timestamp}></time>
+                    ) : (
+                      <span class="text-body-tertiary">Sin entradas</span>
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
           </div>
 
           <div class="pt-3 position-relative z-2">
