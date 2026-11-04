@@ -442,7 +442,7 @@ describe('Web UI & HTMX endpoints', () => {
     expect(html).toContain('hx-boost="false"')
     expect(html).toContain('Exportar')
     expect(html).toContain('<footer')
-    expect(html).toContain('v1.3.0')
+    expect(html).toContain(`v${version}`)
   })
 
   it('GET /export downloads full data as JSON with appropriate headers and structure', async () => {
