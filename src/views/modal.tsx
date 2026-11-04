@@ -116,7 +116,7 @@ interface ColorPickerProps {
   idPrefix?: string
 }
 
-export function ColorPicker({ selectedColor = null, idPrefix = 'tracker-color' }: ColorPickerProps) {
+export function ColorPicker({ selectedColor = null, idPrefix = 'track-color' }: ColorPickerProps) {
   return (
     <div class="mb-3">
       <label class="form-label fw-medium d-block">Color</label>

@@ -9,43 +9,43 @@ import { Icon } from './icons'
 import { ColorPicker, FormModal, SubmitButton } from './modal'
 
 interface DashboardProps {
-  trackers: Track[]
+  tracks: Track[]
   query?: string
 }
 
-interface TrackerCardProps {
-  tracker: Track
+interface TrackCardProps {
+  track: Track
 }
 
-export function TrackerCard({ tracker }: TrackerCardProps) {
-  const icon = getTrackIcon(tracker.type)
-  const typeLabel = getTrackTypeLabel(tracker.type)
+export function TrackCard({ track }: TrackCardProps) {
+  const icon = getTrackIcon(track.type)
+  const typeLabel = getTrackTypeLabel(track.type)
 
   return (
-    <div class="col" id={`tracker-card-${tracker.id}`}>
+    <div class="col" id={`track-card-${track.id}`}>
       <div class="card h-100 border-0 bg-body rounded-3 position-relative">
         <div class="card-body p-3 d-flex flex-column justify-content-between">
           <div>
             <div class="d-flex align-items-center justify-content-between gap-2">
               <div class="d-flex align-items-center gap-2 text-truncate flex-grow-1">
-                {tracker.color && (
+                {track.color && (
                   <span
                     class="rounded-circle flex-shrink-0 d-inline-block"
                     style={{
                       width: '0.625rem',
                       height: '0.625rem',
-                      backgroundColor: tracker.color,
+                      backgroundColor: track.color,
                     }}
                   ></span>
                 )}
                 <h2 class="h6 card-title mb-0 fw-semibold text-truncate">
                   <a
-                    href={`/track/${tracker.id}`}
+                    href={`/track/${track.id}`}
                     class="stretched-link text-reset text-decoration-none d-inline-flex align-items-center"
-                    title={tracker.name}
+                    title={track.name}
                     hx-indicator="#page-progress, find .spinner-border"
                   >
-                    <span class="text-truncate">{tracker.name}</span>
+                    <span class="text-truncate">{track.name}</span>
                     <span
                       class="spinner-border spinner-border-sm text-body-secondary ms-2 flex-shrink-0 htmx-indicator"
                       role="status"
@@ -62,32 +62,32 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
               </span>
             </div>
 
-            {tracker.description && (
+            {track.description && (
               <p class="card-text text-body-secondary small mb-0 mt-1 text-truncate">
-                {tracker.description}
+                {track.description}
               </p>
             )}
           </div>
 
           <div class="pt-3 position-relative z-2">
-            {tracker.type === 'habit' ? (
+            {track.type === 'habit' ? (
               <SubmitButton
                 type="button"
                 label="Completar"
-                hx-post={`/track/${tracker.id}`}
-                hx-target={`#tracker-card-${tracker.id}`}
+                hx-post={`/track/${track.id}`}
+                hx-target={`#track-card-${track.id}`}
                 hx-swap="outerHTML"
                 class="btn btn-sm btn-primary w-100 d-flex align-items-center justify-content-center gap-1"
               />
             ) : (
               <form
                 class="m-0 p-0 d-flex"
-                hx-post={`/track/${tracker.id}`}
-                hx-target={`#tracker-card-${tracker.id}`}
+                hx-post={`/track/${track.id}`}
+                hx-target={`#track-card-${track.id}`}
                 hx-swap="outerHTML"
               >
                 <div class="input-group input-group-sm">
-                  {tracker.type === 'numeric' ? (
+                  {track.type === 'numeric' ? (
                     <input
                       type="number"
                       step="any"
@@ -118,18 +118,18 @@ export function TrackerCard({ tracker }: TrackerCardProps) {
   )
 }
 
-function NewTrackerModal() {
+function NewTrackModal() {
   return (
-    <FormModal id="newTrackerModal" title="Crear track" action="/track" submitLabel="Crear track">
+    <FormModal id="newTrackModal" title="Crear track" action="/track" submitLabel="Crear track">
       <div class="mb-3">
-        <label for="tracker-name" class="form-label fw-medium">
+        <label for="track-name" class="form-label fw-medium">
           <span>Nombre</span>
           <span class="text-danger ms-1">*</span>
         </label>
         <input
           type="text"
           class="form-control"
-          id="tracker-name"
+          id="track-name"
           name="name"
           placeholder="ej. Meditación"
           required
@@ -146,14 +146,14 @@ function NewTrackerModal() {
                 type="radio"
                 class="btn-check"
                 name="type"
-                id={`tracker-type-${t.value}`}
+                id={`track-type-${t.value}`}
                 value={t.value}
                 autocomplete="off"
                 checked={idx === 0}
               />
               <label
                 class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 py-2"
-                for={`tracker-type-${t.value}`}
+                for={`track-type-${t.value}`}
               >
                 <Icon name={t.icon} />
                 <span>{t.label}</span>
@@ -163,15 +163,15 @@ function NewTrackerModal() {
         </div>
       </div>
 
-      <ColorPicker idPrefix="tracker-color" />
+      <ColorPicker idPrefix="track-color" />
 
       <div class="mb-2">
-        <label for="tracker-description" class="form-label fw-medium">
+        <label for="track-description" class="form-label fw-medium">
           Descripción
         </label>
         <textarea
           class="form-control"
-          id="tracker-description"
+          id="track-description"
           name="description"
           placeholder="Descripción..."
           rows={2}
@@ -182,10 +182,10 @@ function NewTrackerModal() {
   )
 }
 
-export function TrackersGrid({ trackers }: DashboardProps) {
-  if (trackers.length === 0) {
+export function TracksGrid({ tracks }: DashboardProps) {
+  if (tracks.length === 0) {
     return (
-      <div id="trackers-grid" class="card text-center p-5 border-0 bg-body rounded-3">
+      <div id="tracks-grid" class="card text-center p-5 border-0 bg-body rounded-3">
         <div class="py-4 d-flex flex-column align-items-center">
           <Icon name="activity" class="text-body-tertiary fs-1 mb-3 d-block mx-auto" />
           <h3 class="h5 mb-3">No hay tracks</h3>
@@ -193,7 +193,7 @@ export function TrackersGrid({ trackers }: DashboardProps) {
             type="button"
             class="btn btn-primary d-inline-flex align-items-center gap-1"
             data-bs-toggle="modal"
-            data-bs-target="#newTrackerModal"
+            data-bs-target="#newTrackModal"
           >
             <Icon name="plus-lg" />
             <span>Crear track</span>
@@ -204,17 +204,17 @@ export function TrackersGrid({ trackers }: DashboardProps) {
   }
 
   return (
-    <div id="trackers-grid">
+    <div id="tracks-grid">
       <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
-        {trackers.map((tracker) => (
-          <TrackerCard tracker={tracker} />
+        {tracks.map((track) => (
+          <TrackCard track={track} />
         ))}
       </div>
     </div>
   )
 }
 
-export function DashboardPage({ trackers, query = '' }: DashboardProps) {
+export function DashboardPage({ tracks, query = '' }: DashboardProps) {
   return (
     <Layout>
       <div>
@@ -233,7 +233,7 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
                 aria-label="Buscar tracks"
                 hx-get="/"
                 hx-trigger="keyup changed delay:200ms, search"
-                hx-target="#trackers-grid"
+                hx-target="#tracks-grid"
                 hx-swap="outerHTML"
               />
               <button
@@ -257,7 +257,7 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
               type="button"
               class="btn btn-primary d-flex align-items-center gap-2"
               data-bs-toggle="modal"
-              data-bs-target="#newTrackerModal"
+              data-bs-target="#newTrackModal"
             >
               <Icon name="plus-lg" />
               <span>Crear track</span>
@@ -265,11 +265,11 @@ export function DashboardPage({ trackers, query = '' }: DashboardProps) {
           </div>
         </div>
 
-        {/* Trackers Grid */}
-        <TrackersGrid trackers={trackers} />
+        {/* Tracks Grid */}
+        <TracksGrid tracks={tracks} />
 
         {/* Create Modal */}
-        <NewTrackerModal />
+        <NewTrackModal />
       </div>
     </Layout>
   )
