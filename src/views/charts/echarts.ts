@@ -29,8 +29,9 @@ export function renderCartesianChart({
   scaleY = false,
   series,
 }: RenderCartesianOptions) {
-  const width = mini ? 68 : 560
-  const height = mini ? 20 : 130
+  const width = mini ? 320 : 1080
+  const height = mini ? 32 : 140
+  const padX = mini ? 3 : boundaryGap ? 4 : 18
 
   const chart = echarts.init(null, null, {
     renderer: 'svg',
@@ -42,8 +43,8 @@ export function renderCartesianChart({
   chart.setOption({
     animation: false,
     grid: mini
-      ? { left: 2, right: 2, top: 2, bottom: 2 }
-      : { left: 18, right: 18, top: 12, bottom: 22 },
+      ? { left: padX, right: padX, top: 3, bottom: 3 }
+      : { left: padX, right: padX, top: 8, bottom: 22 },
     xAxis: {
       type: 'category',
       show: !mini,
@@ -79,13 +80,10 @@ export function renderCartesianChart({
     }
   )
 
-  const rootAttrs = mini
-    ? `<svg role="img" aria-label="${ariaLabel}" `
-    : `<svg class="w-100 h-100" role="img" aria-label="${ariaLabel}"`
-
   return raw(
-    mini
-      ? svg.replace(/^<svg /, rootAttrs)
-      : svg.replace(/^<svg width="\d+" height="\d+"/, rootAttrs)
+    svg.replace(
+      /^<svg width="\d+" height="\d+"/,
+      `<svg class="w-100 d-block" role="img" aria-label="${ariaLabel}"`
+    )
   )
 }

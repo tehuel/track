@@ -1,7 +1,7 @@
 import { renderCartesianChart, type CartesianChartProps } from './echarts'
 
 export function BarsChart({ points, color, ariaLabel, mini = false }: CartesianChartProps) {
-  const radius = mini ? 1.5 : 2.5
+  const radius = mini ? 2 : 3
   return (
     <>
       {renderCartesianChart({
@@ -12,7 +12,7 @@ export function BarsChart({ points, color, ariaLabel, mini = false }: CartesianC
         series: {
           type: 'bar',
           data: points.map((p) => p.value),
-          barMaxWidth: mini ? 6 : 28,
+          barWidth: '65%',
           showBackground: true,
           backgroundStyle: {
             color: 'currentColor',

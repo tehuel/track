@@ -20,18 +20,26 @@ export function GridChart({
 
   if (mini) {
     return (
-      <div class="d-inline-flex align-items-center gap-1" role="img" aria-label="Últimos 7 días">
+      <div
+        class="w-100"
+        role="img"
+        aria-label="Últimos 7 días"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+          gap: '0.25rem',
+        }}
+      >
         {points.map((p) => {
           const active = p.value > 0
           return (
             <span
-              class="rounded-circle d-inline-block"
+              class="rounded-pill d-block"
               title={`${p.label}: ${formatChartValue(p.value)}`}
               style={{
-                width: '0.55rem',
-                height: '0.55rem',
+                height: '0.5rem',
                 backgroundColor: active ? color : 'currentColor',
-                opacity: active ? getIntensityOpacity(p.value, maxVal) : '0.2',
+                opacity: active ? getIntensityOpacity(p.value, maxVal) : '0.15',
               }}
             ></span>
           )
@@ -42,7 +50,7 @@ export function GridChart({
 
   if (period === '7d') {
     return (
-      <div class="d-flex justify-content-between gap-1 text-center w-100">
+      <div class="d-flex justify-content-between gap-2 text-center w-100">
         {points.map((p) => {
           const active = p.value > 0
           return (
@@ -52,9 +60,8 @@ export function GridChart({
             >
               <span class="text-body-secondary small">{p.shortLabel}</span>
               <span
-                class="rounded-circle d-inline-flex align-items-center justify-content-center small fw-semibold font-monospace"
+                class="rounded-3 d-inline-flex align-items-center justify-content-center small fw-semibold font-monospace w-100"
                 style={{
-                  width: '2.5rem',
                   height: '2.5rem',
                   backgroundColor: active ? color : 'transparent',
                   color: active ? '#fff' : 'var(--bs-secondary-color)',
@@ -109,9 +116,8 @@ export function GridChart({
 
   return (
     <svg
-      viewBox="0 0 572 77"
-      class="w-100"
-      style={{ height: '100%', maxHeight: '7.5rem' }}
+      viewBox="0 0 569.5 74.5"
+      class="w-100 d-block"
       role="img"
       aria-label="Actividad anual"
     >

@@ -82,11 +82,11 @@ export function TrackCard({ track, summary }: TrackCardProps) {
             {summary && (() => {
               const mode = getTrackChartMode(track, 'dashboard')
               return (
-                <div class="d-flex align-items-center justify-content-between gap-2 mt-3 position-relative z-2">
-                  <div class="d-flex align-items-center flex-shrink-0" data-chart-mode={mode}>
+                <div class="mt-3 position-relative z-2">
+                  <div class="w-100" data-chart-mode={mode}>
                     <Chart mode={mode} track={track} points={summary.points} mini />
                   </div>
-                  <div class="text-body-secondary small text-truncate">
+                  <div class="text-body-secondary small text-truncate mt-1">
                     {summary.latestEvent ? (
                       <time datetime={summary.latestEvent.timestamp}></time>
                     ) : (
